@@ -38,6 +38,7 @@ project:
         - file: reproducibility/reproduce.md
         - file: reproducibility/regeneration-plan.md
         - file: data/provenance.md
+        - file: results/README.md
         - file: code/README.md
 site:
   template: book-theme

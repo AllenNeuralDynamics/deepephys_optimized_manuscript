@@ -13,7 +13,12 @@ Master results table (all models × all metrics, sorted by `d′_self`, read aga
 band) and the d′-ranking figure. **Headline read-out (a): does denoising still lower d′ when trained
 and scored in the same band?**
 
-<!-- ```{figure} ../figures/f1_dprime_ranking.png
+<!-- Uncomment each block once code/figures/collate.py + the figure scripts have written the file.
+Master results table (T1):
+```{include} results/tables/master_table.md
+```
+d′ ranking figure (F1):
+```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
 d′ across all models against the champion ±2σ noise band; dotted line = raw data.
 ``` -->
@@ -24,11 +29,29 @@ Six matched Charbonnier↔L2 pairs (base, omission, capacity, best-architecture,
 SNR-trap) plus the loss × capacity 2×2. Does the training loss change the outcome, or is it
 redundant with capacity as previously suggested?
 
+<!-- ```{figure} figures/f3_loss_pairs.png
+:label: fig-loss-pairs
+The six Charbonnier↔L2 matched pairs (Δ per axis).
+```
+```{figure} figures/f2_loss_capacity_2x2.png
+:label: fig-loss-capacity
+Loss × capacity 2×2.
+``` -->
+
 ## Capacity and the SNR trap
 
 Whether added capacity / higher SNR translates into detectability, or trades against it
 (the SNR-gain vs Δd′ plot). Includes the enlarged-architecture case that previously collapsed an
 individual unit.
+
+<!-- ```{figure} figures/f4_snr_vs_dprime.png
+:label: fig-snr-trap
+SNR gain vs Δd′ — the SNR trap.
+```
+```{figure} figures/f5_amp_vs_quality.png
+:label: fig-amp-quality
+Amplitude preservation vs baseline unit quality (shrinkage).
+``` -->
 
 ## The omission gap (the primary lever)
 
@@ -47,7 +70,11 @@ SUPPORT-scale trajectories (~3.3 M updates, 12 log-spaced checkpoints) for the o
 losses: do the spike-level metrics keep improving past the short-run budget, or saturate early?
 Also tests whether validation-loss checkpoint selection coincides with the d′/amp optimum.
 
-<!-- ```{figure} ../figures/f8_trajectory.png
+<!-- ```{figure} figures/f8_trajectory.png
 :label: fig-trajectory
 d′ and amplitude vs training updates for the omission A/B at SUPPORT scale.
+```
+```{figure} figures/f9_val_loss_overfit.png
+:label: fig-val-loss
+Validation-loss / overfit curves with best-checkpoint markers.
 ``` -->

@@ -1,0 +1,6 @@
+# Python deps for collation and figure generation (local, manuscript-side).
+pandas>=2.0
+tabulate>=0.9      # pretty Markdown tables from collate.py (optional but recommended)
+matplotlib>=3.7    # figure generation (code/figures/make_*.py)
+numpy>=1.24
+scipy>=1.10        # PSD (Welch) for the band-mismatch figure; stats for the noise floor

@@ -26,6 +26,11 @@ This is legitimate because DeepInterpolation is self-supervised (blind-spot): gr
 labels are used only for *scoring*, never for training. Per-recording train = evaluate is the
 intended deployment, not label leakage.
 
+<!-- ```{figure} figures/f10_psd_band_mismatch.png
+:label: fig-psd
+Power spectral density of the training data vs the AP-band evaluation recording — the band mismatch.
+``` -->
+
 ## Quantification (identical for every run)
 
 All models are scored by one uniform protocol (full catalog and formulas in

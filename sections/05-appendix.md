@@ -21,7 +21,10 @@ the exact training override and its rationale — is tabulated in
 (columns), with a heatmap. The dominant pattern is expected to be vertical (a unit-quality
 gradient), i.e. amplitude undershoot is a property of the *unit*, not the architecture.
 
-<!-- ```{figure} ../figures/f6_perunit_amp_heatmap.png
+<!-- Uncomment when produced by code/figures/collate.py + make_perunit_heatmaps.py:
+```{include} results/tables/perunit_amp.md
+```
+```{figure} figures/f6_perunit_amp_heatmap.png
 :label: fig-perunit-amp
 Per-unit amplitude preservation across models (green ≈ preserved, red = smoothed).
 ``` -->
@@ -31,7 +34,10 @@ Per-unit amplitude preservation across models (green ≈ preserved, red = smooth
 Change in detectability from denoising, `d′_deep − d′_raw`, per unit × model, as a heatmap (red =
 denoising hurts, blue = helps). Exposes per-unit collapses that the mean hides.
 
-<!-- ```{figure} ../figures/f7_perunit_dprime_delta_heatmap.png
+<!-- Uncomment when produced by code/figures/collate.py + make_perunit_heatmaps.py:
+```{include} results/tables/perunit_dprime.md
+```
+```{figure} figures/f7_perunit_dprime_delta_heatmap.png
 :label: fig-perunit-dprime
 Per-unit change in detectability from denoising, across models.
 ``` -->
