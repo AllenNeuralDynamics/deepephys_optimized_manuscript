@@ -8,7 +8,7 @@ amplitudes (a *hybrid* recording). Because the true spike times and waveforms ar
 and waveform fidelity are measured directly, without running a spike sorter. The evaluation is
 identical for all models — same 10 units, same `seed=0` subsample of spike and background windows —
 so **every difference between models reflects training, not the evaluation.** Exact asset paths are
-in [](../data/provenance.md).
+in [Data & compute provenance](data/provenance.md).
 
 ## The in-domain rule (the correction)
 
@@ -29,7 +29,7 @@ intended deployment, not label leakage.
 ## Quantification (identical for every run)
 
 All models are scored by one uniform protocol (full catalog and formulas in
-[](../reproducibility/regeneration-plan.md), §5). Per-unit metrics are computed on each of the 10
+[the pre-registered design](reproducibility/regeneration-plan.md), §5). Per-unit metrics are computed on each of the 10
 GT units, then averaged.
 
 **Detection (primary).** Matched-filter d′: a per-unit template is slid over the trace; d′ is the
@@ -44,7 +44,7 @@ denoising; negative means denoising made a unit *harder* to detect).
 **Per-unit × per-model resolution.** Both amplitude and detection are reported as matrices — rows =
 the 10 units sorted by baseline separability, columns = every model — so an intervention's effect is
 read across the whole unit population, not just at the 10-unit mean (appendix
-[](sections/05-appendix.md)).
+[Appendix B/C](sections/05-appendix.md)).
 
 ## The noise floor: why single runs cannot be trusted
 

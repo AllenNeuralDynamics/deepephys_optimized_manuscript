@@ -20,9 +20,10 @@ project:
   authors:
     - name: Jérôme Lecoq
       affiliation: Allen Institute for Neural Dynamics
-      corresponding: true
+      # TODO fill in, then uncomment to mark corresponding author:
+      # email: jerome.lecoq@alleninstitute.org
+      # corresponding: true
       # orcid: 0000-0000-0000-0000
-      # email: jeromel@alleninstitute.org
   # github: https://github.com/<org>/deepephys_optimized_manuscript
   bibliography:
     - references.bib

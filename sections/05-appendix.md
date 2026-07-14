@@ -4,7 +4,7 @@
 
 One line per model (champion + ablations). The operational definition of every configuration —
 the exact training override and its rationale — is tabulated in
-[](../reproducibility/regeneration-plan.md) §4. Families:
+[the pre-registered design](reproducibility/regeneration-plan.md) §4. Families:
 
 - **Baseline** — the champion (`fold` geometry, `base_channels=32`, `depth=3`, 3-frame temporal
   blind spot, Charbonnier loss).

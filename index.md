@@ -20,7 +20,7 @@ abstract: |
   uniform quantification protocol (matched-filter d′, amplitude and waveform
   fidelity, resolved per-unit and per-model, read against a replicate-derived
   noise floor). The full design is pre-registered (see
-  [](reproducibility/regeneration-plan.md)) and the entire train → score → figure
+  [the pre-registered design](reproducibility/regeneration-plan.md)) and the entire train → score → figure
   pipeline is reproducible from this repository.
   **Quantitative results are being regenerated in-domain and will be reported here.**
 ---

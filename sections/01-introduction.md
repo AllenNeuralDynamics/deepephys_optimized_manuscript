@@ -2,7 +2,7 @@
 
 :::{note} Manuscript status
 Prose is carried over from the prior internal report; **all quantitative claims are being
-re-established strictly in-domain** (see [](../reproducibility/regeneration-plan.md)) before they
+re-established strictly in-domain** (see [the pre-registered design](reproducibility/regeneration-plan.md)) before they
 appear here. Numbers shown in the superseded v1 report were measured out-of-band and are archived,
 not used.
 :::
@@ -21,8 +21,8 @@ noise is removed, improving downstream spike sorting.
 The reference denoiser is a `fold`-geometry ephys DeepInterpolation network: channels are scattered
 onto the Neuropixels 1.0 probe grid, a 1-D U-Net runs along probe depth, and a probe-axis blind-spot
 branch is fused per channel. The champion configuration and every ablation are enumerated in the
-model glossary ([](sections/05-appendix.md)) and defined operationally in
-[](../reproducibility/regeneration-plan.md).
+model glossary ([Appendix A](sections/05-appendix.md)) and defined operationally in
+[the pre-registered design](reproducibility/regeneration-plan.md).
 
 ## The puzzle: denoising helps SNR but hurts detection
 

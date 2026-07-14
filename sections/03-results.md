@@ -4,7 +4,7 @@
 This section is the pre-registered results skeleton. Each subsection states the question and the
 figure/table that answers it; **the in-domain numbers and figures are inserted once scoring
 completes.** The experimental design that produces them is fixed in advance in
-[](../reproducibility/regeneration-plan.md).
+[the pre-registered design](reproducibility/regeneration-plan.md).
 :::
 
 ## Detection under an in-domain noise floor
@@ -39,7 +39,7 @@ both losses?** Reported as an A/B with seed replicates.
 ## Per-unit structure
 
 Amplitude preservation as a function of unit quality (the shrinkage law), and the per-unit
-amplitude and Δd′ matrices across all models (appendix [](sections/05-appendix.md)).
+amplitude and Δd′ matrices across all models (appendix [Appendix B/C](sections/05-appendix.md)).
 
 ## Training length and saturation
 
