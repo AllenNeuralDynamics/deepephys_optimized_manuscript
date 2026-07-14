@@ -36,19 +36,15 @@ reviewer can reproduce every table and figure from scratch.
 # one-time: install the MyST CLI
 pip install mystmd            # or: npm install -g mystmd
 
-# live preview of the website
+# live preview of the website (http://localhost:3000)
 myst start
 
-# build the manuscript PDF (typst template; no system LaTeX needed)
-myst build --pdf
-# -> exports/manuscript.pdf
-
-# list / switch templates
-myst templates list --pdf
+# build the static HTML site (output in _build/)
+myst build --html
 ```
 
-To use a LaTeX/arXiv style instead, change `exports.template` in `index.md` to e.g.
-`arxiv_two_column` (requires a LaTeX toolchain such as `tectonic`).
+The manuscript is read as a **local HTML website** (MyST book theme). No PDF or LaTeX toolchain is
+required.
 
 ## Reproducing the results
 

@@ -8,7 +8,7 @@ what to vendor and how.
 |---|---|---|
 | [`training/`](training/README.md) | launch Code Ocean training runs | documented (capsule-side) |
 | [`scoring/`](scoring/README.md) | HPC sbatch d′ / diagnostic scoring | **to vendor from HPC** |
-| [`figures/`](figures/README.md) | download, collate, plot, build PDF | **to vendor / re-commit** |
+| [`figures/`](figures/README.md) | download, collate, plot, render site figures | **to vendor / re-commit** |
 
 :::{note}
 The scoring sbatch scripts currently live on the HPC under `$BASE`; the download/collate/plot

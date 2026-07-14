@@ -1,6 +1,6 @@
 # Reproduce
 
-End-to-end: **environment → launch training → score checkpoints → collate → figures → PDF.**
+End-to-end: **environment → launch training → score checkpoints → collate → figures → HTML site.**
 All identifiers (capsules, data assets, recording paths, HPC locations) are in
 [](../data/provenance.md).
 
@@ -76,11 +76,11 @@ Collate mean-over-10-units into the master table and per-unit matrices, then ren
 collection (§6 of the plan). Scripts and their exact inputs/outputs are documented in
 [`code/figures/`](../code/figures/README.md).
 
-## 6. Build the manuscript
+## 6. Build the manuscript (local HTML site)
 
 ```bash
-myst start          # live website preview
-myst build --pdf    # -> exports/manuscript.pdf
+myst start          # live preview at http://localhost:3000
+myst build --html   # static site in _build/
 ```
 
 ## 7. Currently running (in-domain SUPPORT-scale omission A/B)

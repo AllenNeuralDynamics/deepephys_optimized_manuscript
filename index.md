@@ -1,10 +1,6 @@
 ---
 title: Optimizing DeepInterpolation for Neuropixels spike detection
 short_title: DeepEphys Optimized
-exports:
-  - format: pdf
-    template: lapreprint-typst
-    output: exports/manuscript.pdf
 abstract: |
   DeepInterpolation is a self-supervised, blind-spot denoiser proposed to improve
   the signal-to-noise ratio of extracellular electrophysiology. A prior internal

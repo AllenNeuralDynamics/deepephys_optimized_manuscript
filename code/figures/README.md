@@ -13,7 +13,7 @@ re-committed here so the figures regenerate deterministically.
 | `make_perunit_heatmaps.py` | F6/F7 per-unit amplitude and Δd′ heatmaps (units × models) |
 | `make_traj_fig.py` | F8 d′/amp vs training-updates trajectories |
 | `psd_plot.py` | F10 PSD band-mismatch (train vs eval) — the correction evidence |
-| `build_report_pdf.py` | (optional) legacy pandoc/tectonic PDF; superseded by `myst build --pdf` |
+| `build_report_pdf.py` | (optional) legacy pandoc/tectonic PDF from the old report; not used — the site is HTML |
 
 ## Figure ↔ quantification map
 
