@@ -1,0 +1,42 @@
+# MyST Markdown project configuration
+# Build the website:   myst start
+# Build the PDF:       myst build --pdf
+# Docs:                https://mystmd.org/guide/frontmatter
+version: 1
+project:
+  id: deepephys-optimized-manuscript
+  title: Optimizing DeepInterpolation for Neuropixels spike detection
+  subtitle: An in-domain re-evaluation of self-supervised denoising for electrophysiology
+  description: >-
+    A rigorous, strictly in-domain re-evaluation of the DeepInterpolation ephys
+    denoiser for Neuropixels spike detection, with a fully reproducible
+    train -> score -> figure pipeline.
+  keywords:
+    - DeepInterpolation
+    - Neuropixels
+    - spike sorting
+    - self-supervised denoising
+    - electrophysiology
+  authors:
+    - name: Jérôme Lecoq
+      affiliation: Allen Institute for Neural Dynamics
+      corresponding: true
+      # orcid: 0000-0000-0000-0000
+      # email: jeromel@alleninstitute.org
+  # github: https://github.com/<org>/deepephys_optimized_manuscript
+  bibliography:
+    - references.bib
+  license:
+    content: CC-BY-4.0
+    code: MIT
+  # Table of contents for the website (the manuscript itself is index.md)
+  toc:
+    - file: index.md
+    - title: Reproducibility
+      children:
+        - file: reproducibility/reproduce.md
+        - file: reproducibility/regeneration-plan.md
+        - file: data/provenance.md
+        - file: code/README.md
+site:
+  template: book-theme

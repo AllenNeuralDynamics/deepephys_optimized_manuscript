@@ -1,0 +1,26 @@
+# MyST build outputs
+_build/
+exports/
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+env/
+.ipynb_checkpoints/
+
+# Large data / model artifacts (keep provenance + code, not blobs)
+*.zarr/
+*.pt
+*.npy
+*.nwb
+checkpoints*/
+traj_scores/
+
+# Credentials — never commit
+*.env
+.codeocean.env
+
+# OS
+.DS_Store
