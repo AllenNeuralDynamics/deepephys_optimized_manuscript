@@ -17,6 +17,9 @@ env/
 checkpoints*/
 traj_scores/
 
+# Local trained-model store (NOT committed — populated by code/store_model.py)
+models/
+
 # Credentials — never commit
 *.env
 .codeocean.env

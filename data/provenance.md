@@ -49,3 +49,11 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 
 Log-spaced steps: 1, 4, 15, 60, 235, 919, 3597, 14078, 55103, 215688, 844255, 3304616 —
 files `ckpt_step_########.pt` plus `best_model.pt`.
+
+## Local model store (weights — not in git)
+
+Trained checkpoints live in the **git-ignored** `models/<label>/` store, one folder per run, each
+with a `manifest.json` (config, loss, `co_id`, and a per-file sha256 for integrity). Populate it
+with `python code/store_model.py <label> <ckpt_dir>` after downloading a run's checkpoints
+(`code/figures/co_dl.py`). Weights are also always recoverable from each run's Code Ocean
+computation via the `co_id` recorded in `results/runs.csv`.
