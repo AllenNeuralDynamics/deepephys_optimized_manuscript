@@ -1,0 +1,2 @@
+label,config,seed,loss,tier,dprime_deep,dprime_deep_fixed,dprime_raw,snr_deep,amp_ratio,fwhm_ratio,temporal_cos,spatial_cos
+ib_om0_scale,support_all_l2_om0,0,l2,scale,4.362950698333062,4.400329859726126,4.496968895228467,6.899914789199829,0.938940680027008,0.976388888888889,0.9962679743766785,0.9997406661510467
