@@ -140,27 +140,34 @@ the configuration that removes the most noise is not the one that is easiest to 
 SNR/detection dissociation, first flagged out of band, reproduces cleanly in-band and is the crux of
 the whole detection deficit.
 
-## Training length and saturation
+## Training length: amplitude saturates, detection does not
 
-Two matched runs trained ~7× longer (SUPPORT scale, ~3.3 M updates, 12 log-spaced checkpoints) settle
-two questions the short runs could not: does `omission=0` hold up, and were the models merely
-undertrained? Both metrics **saturate within the first ~10⁴ updates** and then plateau across the
-final two decades of training — so the short base32 runs (~0.28 M updates) were already far past
-convergence, and the models are **not undertrained**.
+Two matched runs trained ~7× longer (SUPPORT scale, ~3.3 M updates, 12 log-spaced checkpoints) test
+whether the short runs were undertrained. The two metrics behave **oppositely**:
 
-The trajectories also resolve the omission gap at scale, and the answer sharpens everything above.
-`omission=0` leads through mid-training (~+0.13 d′ around 10⁴–10⁵ updates), but the **d′ gap closes at
-convergence**: at the final step both arms reach the *same* detectability (om0 4.361, om1 4.361),
-while the **amplitude gap persists** (0.931 vs 0.870). Hiding t±1 does not lower the detection ceiling
-— it only slows the approach to it — whereas it permanently costs amplitude. And the
-validation-loss-selected checkpoint is demonstrably wrong for spike quality: om1's `best_model`
-(d′ 4.275) is beaten by its own final checkpoint (4.361), the concrete signature of a spike-blind loss
-picking the wrong point on the plateau.
+- **Amplitude saturates early** — flat to ±0.02 after ~10³–10⁵ updates (om0 −0.016, om1 +0.027 across
+  the final 2.4 decades). For amplitude the short budget is well past convergence.
+- **Detection does not.** d′ keeps climbing to 3.3 M: **om0 +0.11, om1 +0.30** from 14 k onward, and
+  om1's *largest late gain is its final step* (+0.11 from 844 k → 3.3 M). om1 (t±1 hidden) has **not
+  converged** even at 3.3 M.
+
+So the models are **undertrained for detection**: the short budget (~0.28 M) sits on the rising part
+of the d′ curve and *under-measures* it, biased toward faster-converging configs. (This reverses the
+out-of-band report's "converges in one epoch" reading, which was taken off the spike-blind validation
+loss.) Short-run d′ rankings are therefore a **convergence-speed-biased screen**, to be read only
+alongside the trajectory; near-converged comparisons need SUPPORT-scale training — and even 3.3 M is a
+lower bound for slow configs.
+
+This also nuances the omission gap. At 3.3 M the two arms meet (om0 4.361, om1 4.361) and the
+**amplitude gap persists** (0.931 vs 0.870) — but om0 has ~flattened while om1 is still rising, so the
+*asymptotic* d′ ordering is unresolved (with more training om1 could match or overtake om0). And the
+validation-loss-selected `best_model` is a poor ruler for spike quality — om1's best-by-loss (d′ 4.275)
+is beaten by its own final checkpoint (4.361), the spike-blind-loss signature.
 
 ```{figure} figures/f8_trajectory.png
 :label: fig-trajectory
 **SUPPORT-scale omission A/B.** d′ (left) and amplitude (right) vs training updates (log) for om0
-(t±1 visible) and om1 (t±1 hidden); dotted line = raw d′. Both saturate by ~10⁴ updates; the d′ gap
-closes while the amplitude gap persists.
+(t±1 visible) and om1 (t±1 hidden); dotted line = raw d′. Amplitude saturates early; d′ keeps rising
+(om1 still climbing at 3.3 M), the two arms meeting only at the last checkpoint.
 ```
 <!-- F9 val-loss/overfit curves: pending losses.jsonl download -->

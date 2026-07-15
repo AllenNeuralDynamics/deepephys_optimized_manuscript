@@ -30,9 +30,9 @@ train/deploy band mismatch.
 
 The earlier report's headline — `omission=0` as "the largest single lever," +0.204 d′ — does **not**
 survive the in-band correction. In-band its detection effect shrinks ~6× and, at SUPPORT scale, the
-d′ gap **closes entirely** (om0 = om1 = 4.361 at 3.3 M updates): revealing t±1 mainly **accelerates
-convergence** and **improves amplitude**, rather than raising the detection ceiling. This is the
-clearest single consequence of scoring in the correct band.
+d′ gap **closes by 3.3 M** (om0 = om1 = 4.361 — though om1 is still rising there): revealing t±1 mainly
+**accelerates convergence** and **improves amplitude**, rather than raising the detection ceiling.
+This is the clearest single consequence of scoring in the correct band.
 
 ## Denoising still costs detection
 
@@ -49,9 +49,12 @@ the shrinkage estimator flattens (the same units that dominate the amplitude und
 helps because it gives the network more power to separate those units; the omission gap helps their
 *amplitude* but not, at convergence, their *detectability*. That points the search for the remaining
 −0.11 to −0.22 d′ at interventions that specifically protect weak-unit separability — spike-aware
-losses and larger receptive fields — which is exactly what Tier 2/3 probes. Whether any of them clears
-the band, or whether a residual denoising cost is intrinsic to the blind-spot objective, is the open
-question this manuscript sets up.
+losses and larger receptive fields — which is exactly what Tier 2/3 probes. The trajectories add a
+lever the earlier report missed: **d′ is still rising at 3.3 M updates** (om1 by +0.30 past 14 k,
+steepest at its final checkpoint), so **training length itself is a detection lever** — and the
+short-budget rankings are a convergence-speed-biased screen, not converged values. Whether any of
+these clears the band, or whether a residual denoising cost is intrinsic to the blind-spot objective,
+is the open question this manuscript sets up.
 
 ## Recommended configuration
 

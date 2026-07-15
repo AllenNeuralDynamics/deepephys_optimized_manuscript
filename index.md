@@ -20,8 +20,10 @@ abstract: |
   pipeline is reproducible from this repository.
   **In-band, denoising still modestly lowers detectability (every model below raw); capacity is the
   leading detection lever; and the previously-dominant "omission gap" is in-band an amplitude lever
-  whose detection advantage closes at convergence — revising the out-of-band conclusions. The
-  remaining architecture/loss sweep is in progress.**
+  whose detection advantage is a convergence-speed effect that vanishes only by 3.3 M updates.
+  Detection itself keeps rising with training (not converged even at 3.3 M), so training length is a
+  lever too. These revise the out-of-band conclusions; the remaining architecture/loss sweep is in
+  progress.**
 ---
 
 ```{include} sections/01-introduction.md
