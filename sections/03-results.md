@@ -13,13 +13,20 @@ AP band); the raw-data reference is **d′ = 4.497**. Full ledger: `results/tabl
 Twenty-one models are scored so far — the five replicated noise-floor configurations and the two
 SUPPORT-scale omission runs. Read against the raw-data reference of **d′ = 4.497**:
 
-| config | loss | n | d′ (mean ± sd) | Δ vs raw | amp |
-|---|---|---|---|---|---|
-| **base64** | Charbonnier | 3 | **4.382 ± 0.017** | −0.115 | 0.880 |
-| omission0 | Charbonnier | 5 | 4.312 ± 0.007 | −0.185 | **0.932** |
-| omission0 | L2 | 3 | 4.305 ± 0.004 | −0.192 | 0.931 |
-| champ_l2 | L2 | 3 | 4.289 ± 0.041 | −0.208 | 0.861 |
-| champion | Charbonnier | 5 | 4.277 ± 0.015 | −0.220 | 0.859 |
+| config | loss | n | d′_self | d′_fixed | Δ vs raw | amp | fwhm | snr_deep |
+|---|---|---|---|---|---|---|---|---|
+| **base64** | charb | 3 | **4.382** | 4.410 | −0.115 | 0.880 | 1.009 | 7.70 |
+| om0_scale | L2 | 1 | 4.363 | 4.400 | −0.134 | **0.939** | 0.976 | 6.90 |
+| omission0 | charb | 5 | 4.312 | 4.354 | −0.185 | 0.932 | 0.976 | 6.89 |
+| omission0_l2 | L2 | 3 | 4.305 | 4.346 | −0.192 | 0.931 | 0.976 | 6.89 |
+| champ_l2 | L2 | 3 | 4.289 | 4.313 | −0.208 | 0.861 | 1.007 | 7.60 |
+| champion | charb | 5 | 4.277 | 4.300 | −0.220 | 0.859 | 1.007 | 7.60 |
+| om1_scale | L2 | 1 | 4.274 | 4.296 | −0.223 | 0.869 | 1.041 | 7.68 |
+
+(`om0_scale` / `om1_scale` are the SUPPORT-scale `support_all` runs; the rest are the champion body.
+Per-config seed spread: champion σ = 0.015, omission0 0.007, champ_l2 **0.041**, omission0_l2 0.004,
+base64 0.017. `d′_fixed` tracks `d′_self` throughout — the gains are real signal, not self-consistent
+template sharpening.)
 
 Two facts make any *single* run an unreliable ranking, and both recur in-band: training is stochastic
 (GPU non-determinism, initialisation, data order), and the validation loss is nearly flat with respect
