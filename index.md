@@ -18,7 +18,10 @@ abstract: |
   noise floor). The full design is pre-registered (see
   [the pre-registered design](reproducibility/regeneration-plan.md)) and the entire train → score → figure
   pipeline is reproducible from this repository.
-  **Quantitative results are being regenerated in-domain and will be reported here.**
+  **In-band, denoising still modestly lowers detectability (every model below raw); capacity is the
+  leading detection lever; and the previously-dominant "omission gap" is in-band an amplitude lever
+  whose detection advantage closes at convergence — revising the out-of-band conclusions. The
+  remaining architecture/loss sweep is in progress.**
 ---
 
 ```{include} sections/01-introduction.md

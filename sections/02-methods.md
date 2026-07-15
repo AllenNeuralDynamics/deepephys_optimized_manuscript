@@ -61,7 +61,7 @@ the champion. A companion decomposition quantifies how little a perfect spike re
 even move the (spike-blind) validation loss; this is **re-measured in-band**, because removing the
 LFP changes the fraction of variance that spikes occupy.
 
-:::{note} Results pending
-Numeric anchors (raw-data d′ baseline, champion means, σ) are being re-measured in-band and will be
-inserted here with the in-domain scores.
+:::{note} In-band anchors
+Raw-data reference **d′ = 4.497**; in-band champion **d′ = 4.277 ± 0.015** (5 seeds) → decision band
+**±2σ ≈ 0.03 d′** (σ_amp ≈ 0.004). See Results.
 :::
