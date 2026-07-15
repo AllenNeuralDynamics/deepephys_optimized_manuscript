@@ -4,18 +4,18 @@ ib_champion_s1,1,champion,1,charbonnier,4,,6a46abd3-adef-441a-b9aa-8749eeb1d13c,
 ib_champion_s2,1,champion,2,charbonnier,4,,023a212a-66ff-4327-b26a-953827343b96,running,,,
 ib_champion_s3,1,champion,3,charbonnier,4,,789c0f0f-df99-4c49-ab42-b98ca62fcaa6,running,,,
 ib_champion_s4,1,champion,4,charbonnier,4,,4045a948-aa62-4c1c-98a9-44481f8a202d,running,,,
-ib_omission0_s0,1,omission0,0,charbonnier,4,omission=0,47ca01dd-75aa-471b-a5b2-796e1400c5e2,running,,,
+ib_omission0_s0,1,omission0,0,charbonnier,4,omission=0,3920db25-e580-4219-86bb-556ca6deda15,running,,,retry prev 47ca01dd failed ~5.4h infra
 ib_omission0_s1,1,omission0,1,charbonnier,4,omission=0,0acb0d89-38ba-434d-b32e-12d6f064ddd0,running,,,
 ib_omission0_s2,1,omission0,2,charbonnier,4,omission=0,3ce49cac-0ce8-4038-a76d-77a26e43c515,running,,,
 ib_omission0_s3,1,omission0,3,charbonnier,4,omission=0,0c72fdc7-c4d1-47c2-b8a4-d48059e93992,running,,,
 ib_omission0_s4,1,omission0,4,charbonnier,4,omission=0,90c0be9b-50b7-4496-91ac-eeef313dbde4,running,,,
 ib_champ_l2_s0,1,champ_l2,0,l2,4,loss=l2,f952bacc-05b7-4681-89fd-362e61398f18,running,,,
-ib_champ_l2_s1,1,champ_l2,1,l2,4,loss=l2,2b81abf5-b587-4fbc-9469-728238aab9d4,running,,,
+ib_champ_l2_s1,1,champ_l2,1,l2,4,loss=l2,f6ad0879-028c-4c88-ac4d-1a06ce8c4062,running,,,retry prev 2b81abf5 failed ~5.4h infra
 ib_champ_l2_s2,1,champ_l2,2,l2,4,loss=l2,4707df2e-2f14-4276-a9d7-7105baddb638,running,,,
 ib_omission0_l2_s0,1,omission0_l2,0,l2,4,omission=0 loss=l2,5ffe880e-7dd6-4b47-be0c-a95a7518fbed,running,,,
 ib_omission0_l2_s1,1,omission0_l2,1,l2,4,omission=0 loss=l2,f5b8a9e9-baee-46ff-b84a-e289486018a5,running,,,
 ib_omission0_l2_s2,1,omission0_l2,2,l2,4,omission=0 loss=l2,6a3102b0-7654-4a5e-9297-ec2fa464675c,running,,,
-ib_base64_s0,1,base64,0,charbonnier,4,base_channels=64,d7d6c3a7-9d75-4626-95bb-93ce7b4b86d3,running,,,
+ib_base64_s0,1,base64,0,charbonnier,4,base_channels=64,150de2af-e815-41d3-8807-737a307df53c,running,,,retry prev d7d6c3a7 failed ~5.4h infra
 ib_base64_s1,1,base64,1,charbonnier,4,base_channels=64,7ba528b9-b13d-4180-a70b-b07ddaac2822,running,,,
 ib_base64_s2,1,base64,2,charbonnier,4,base_channels=64,2aa9cede-0ef1-45a2-9428-094edb8db519,running,,,
 ib_support_sd_s0,2,support_sd,0,charbonnier,4,bs_stage=1 bs_dense=1,,pending,,,
@@ -37,4 +37,4 @@ ib_archL10_s0,3,archL10,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128
 ib_hard1000_s0,3,hard1000,0,charbonnier,4,spike_weight=1000 spike_weight_hard=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
 ib_uL100_s0,3,uL100,0,charbonnier,4,spike_weight=100 spike_weight_car=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
-ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,running,,,RUN4
+ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,,RUN4 scoring launched (26 jobs)
