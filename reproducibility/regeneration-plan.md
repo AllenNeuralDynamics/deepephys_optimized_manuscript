@@ -116,6 +116,23 @@ All keep the **charbonnier (eps=0.4)** base loss; the spike-weight only re-weigh
 ### Deliberately excluded (were within-noise "does X stack on Y" combos in the old report)
 `fuse128/1024`, `archL3`, `fuse256_tmult8`, `fuse256_wL3/fuse512_wL3`, `uL30/300`, `support_sd_l2`. Pull any back if a section needs it.
 
+### Tier 2/3 execution policy (set at the Tier-1 decision gate, 2026-07-15)
+The in-band Tier-1 + scale results reframe both the sweep and its training durations.
+
+**Reprioritized (report-driven).** Detection lever = capacity; the deficit is on weak units; omission = amplitude lever; L2 neutral. Run the **ceiling-test wave first**: `arch`, `archL10`, `uL100`, `hard1000`, `base64_l2` + the new omission=0 combos. Deprioritize likely-nulls (`no_norm`, `tmult8`, `fuse512`, `l10g2`, `arch_l2`, confirmatory `*_l2` pairs).
+
+**NEW omission=0 combos (option c).** omission=0 rescues weak-unit amplitude while capacity drives detection, but the two are never combined in the sweep. Add (each `omission=0` → forces `bs_frames=1`):
+- `ib_base64_om0` — capacity + weak-unit amplitude rescue (deployment-champion candidate).
+- `ib_arch_om0` — max capacity + rescue.
+- `ib_uL100_om0` — weak-unit protection from loss and temporal design together.
+
+**Duration policy (option b) — d′ is NOT converged at 3.3 M.** The scale trajectories show amplitude saturates by ~10³–10⁵ but **d′ keeps rising to 3.3 M** (om0 +0.11, om1 +0.30 from step 14 k; om1 steepest at its final step). Therefore:
+- **Screen** = `train_chunks=4` (~0.28 M) for all Tier 2/3 — matches Tier 1, but is a **convergence-speed-biased screen**, never a converged measurement. Trajectory-score (12 ckpts) the ceiling / high-capacity / combo configs so convergence state is visible.
+- **Scale-validate** the top 2–4 screened configs at `train_chunks=47` (~3.3 M) with full trajectory — the near-converged comparison for the champion call (even 3.3 M is a *lower bound* for slow configs).
+- Never claim convergence from a short run; report the end-of-curve slope.
+
+**Gate 2 still required** for `uL100` / `hard1000` / `uL100_om0`: copy exact `spike_weight_thresh` from the original runs before launch.
+
 ---
 
 ## 5. Quantification & comparison — IDENTICAL for every run
