@@ -18,23 +18,26 @@ ib_omission0_l2_s2,1,omission0_l2,2,l2,4,omission=0 loss=l2,6a3102b0-7654-4a5e-9
 ib_base64_s0,1,base64,0,charbonnier,4,base_channels=64,150de2af-e815-41d3-8807-737a307df53c,running,,,retry prev d7d6c3a7 failed ~5.4h infra
 ib_base64_s1,1,base64,1,charbonnier,4,base_channels=64,7ba528b9-b13d-4180-a70b-b07ddaac2822,running,,,
 ib_base64_s2,1,base64,2,charbonnier,4,base_channels=64,2aa9cede-0ef1-45a2-9428-094edb8db519,running,,,
-ib_support_sd_s0,2,support_sd,0,charbonnier,4,bs_stage=1 bs_dense=1,,pending,,,
-ib_support_all_s0,2,support_all,0,charbonnier,4,bs_stage=1 bs_dense=1 bs_multiscale=1,,pending,,,
-ib_support_all_l2_s0,2,support_all_l2,0,l2,4,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2,,pending,,,
-ib_fuse256_s0,2,fuse256,0,charbonnier,4,fuse_channels=256,,pending,,,
-ib_fuse256_l2_s0,2,fuse256_l2,0,l2,4,fuse_channels=256 loss=l2,,pending,,,
-ib_fuse512_s0,2,fuse512,0,charbonnier,4,fuse_channels=512,,pending,,,
-ib_tmult8_s0,2,tmult8,0,charbonnier,4,temporal_mult=8,,pending,,,
-ib_base64_l2_s0,2,base64_l2,0,l2,4,base_channels=64 loss=l2,,pending,,,
-ib_no_norm_s0,2,no_norm,0,charbonnier,4,norm=none,,pending,,,
-ib_ho_s0,2,ho,0,charbonnier,4,bs_frames=1,,pending,,,
-ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7,,pending,,,
-ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,,pending,,,
+ib_support_sd_s0,2,support_sd,0,charbonnier,4,bs_stage=1 bs_dense=1,86def9b1-d235-4c52-85bc-2abe73f720b6,running,,,
+ib_support_all_s0,2,support_all,0,charbonnier,4,bs_stage=1 bs_dense=1 bs_multiscale=1,aac86bd9-921a-428c-84bf-f796754f5223,running,,,
+ib_support_all_l2_s0,2,support_all_l2,0,l2,4,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2,bff01ba8-b3b3-4991-84e1-ca27468ffde3,running,,,
+ib_fuse256_s0,2,fuse256,0,charbonnier,4,fuse_channels=256,4ef6e204-55ae-4204-be7a-aa20b20da19b,running,,,
+ib_fuse256_l2_s0,2,fuse256_l2,0,l2,4,fuse_channels=256 loss=l2,2527118b-1632-495a-849b-615133ed4655,running,,,
+ib_fuse512_s0,2,fuse512,0,charbonnier,4,fuse_channels=512,d696e955-4178-44ca-bf37-751ae05ffc19,running,,,
+ib_tmult8_s0,2,tmult8,0,charbonnier,4,temporal_mult=8,2e900263-189b-4e60-8ef5-8a4b8538b171,running,,,
+ib_base64_l2_s0,2,base64_l2,0,l2,4,base_channels=64 loss=l2,61adfe54-58e6-4415-b37e-8547dd46a18d,running,,,
+ib_no_norm_s0,2,no_norm,0,charbonnier,4,norm=none,ea57747a-8770-460c-83bf-3863e0e6eb9f,running,,,
+ib_ho_s0,2,ho,0,charbonnier,4,bs_frames=1,12b49fe9-954f-41d3-b897-6b48cd6baa41,running,,,
+ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7,4744910d-e966-4586-b16f-e9edae58c40f,running,,,
+ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,268ef4a5-de9a-486d-87da-96dd536ad5db,running,,,
+ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,26341aa2-a503-44f8-b764-e6544a0ba19e,running,,,capacity + weak-unit amplitude rescue (deployment candidate)
+ib_arch_om0_s0,2,arch_om0,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 omission=0,260da9a6-1900-46af-a7f7-798987d95c35,running,,,max capacity + rescue
 ib_weighted_s0,3,weighted,0,charbonnier,4,spike_weight=3,,pending,,,
 ib_l10g1_s0,3,l10g1,0,charbonnier,4,spike_weight=10 spike_weight_gamma=1,,pending,,,
 ib_l10g2_s0,3,l10g2,0,charbonnier,4,spike_weight=10 spike_weight_gamma=2,,pending,,,
 ib_archL10_s0,3,archL10,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 spike_weight=10,,pending,,,
 ib_hard1000_s0,3,hard1000,0,charbonnier,4,spike_weight=1000 spike_weight_hard=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
 ib_uL100_s0,3,uL100,0,charbonnier,4,spike_weight=100 spike_weight_car=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
+ib_uL100_om0_s0,3,uL100_om0,0,charbonnier,4,spike_weight=100 spike_weight_car=1 spike_weight_thresh=TBD omission=0,,pending,,,thresh from original run; loss+temporal weak-unit protection
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
 ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,yes,RUN4 in-band trajectory scored (13 ckpts)
