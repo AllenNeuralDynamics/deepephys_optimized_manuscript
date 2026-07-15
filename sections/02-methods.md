@@ -64,13 +64,13 @@ every spike *perfectly* would move the whole-frame validation loss by a rounding
 seed-to-seed noise. The loss-selected "best" checkpoint is therefore effectively a random draw along a
 plateau — which is exactly why models are scored with the spike-level d′ surrogate, not the loss.
 
-We therefore retrain the key configurations across **3–5 seeds**; the champion's 5-seed standard
+We therefore retrain the key configurations across **3–5 seeds**; base32's 5-seed standard
 deviation defines the significance scale (σ), and a difference is treated as real only if it clears
-**~2σ**, confirmed by a Welch t-test against the champion. The spike-fraction decomposition that makes
+**~2σ**, confirmed by a Welch t-test against base32. The spike-fraction decomposition that makes
 the loss spike-blind is **re-measured in-band** (Tier 2/3), since removing the LFP changes the
 fraction of variance spikes occupy and could sharpen — though not eliminate — the effect.
 
 :::{note} In-band anchors
-Raw-data reference **d′ = 4.497**; in-band champion **d′ = 4.277 ± 0.015** (5 seeds) → decision band
+Raw-data reference **d′ = 4.497**; in-band base32 **d′ = 4.277 ± 0.015** (5 seeds) → decision band
 **±2σ ≈ 0.03 d′** (σ_amp ≈ 0.004). See Results.
 :::

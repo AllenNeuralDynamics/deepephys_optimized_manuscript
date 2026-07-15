@@ -8,15 +8,15 @@ probe-axis blind-spot branch). Every override is defined in
 [the pre-registered design](reproducibility/regeneration-plan.md) §4.
 
 **Scored (Tier 1 + SUPPORT scale).**
-- **champion** — the reference: `base_channels=32, depth=3`, 3-frame temporal blind spot
+- **base32** — the reference: `base_channels=32, depth=3`, 3-frame temporal blind spot
   (`omission=1`), `bs_channels=64 / bs_depth=5`, `fuse_channels=64`, Charbonnier loss. In-band
   d′ 4.277 ± 0.015, amp 0.859 (5 seeds).
-- **omission0** — champion with the omission gap removed (`omission=0`, which also forces a 1-frame
+- **omission0** — base32 with the omission gap removed (`omission=0`, which also forces a 1-frame
   blind spot): the temporal branch now sees t±1. d′ 4.312, amp 0.932 (5 seeds).
-- **champ_l2** — champion with L2/MSE instead of Charbonnier; nothing else changed. d′ 4.289,
+- **champ_l2** — base32 with L2/MSE instead of Charbonnier; nothing else changed. d′ 4.289,
   amp 0.861 (3 seeds; the study's noisiest replicate set, σ = 0.041).
 - **omission0_l2** — omission0 in L2, completing the loss × omission 2×2. d′ 4.305, amp 0.931 (3 seeds).
-- **base64** — champion with the U-Net base width doubled (32 → 64, 3.15 M params). d′ 4.382,
+- **base64** — base32 with the U-Net base width doubled (32 → 64, 3.15 M params). d′ 4.382,
   amp 0.880 (3 seeds) — the leading detection config.
 - **om0_scale / om1_scale** — the two SUPPORT-scale runs (`support_all` wiring, L2, ~3.3 M updates)
   with `omission=0` / `omission=1`; the saturation A/B. Final-step d′ 4.361 / 4.361; amp 0.939 / 0.870.
@@ -32,7 +32,7 @@ plan, not yet scored.
 quality) across a representative model set; seeds averaged, full 21-model matrix in
 `results/tables/perunit_amp.csv`.
 
-| unit | base d′ | champion | omission0 | champ_l2 | omission0_l2 | base64 | om0_scale | om1_scale |
+| unit | base d′ | base32 | omission0 | champ_l2 | omission0_l2 | base64 | om0_scale | om1_scale |
 |---|---|---|---|---|---|---|---|---|
 | 2143 | 12.53 | 1.005 | 0.990 | 1.001 | 0.987 | 1.011 | 0.984 | 1.009 |
 | 793 | 8.57 | 1.003 | 0.962 | 1.005 | 0.957 | 1.012 | 0.949 | 1.023 |
@@ -47,13 +47,18 @@ quality) across a representative model set; seeds averaged, full 21-model matrix
 | **mean** | — | 0.859 | 0.932 | 0.861 | 0.931 | 0.880 | 0.939 | 0.869 |
 
 The dominant structure is **vertical, not horizontal**: strong units (top) return near 1.0 in *every*
-model, weak units (bottom) are smoothed to 0.67–0.82 in the champion-body configs — amplitude
+model, weak units (bottom) are smoothed to 0.67–0.82 in the base32-body configs — amplitude
 undershoot is a property of the *unit*, not the architecture (Spearman with baseline d′ = 0.94). The
 one lever that shifts a column is the omission gap: `omission0` and `om0_scale` lift precisely the weak
 units (1129 0.67 → 0.83/0.88, 94 0.81 → 0.97) while leaving strong units unchanged; `base64` lifts them
-mildly; `champ_l2` tracks the champion almost exactly.
+mildly; `champ_l2` tracks base32 almost exactly.
 
-<!-- Heatmap F6 added by code/figures/make_perunit_heatmaps.py -> figures/f6_perunit_amp_heatmap.png -->
+```{figure} figures/f6_perunit_amp_heatmap.png
+:label: fig-perunit-amp
+**Per-unit amplitude across models** (units × architectures; green ≈ preserved, red = smoothed). The
+gradient is vertical (unit quality) and near-identical in every column — the undershoot is a property
+of the unit, not the architecture.
+```
 
 ## C. Per-unit detection (Δd′) across models
 
@@ -61,7 +66,7 @@ Change in detectability from denoising, Δd′ = d′_deep − d′_raw, per uni
 averaged; full matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made that
 unit *harder* to detect.
 
-| unit | base d′ | champion | omission0 | champ_l2 | omission0_l2 | base64 | om0_scale | om1_scale |
+| unit | base d′ | base32 | omission0 | champ_l2 | omission0_l2 | base64 | om0_scale | om1_scale |
 |---|---|---|---|---|---|---|---|---|
 | 2143 | 12.53 | +0.730 | +0.087 | +0.684 | +0.023 | +1.038 | +0.205 | +0.580 |
 | 793 | 8.57 | +0.056 | −0.298 | +0.196 | −0.327 | +0.365 | −0.050 | +0.088 |
@@ -77,11 +82,15 @@ unit *harder* to detect.
 
 Two things stand out. First, **almost every cell is negative** — denoising reduces separability for
 nearly every unit (the cost that motivates the whole study), with column means from −0.115 (base64) to
-−0.22 (champion, om1_scale). Second, the damage is **not uniform**: it concentrates on the mid-to-weak
-units (unit 1129 −0.50, 1300 −0.48 in the champion), while the single strongest unit (2143, baseline
-d′ 12.5) actually *gains* (+0.73 champion, +1.04 base64) — a well-isolated unit whose denoised template
+−0.22 (base32, om1_scale). Second, the damage is **not uniform**: it concentrates on the mid-to-weak
+units (unit 1129 −0.50, 1300 −0.48 in base32), while the single strongest unit (2143, baseline
+d′ 12.5) actually *gains* (+0.73 base32, +1.04 base64) — a well-isolated unit whose denoised template
 sharpens. `base64` damages least across the board (mean −0.115), consistent with capacity being the
 detection lever; the omission configs sit between (−0.185 to −0.19), their amplitude rescue not
 translating into detection.
 
-<!-- Heatmap F7 added by code/figures/make_perunit_heatmaps.py -> figures/f7_perunit_dprime_delta_heatmap.png -->
+```{figure} figures/f7_perunit_dprime_delta_heatmap.png
+:label: fig-perunit-dprime
+**Per-unit change in detectability Δd′** (units × architectures; red = denoising hurts, blue = helps).
+Almost every cell is red; the strongest unit (2143) is the exception, and `base64` is the least red.
+```

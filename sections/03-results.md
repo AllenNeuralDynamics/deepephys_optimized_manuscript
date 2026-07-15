@@ -1,7 +1,7 @@
 # Results
 
 :::{note} Current state
-In-band scoring is complete for **Tier 1** (champion, omission0, champ_l2, omission0_l2, base64 — with
+In-band scoring is complete for **Tier 1** (base32, omission0, champ_l2, omission0_l2, base64 — with
 seed replicates) and the two **SUPPORT-scale** omission runs. The remaining sweep (SUPPORT wiring,
 fuse width, enlarged architecture, spike-weighting — Tier 2/3) is in progress; those rows and the
 figure panels are added as they land. All numbers below are in-band (train = eval on `recording1_3`,
@@ -20,41 +20,38 @@ SUPPORT-scale omission runs. Read against the raw-data reference of **d′ = 4.4
 | omission0 | charb | 5 | 4.312 | 4.354 | −0.185 | 0.932 | 0.976 | 6.89 |
 | omission0_l2 | L2 | 3 | 4.305 | 4.346 | −0.192 | 0.931 | 0.976 | 6.89 |
 | champ_l2 | L2 | 3 | 4.289 | 4.313 | −0.208 | 0.861 | 1.007 | 7.60 |
-| champion | charb | 5 | 4.277 | 4.300 | −0.220 | 0.859 | 1.007 | 7.60 |
+| base32 | charb | 5 | 4.277 | 4.300 | −0.220 | 0.859 | 1.007 | 7.60 |
 | om1_scale | L2 | 1 | 4.274 | 4.296 | −0.223 | 0.869 | 1.041 | 7.68 |
 
-(`om0_scale` / `om1_scale` are the SUPPORT-scale `support_all` runs; the rest are the champion body.
-Per-config seed spread: champion σ = 0.015, omission0 0.007, champ_l2 **0.041**, omission0_l2 0.004,
+(`om0_scale` / `om1_scale` are the SUPPORT-scale `support_all` runs; the rest are the base32 body.
+Per-config seed spread: base32 σ = 0.015, omission0 0.007, champ_l2 **0.041**, omission0_l2 0.004,
 base64 0.017. `d′_fixed` tracks `d′_self` throughout — the gains are real signal, not self-consistent
 template sharpening.)
 
 Two facts make any *single* run an unreliable ranking, and both recur in-band: training is stochastic
 (GPU non-determinism, initialisation, data order), and the validation loss is nearly flat with respect
 to spikes, so the loss-selected "best" checkpoint is effectively drawn from a plateau. We therefore
-retrained the key configurations 3–5 times, changing only the seed. The champion's five seeds scatter
+retrained the key configurations 3–5 times, changing only the seed. base32's five seeds scatter
 with **σ_d′ = 0.015** and **σ_amp = 0.004**, which fixes the decision rule for everything below: **a
 difference is real only if it clears ≈ 2σ (≈ 0.03 d′, ≈ 0.01 amp)**, confirmed by a Welch t-test against
-the champion. The rule immediately disciplines the table — `champ_l2` carries by far the widest spread
-(σ = 0.041, ~3× the champion), so its mid-table placement is seed scatter, not signal.
+base32. The rule immediately disciplines the table — `champ_l2` carries by far the widest spread
+(σ = 0.041, ~3× base32), so its mid-table placement is seed scatter, not signal.
 
 **Read-out (a): denoising still lowers detectability in-band.** Every configuration — the best
 included — sits below the raw d′ of 4.497, by 0.11 to 0.22. Training in the model's own band does not
 remove the deficit, so the central puzzle of the prior study is a genuine property of the denoiser,
 not an out-of-domain artifact.
 
-<!-- Uncomment each block once code/figures/collate.py + the figure scripts have written the file.
-Master results table (T1):
-```{include} results/tables/master_table.md
-```
-d′ ranking figure (F1):
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-d′ across all models against the champion ±2σ noise band; dotted line = raw data.
-``` -->
+**d′ across architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ over seeds); the
+grey band is base32's 5-seed ±2σ, the dotted line is raw data (4.497). Only `base64` clears the band;
+`champ_l2`'s wide error bar is why single runs cannot be ranked.
+```
 
 ## The loss axis is neutral
 
-Switching Charbonnier → L2 on the champion body moves d′ by only **+0.012 (t = 0.49, NS)** and does
+Switching Charbonnier → L2 on the base32 body moves d′ by only **+0.012 (t = 0.49, NS)** and does
 nothing for amplitude (0.859 → 0.861). `champ_l2` is the study's single noisiest replicate set
 (σ = 0.041): its occasional high draws are lucky seeds — exactly the pattern the prior report walked
 back after replication (its headline +0.13 collapsed to a non-significant mean). L2 stacked on the
@@ -70,27 +67,29 @@ The six Charbonnier↔L2 matched pairs (Δ per axis).
 ```{figure} figures/f2_loss_capacity_2x2.png
 :label: fig-loss-capacity
 Loss × capacity 2×2.
-``` -->
+``` (F2/F3 pending Tier 2/3) -->
 
 ## Capacity is the leading detection lever
 
 Doubling the U-Net base width (`base64`, 32 → 64 channels) is the largest reproducible move in the
 study so far: **d′ 4.277 → 4.382, +0.105 (Welch t = 8.7, p < 10⁻³)** — roughly three-quarters of the
-way to closing the champion's deficit against raw, and it nudges amplitude up as well (0.859 → 0.880).
-It is not merely above the champion but **significantly above every other configuration**, omission0
-included (+0.071, t = 6.8). Within the champion's temporal design the reproducible detection ordering
+way to closing base32's deficit against raw, and it nudges amplitude up as well (0.859 → 0.880).
+It is not merely above base32 but **significantly above every other configuration**, omission0
+included (+0.071, t = 6.8). Within the base32 temporal design the reproducible detection ordering
 is therefore unambiguous — **capacity dominates**, and on the sorting-relevant axis rather than by
 simply removing more noise. The enlarged (15×) architecture, which in the prior report bought the most
 SNR yet the *worst* detection, is retested in Tier 2/3.
 
-<!-- ```{figure} figures/f4_snr_vs_dprime.png
+```{figure} figures/f4_snr_vs_dprime.png
 :label: fig-snr-trap
-SNR gain vs Δd′ — the SNR trap.
+**The SNR trap.** SNR gain (snr_deep − snr_raw) vs Δd′ (deep − raw) per architecture — removing more
+noise does not buy detectability.
 ```
 ```{figure} figures/f5_amp_vs_quality.png
 :label: fig-amp-quality
-Amplitude preservation vs baseline unit quality (shrinkage).
-``` -->
+**Amplitude follows unit quality.** amp_ratio vs baseline d′ (log) for base32 (black) and omission0
+(blue); grey links join the same unit — weak units are smoothed, omission0 rescues them.
+```
 
 ## The omission gap: an amplitude lever, not a detection lever
 
@@ -113,7 +112,7 @@ amplitude gain lands (next section) is what makes the two axes decouple.
 
 The single "0.86 amplitude" is a mean over a steep quality gradient, and that gradient — not the
 architecture — is the dominant structure. Ranking the ten ground-truth units by intrinsic
-separability (raw d′, spanning 1.0–12.5) and reading champion amplitude down the ranking gives a
+separability (raw d′, spanning 1.0–12.5) and reading base32 amplitude down the ranking gives a
 textbook law: **Spearman(amp, baseline d′) = +0.94**. Loud, well-isolated units come back at full
 height (unit 2143, raw d′ 12.5 → amp 1.00; unit 793, 8.6 → 1.00); faint units near the sorting floor
 are smoothed hard (unit 1129, raw d′ 2.1 → 0.67; unit 664, 1.0 → 0.77; unit 720, 2.2 → 0.78).
@@ -134,7 +133,7 @@ The full per-unit amplitude and Δd′ matrices across all models are in
 
 ## The SNR trap
 
-Denoising unambiguously improves signal-to-noise — the champion lifts mean per-unit SNR from **5.80
+Denoising unambiguously improves signal-to-noise — base32 lifts mean per-unit SNR from **5.80
 (raw) to 7.63 (+32%)** — and yet its detectability *falls* (4.497 → 4.277). Higher SNR and better
 detection are simply not the same axis, and optimising the former is actively misleading for sorting:
 the configuration that removes the most noise is not the one that is easiest to sort. This
@@ -146,7 +145,7 @@ the whole detection deficit.
 Two matched runs trained ~7× longer (SUPPORT scale, ~3.3 M updates, 12 log-spaced checkpoints) settle
 two questions the short runs could not: does `omission=0` hold up, and were the models merely
 undertrained? Both metrics **saturate within the first ~10⁴ updates** and then plateau across the
-final two decades of training — so the short champion runs (~0.28 M updates) were already far past
+final two decades of training — so the short base32 runs (~0.28 M updates) were already far past
 convergence, and the models are **not undertrained**.
 
 The trajectories also resolve the omission gap at scale, and the answer sharpens everything above.
@@ -158,11 +157,10 @@ validation-loss-selected checkpoint is demonstrably wrong for spike quality: om1
 (d′ 4.275) is beaten by its own final checkpoint (4.361), the concrete signature of a spike-blind loss
 picking the wrong point on the plateau.
 
-<!-- ```{figure} figures/f8_trajectory.png
+```{figure} figures/f8_trajectory.png
 :label: fig-trajectory
-d′ and amplitude vs training updates for the omission A/B at SUPPORT scale.
+**SUPPORT-scale omission A/B.** d′ (left) and amplitude (right) vs training updates (log) for om0
+(t±1 visible) and om1 (t±1 hidden); dotted line = raw d′. Both saturate by ~10⁴ updates; the d′ gap
+closes while the amplitude gap persists.
 ```
-```{figure} figures/f9_val_loss_overfit.png
-:label: fig-val-loss
-Validation-loss / overfit curves with best-checkpoint markers.
-``` -->
+<!-- F9 val-loss/overfit curves: pending losses.jsonl download -->

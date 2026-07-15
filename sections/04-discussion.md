@@ -55,7 +55,7 @@ question this manuscript sets up.
 
 ## Recommended configuration
 
-On the in-band evidence so far, the pragmatic pick is the champion body with **doubled capacity
+On the in-band evidence so far, the pragmatic pick is the base32 body with **doubled capacity
 (`base64`)** — the only lever with a clear, replicated detection gain (+0.105 d′) — optionally with
 `omission=0` where waveform fidelity matters more than the last fraction of detectability. L2 is a
 harmless default. The final recommendation awaits the Tier 2/3 sweep (SUPPORT wiring, fuse width, the

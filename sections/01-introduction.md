@@ -16,7 +16,7 @@ only the structure shared with the surround. Applied to extracellular electrophy
 that spikes (spatiotemporally correlated across channels) are preserved while thermal/independent
 noise is removed, improving downstream spike sorting.
 
-## The model under study (the "champion")
+## The reference architecture (`base32`)
 
 The reference denoiser is a `fold`-geometry ephys DeepInterpolation network. Channels are scattered
 onto the Neuropixels 1.0 probe grid and the array's W columns are folded into the feature axis; a
@@ -24,8 +24,8 @@ onto the Neuropixels 1.0 probe grid and the array's W columns are folded into th
 channel: a **temporal** branch that reads a short window of frames around the target, and a
 probe-axis **spatial blind-spot** branch over the centre frame. The single design choice this study
 turns on lives in the temporal branch — the **omission gap**: whether it may see the frames
-immediately adjacent to the target (t±1) or hides them along with the target itself. The champion
-hides them (`omission=1`); the SUPPORT denoiser that inspired this work does not. Every configuration
+immediately adjacent to the target (t±1) or hides them along with the target itself. The base32
+reference hides them (`omission=1`); the SUPPORT denoiser that inspired this work does not. Every configuration
 and ablation is enumerated in the model glossary ([Appendix A](sections/05-appendix.md)) and defined
 operationally in [the pre-registered design](reproducibility/regeneration-plan.md).
 
