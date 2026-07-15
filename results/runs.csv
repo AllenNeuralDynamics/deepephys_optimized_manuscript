@@ -30,7 +30,7 @@ ib_no_norm_s0,2,no_norm,0,charbonnier,4,norm=none,ea57747a-8770-460c-83bf-3863e0
 ib_ho_s0,2,ho,0,charbonnier,4,bs_frames=1,12b49fe9-954f-41d3-b897-6b48cd6baa41,running,,,
 ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7,4744910d-e966-4586-b16f-e9edae58c40f,running,,,
 ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,268ef4a5-de9a-486d-87da-96dd536ad5db,running,,,
-ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,26341aa2-a503-44f8-b764-e6544a0ba19e,running,,,capacity + weak-unit amplitude rescue (deployment candidate)
+ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,4fe25467-e63f-49b3-8d01-0894d6eb6392,running,,,capacity + weak-unit amplitude rescue (deployment candidate); retry prev 26341aa2 failed ~1.3h infra (exit0 no results)
 ib_arch_om0_s0,2,arch_om0,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 omission=0,260da9a6-1900-46af-a7f7-798987d95c35,running,,,max capacity + rescue
 ib_weighted_s0,3,weighted,0,charbonnier,4,spike_weight=3,,pending,,,
 ib_l10g1_s0,3,l10g1,0,charbonnier,4,spike_weight=10 spike_weight_gamma=1,,pending,,,
