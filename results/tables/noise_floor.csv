@@ -1,6 +1,15 @@
 config,n,dprime_deep_sd,amp_ratio_sd
 arch,1,,
 arch_l2,1,,
+arch_l2_om0,3,0.018573905430947266,0.0016739577194318082
+arch_l2_om0_g100,1,,
+arch_l2_om0_g1000,1,,
+arch_l2_om0_g1000h,1,,
+arch_l2_om0_g300,1,,
+arch_l2_om0_w10,1,,
+arch_l2_om0_w10g2,1,,
+arch_l2_om0_w3,1,,
+arch_l2_om0_w30,1,,
 arch_om0,1,,
 base64,3,0.017196134019452528,0.0007641477490676104
 base64_l2,1,,
@@ -14,6 +23,9 @@ ho,1,,
 no_norm,1,,
 omission0,5,0.006919585825510877,0.0031674997299273294
 omission0_l2,3,0.0036445591422093657,0.003193817802724948
+omission0_l2_g100,1,,
+omission0_l2_w10,1,,
+origdi,3,0.0101289403417199,0.003518804043247409
 support_all,1,,
 support_all_l2,1,,
 support_all_l2_om0,1,,
