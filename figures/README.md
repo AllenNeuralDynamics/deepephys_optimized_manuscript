@@ -4,6 +4,6 @@ Manuscript figure assets, generated **in-domain** from the scored CSVs by the sc
 [`../code/figures/`](../code/figures/README.md). The figure ↔ quantification map (10 figures + 5
 tables) is in [](../reproducibility/regeneration-plan.md) §6.
 
-A schematic of the reference (`base32`) two-branch fold architecture is available as
-`champion_architecture.png` / `.md` (not currently embedded — see [Methods](../sections/02-methods.md)
-for the layer-by-layer description and the variant-construction table).
+The reference (`base32`) two-branch fold architecture is embedded as a diagram in
+[Methods](../sections/02-methods.md); a full layer-by-layer reference (shapes, receptive fields, and
+the three blind-spot guards) is in [`architecture_reference.md`](architecture_reference.md).

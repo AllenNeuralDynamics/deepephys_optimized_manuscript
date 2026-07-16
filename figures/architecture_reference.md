@@ -1,4 +1,4 @@
-# Champion architecture — `FoldDeepInterp1D`
+# Reference architecture — `base32` (`FoldDeepInterp1D`)
 
 Blind-spot DeepInterpolation ephys denoiser, `geometry="fold"`. Predicts the clean
 **center frame** `t` from a ±30-frame temporal window, never using the sample it

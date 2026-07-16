@@ -40,6 +40,45 @@ scattered onto the 192 × 4 probe grid and split into the two branches:
 | loss | Charbonnier |
 | size | ~0.85 M parameters (U-Net ≈ 87%) |
 
+```{mermaid}
+flowchart TD
+    IN["Input context<br/>(B, 63, 384)"] --> SC["grid.scatter<br/>(B, 63, 192, 4)<br/>384 ch → 192×4 grid"]
+    SC --> SPLIT{"split frames"}
+    SPLIT -->|"60 neighbour frames"| FN["fold → (B, 240, 192)<br/>60 frames × 4 cols"]
+    SPLIT -->|"3 centre frames {t-1,t,t+1}"| FC["fold → (B, 12, 192)<br/>3 frames × 4 cols"]
+    subgraph UNET["TEMPORAL U-Net — centre + t±1 EXCLUDED — conv along DEPTH (H=192)"]
+        FN --> ST["stem DoubleConv1d<br/>240→32, k3"]
+        ST --> D1["Down1 pool/2 · 32→64 @H=96"]
+        D1 --> D2["Down2 pool/2 · 64→128 @H=48"]
+        D2 --> D3["Down3 pool/2 — bottleneck<br/>128→256 @H=24"]
+        D3 --> U3["Up3 →128 @H=48 (+skip)"]
+        U3 --> U2["Up2 →64 @H=96 (+skip)"]
+        U2 --> U1["Up1 →32 @H=192 (+skip)"]
+        U1 --> UH["head Conv1d 32→4, k1"]
+    end
+    UH --> UO["u : (B, 4, 192)"]
+    subgraph BS["BLIND-SPOT branch — centre frame — dilated HOLE-convs (centre tap zeroed)"]
+        FC --> H1["ConvHole1D k3 d=1<br/>12→64 · GELU"]
+        H1 --> H2["ConvHole1D k3 d=2<br/>64→64 · GELU"]
+        H2 --> H3["ConvHole1D k3 d=4"]
+        H3 --> H4["ConvHole1D k3 d=8"]
+        H4 --> H5["ConvHole1D k3 d=16"]
+    end
+    H5 --> BO["b : (B, 64, 192)<br/>±31 rows, own row EXCLUDED"]
+    UO --> FUSE["FUSE — pointwise 1×1 only<br/>concat 4+64=68 → 68→64→64→4 (GELU)"]
+    BO --> FUSE
+    FUSE --> Y["y : (B, 4, 192)"]
+    Y --> UF["unfold + grid.gather"]
+    UF --> OUT["Denoised centre<br/>(B, 1, 384)"]
+```
+
+**The two-branch `base32` (`FoldDeepInterp1D`) denoiser.** The neighbour frames — with the target *and*
+its immediate t±1 neighbours excluded — drive the **temporal U-Net** along probe depth; the three
+centre frames drive the **blind-spot branch** of five dilated `ConvHole1D` layers whose centre kernel
+tap is forced to zero (the "holes"), so a channel's prediction never uses its own value. A
+pointwise-only (1×1) fuse head merges the two branches, which keeps the blind spot intact. Each swept
+variant below changes exactly one piece of this diagram.
+
 **How each swept variant is built.** Every variant changes exactly one part of this reference (all
 enumerated in [the pre-registered design](reproducibility/regeneration-plan.md)):
 
