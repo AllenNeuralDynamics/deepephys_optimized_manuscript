@@ -1,9 +1,23 @@
 config,n,dprime_deep_sd,amp_ratio_sd
+arch,1,,
+arch_l2,1,,
+arch_om0,1,,
 base64,3,0.017196134019452528,0.0007641477490676104
+base64_l2,1,,
+base64_om0,1,,
 champ_l2,3,0.040754505532900866,0.0021702511324142924
 champion,5,0.015429524769554876,0.0044557450752837685
+fuse256,1,,
+fuse256_l2,1,,
+fuse512,1,,
+ho,1,,
+no_norm,1,,
 omission0,5,0.006919585825510877,0.0031674997299273294
 omission0_l2,3,0.0036445591422093657,0.003193817802724948
+support_all,1,,
+support_all_l2,1,,
 support_all_l2_om0,1,,
 support_all_l2_om1,1,,
+support_sd,1,,
+tmult8,1,,
 
