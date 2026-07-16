@@ -58,9 +58,9 @@ CFG = [
     ("tmult8", "ib_tmult8_s0", "charb"),
     ("no_norm", "ib_no_norm_s0", "charb"),
     ("ho", "ib_ho_s0", "charb"),
-    # SUPPORT scale (long training)
-    ("om0_scale", "ib_om0_scale", "L2"),
-    ("om1_scale", "ib_om1_scale", "L2"),
+    # NOTE: the SUPPORT-scale runs (om0_scale / om1_scale) are trained ~7x longer and are
+    # deliberately NOT ranked against the short-budget models here — they appear only in F8,
+    # the training-length comparison.
 ]
 PATS = {c[0]: c[1] for c in CFG}
 NAMES = [c[0] for c in CFG]

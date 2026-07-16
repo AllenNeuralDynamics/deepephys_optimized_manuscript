@@ -58,11 +58,12 @@ not an out-of-domain artifact.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across all 21 architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ over seeds;
-single-seed Tier-2 rows have no bar); base32 (grey bar) anchors its own 5-seed ±2σ band, the dotted
-line is raw data (4.497). The `arch` / `base64` capacity family sits at the top and the
+**d′ across the 19 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
+over seeds; single-seed Tier-2 rows have no bar); base32 (grey bar) anchors its own 5-seed ±2σ band, the
+dotted line is raw data (4.497). The `arch` / `base64` capacity family sits at the top and the
 fuse-width / temporal variants at or below the band; `champ_l2`'s wide error bar is why single runs
-cannot be ranked.
+cannot be ranked. The two SUPPORT-scale runs (7× longer training) are excluded here and compared
+separately in the training-length section below.
 ```
 
 ## The loss axis is neutral
