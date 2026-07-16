@@ -12,7 +12,7 @@ spike-aware loss sweep on the `arch_l2_om0` body), the original DeepInterpolatio
 
 ## The master table and the noise floor
 
-Twenty short-budget architectures are scored in-band — the nineteen swept configurations plus the
+Twenty-one short-budget architectures are scored in-band — the twenty swept configurations plus the
 original DeepInterpolation network (`origdi`) as a published reference (the two SUPPORT-scale runs,
 trained ~7× longer, are held for the training-length section below). The table is seed-averaged where
 replicated and sorted by detection d′, read against the raw-data reference of **d′ = 4.497**:
@@ -22,8 +22,9 @@ replicated and sorted by detection d′, read against the raw-data reference of 
 | **arch** | charb | 1 | **4.409** | 4.437 | −0.088 | 0.871 | 1.020 | 7.81 |
 | arch_l2 | L2 | 1 | 4.407 | 4.434 | −0.090 | 0.877 | 1.003 | 7.84 |
 | base64 | charb | 3 | 4.382 | 4.410 | −0.115 | 0.880 | 1.009 | 7.70 |
-| arch_om0 | charb | 1 | 4.367 | 4.403 | −0.130 | **0.936** | 0.976 | 6.96 |
+| arch_om0 | charb | 1 | 4.367 | 4.403 | −0.130 | 0.936 | 0.976 | 6.96 |
 | base64_l2 | L2 | 1 | 4.366 | 4.398 | −0.131 | 0.880 | 1.003 | 7.70 |
+| arch_l2_om0 | L2 | 3 | 4.360 | 4.400 | −0.137 | **0.937** | 0.976 | 7.00 |
 | base64_om0 | charb | 1 | 4.359 | 4.397 | −0.138 | 0.934 | 0.976 | 6.91 |
 | support_sd | charb | 1 | 4.313 | 4.339 | −0.184 | 0.857 | 1.023 | 7.56 |
 | support_all | charb | 1 | 4.312 | 4.334 | −0.185 | 0.864 | 1.003 | 7.57 |
@@ -62,7 +63,7 @@ architecture has already recovered from the original is the next section.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across the 20 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
+**d′ across the 21 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
 over seeds; single-seed Tier-2 rows have no bar); base32 (grey) anchors its own 5-seed ±2σ band, the
 original DeepInterpolation network (`origdi`, **crimson**) is the published reference, and the dotted
 line is raw data (4.497). The `arch` / `base64` capacity family sits at the top, the fuse-width /
@@ -222,6 +223,15 @@ So the residual detection deficit **is not recoverable by loss-level spike empha
 architecture is optimized, up-weighting spikes cannot convert the recovered amplitude into
 detectability, which points to the deficit being intrinsic to the blind-spot objective rather than a
 loss-weighting oversight (Discussion).
+
+```{figure} figures/f9_spike_weight.png
+:label: fig-spike-weight
+**Spike-aware loss does not move detection.** d′ vs spike weight λ (log) on the `arch_l2_om0` body:
+soft magnitude weighting (blue), the saturating position gate (orange), the focal γ = 2 variant (red
+cross), and the hard gate (purple), read against the baseline ±2σ band (grey) and raw (dotted). Every
+point sits in or below the band — the soft sweep is flat within noise, and the aggressive settings
+(focal γ = 2, gate λ = 1000) collapse detection.
+```
 
 ## Per-unit amplitude: who gets smoothed, and why
 
