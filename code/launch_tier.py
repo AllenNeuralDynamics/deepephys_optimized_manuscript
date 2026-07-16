@@ -113,7 +113,8 @@ def main() -> None:
                 row["co_id"] = launched[row["label"]]
                 row["state"] = "running"
         with open(RUNS, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+            fieldnames = [k for k in rows[0].keys() if k is not None]
+            w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
             w.writeheader()
             w.writerows(rows)
 

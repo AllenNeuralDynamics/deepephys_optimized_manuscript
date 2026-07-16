@@ -45,5 +45,8 @@ ib_arch_l2_om0_g1000_s0,3,arch_l2_om0_g1000,0,l2,4,base_channels=64 depth=4 bs_c
 ib_arch_l2_om0_g1000h_s0,3,arch_l2_om0_g1000h,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=1000 spike_weight_thresh=8 spike_weight_hard=1 spike_weight_car=1,287e5075-fb3c-4bfd-a650-9fbccbadd384,running,,,hard binary gate thresh=8 car=1
 ib_omission0_l2_w10_s0,3,omission0_l2_w10,0,l2,4,loss=l2 omission=0 spike_weight=10,61f83b06-73a0-4b6e-b429-aeae04931c36,running,,,base32-capacity control (vs omission0_l2)
 ib_omission0_l2_g100_s0,3,omission0_l2_g100,0,l2,4,loss=l2 omission=0 spike_weight=100 spike_weight_thresh=5 spike_weight_car=1,1d200eaa-04d0-4184-9422-86aa9d1eb5d1,running,,,base32-capacity control (vs omission0_l2)
+ib_origdi_s0,orig,origdi,0,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,0bb83903-4910-4f77-99a3-9a1b6318286f,running,,,faithful original DeepInterpolation ephys U-Net (Lecoq 2021 unet_single_ephys_1024) — temporal-only; no spatial blind spot
+ib_origdi_s1,orig,origdi,1,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,8bb9b688-57cc-4d24-ab3e-c2d9734a0fbc,running,,,
+ib_origdi_s2,orig,origdi,2,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,74f2d2ee-826d-45f3-9c03-6bf2ea264c21,running,,,
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
 ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,yes,RUN4 in-band trajectory scored (13 ckpts)
