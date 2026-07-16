@@ -2,31 +2,45 @@
 
 :::{note} Current state
 In-band scoring is complete for **Tier 1** (base32, omission0, champ_l2, omission0_l2, base64 — with
-seed replicates) and the two **SUPPORT-scale** omission runs. The remaining sweep (SUPPORT wiring,
-fuse width, enlarged architecture, spike-weighting — Tier 2/3) is in progress; those rows and the
-figure panels are added as they land. All numbers below are in-band (train = eval on `recording1_3`,
-AP band); the raw-data reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
+seed replicates), all of **Tier 2** (SUPPORT blind-spot wiring, fuse width, the enlarged `arch` body,
+temporal / normalisation variants, and the capacity × `omission=0` combos), and the two **SUPPORT-scale**
+omission runs. Only the **Tier 3** spike-weight amp-lever family is still pending. All numbers below are
+in-band (train = eval on `recording1_3`, AP band); the raw-data reference is **d′ = 4.497**. Full
+ledger: `results/tables/master_table.csv`.
 :::
 
 ## The master table and the noise floor
 
-Twenty-one models are scored so far — the five replicated noise-floor configurations and the two
-SUPPORT-scale omission runs. Read against the raw-data reference of **d′ = 4.497**:
+Nineteen short-budget architectures are scored in-band (the two SUPPORT-scale runs, trained ~7×
+longer, are held for the training-length section below). The table is seed-averaged where replicated
+and sorted by detection d′, read against the raw-data reference of **d′ = 4.497**:
 
 | config | loss | n | d′_self | d′_fixed | Δ vs raw | amp | fwhm | snr_deep |
 |---|---|---|---|---|---|---|---|---|
-| **base64** | charb | 3 | **4.382** | 4.410 | −0.115 | 0.880 | 1.009 | 7.70 |
-| om0_scale | L2 | 1 | 4.363 | 4.400 | −0.134 | **0.939** | 0.976 | 6.90 |
+| **arch** | charb | 1 | **4.409** | 4.437 | −0.088 | 0.871 | 1.020 | 7.81 |
+| arch_l2 | L2 | 1 | 4.407 | 4.434 | −0.090 | 0.877 | 1.003 | 7.84 |
+| base64 | charb | 3 | 4.382 | 4.410 | −0.115 | 0.880 | 1.009 | 7.70 |
+| arch_om0 | charb | 1 | 4.367 | 4.403 | −0.130 | **0.936** | 0.976 | 6.96 |
+| base64_l2 | L2 | 1 | 4.366 | 4.398 | −0.131 | 0.880 | 1.003 | 7.70 |
+| base64_om0 | charb | 1 | 4.359 | 4.397 | −0.138 | 0.934 | 0.976 | 6.91 |
+| support_sd | charb | 1 | 4.313 | 4.339 | −0.184 | 0.857 | 1.023 | 7.56 |
+| support_all | charb | 1 | 4.312 | 4.334 | −0.185 | 0.864 | 1.003 | 7.57 |
 | omission0 | charb | 5 | 4.312 | 4.354 | −0.185 | 0.932 | 0.976 | 6.89 |
 | omission0_l2 | L2 | 3 | 4.305 | 4.346 | −0.192 | 0.931 | 0.976 | 6.89 |
+| support_all_l2 | L2 | 1 | 4.295 | 4.320 | −0.202 | 0.868 | 1.034 | 7.59 |
 | champ_l2 | L2 | 3 | 4.289 | 4.313 | −0.208 | 0.861 | 1.007 | 7.60 |
+| no_norm | charb | 1 | 4.284 | 4.310 | −0.213 | 0.856 | 1.023 | 7.55 |
+| fuse256_l2 | L2 | 1 | 4.282 | 4.311 | −0.215 | 0.857 | 1.023 | 7.59 |
 | base32 | charb | 5 | 4.277 | 4.300 | −0.220 | 0.859 | 1.007 | 7.60 |
-| om1_scale | L2 | 1 | 4.274 | 4.296 | −0.223 | 0.869 | 1.041 | 7.68 |
+| ho | charb | 1 | 4.272 | 4.300 | −0.225 | 0.852 | 1.014 | 7.58 |
+| fuse256 | charb | 1 | 4.265 | 4.296 | −0.232 | 0.853 | 1.003 | 7.50 |
+| tmult8 | charb | 1 | 4.257 | 4.286 | −0.240 | 0.857 | 1.003 | 7.61 |
+| fuse512 | charb | 1 | 4.244 | 4.266 | −0.253 | 0.859 | 1.003 | 7.57 |
 
-(`om0_scale` / `om1_scale` are the SUPPORT-scale `support_all` runs; the rest are the base32 body.
-Per-config seed spread: base32 σ = 0.015, omission0 0.007, champ_l2 **0.041**, omission0_l2 0.004,
-base64 0.017. `d′_fixed` tracks `d′_self` throughout — the gains are real signal, not self-consistent
-template sharpening.)
+(Single-seed rows — the Tier-2 configurations — carry no error bar and are judged against base32's
+noise floor below. Per-config seed spread on the replicated rows: base32 σ = 0.015, omission0 0.007,
+champ_l2 **0.041**, omission0_l2 0.004, base64 0.017. `d′_fixed` tracks `d′_self` throughout — the
+gains are real signal, not self-consistent template sharpening.)
 
 Two facts make any *single* run an unreliable ranking, and both recur in-band: training is stochastic
 (GPU non-determinism, initialisation, data order), and the validation loss is nearly flat with respect
@@ -44,9 +58,11 @@ not an out-of-domain artifact.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ over seeds); the
-grey band is base32's 5-seed ±2σ, the dotted line is raw data (4.497). Only `base64` clears the band;
-`champ_l2`'s wide error bar is why single runs cannot be ranked.
+**d′ across all 21 architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ over seeds;
+single-seed Tier-2 rows have no bar); base32 (grey bar) anchors its own 5-seed ±2σ band, the dotted
+line is raw data (4.497). The `arch` / `base64` capacity family sits at the top and the
+fuse-width / temporal variants at or below the band; `champ_l2`'s wide error bar is why single runs
+cannot be ranked.
 ```
 
 ## The loss axis is neutral
@@ -71,14 +87,20 @@ Loss × capacity 2×2.
 
 ## Capacity is the leading detection lever
 
-Doubling the U-Net base width (`base64`, 32 → 64 channels) is the largest reproducible move in the
-study so far: **d′ 4.277 → 4.382, +0.105 (Welch t = 8.7, p < 10⁻³)** — roughly three-quarters of the
-way to closing base32's deficit against raw, and it nudges amplitude up as well (0.859 → 0.880).
-It is not merely above base32 but **significantly above every other configuration**, omission0
-included (+0.071, t = 6.8). Within the base32 temporal design the reproducible detection ordering
-is therefore unambiguous — **capacity dominates**, and on the sorting-relevant axis rather than by
-simply removing more noise. The enlarged (15×) architecture, which in the prior report bought the most
-SNR yet the *worst* detection, is retested in Tier 2/3.
+Doubling the U-Net base width (`base64`, 32 → 64 channels) is the largest reproducible move on the
+base32 body: **d′ 4.277 → 4.382, +0.105 (Welch t = 8.7, p < 10⁻³)** — roughly three-quarters of the
+way to closing base32's deficit against raw, nudging amplitude up as well (0.859 → 0.880), and
+significantly above omission0 (+0.071, t = 6.8).
+
+Tier 2 adds the two larger bodies. The enlarged **`arch`** (base 64, depth 4, `bs_channels=128`,
+`bs_depth=7` — the configuration the prior out-of-band report found bought the most SNR yet the
+*worst* detection) is here the **top detector, d′ = 4.409**, corroborated by its L2 twin `arch_l2`
+(4.407). But the increment over `base64` is small — **+0.027, inside base64's ±2σ band** — even though
+`arch` roughly doubles the parameter count again. On the short screen the capacity axis therefore runs
+base32 (4.277) → base64 (4.382, +0.105) → arch (4.409, +0.027): monotone but **sharply diminishing**,
+and still 0.088 below raw. Whether `arch`'s larger body keeps climbing at a longer budget — a bigger
+network may simply converge more slowly — is what the training-length section below, and the planned
+scale-validation, are for.
 
 ```{figure} figures/f4_snr_vs_dprime.png
 :label: fig-snr-trap
@@ -90,6 +112,25 @@ noise does not buy detectability.
 **Amplitude follows unit quality.** amp_ratio vs baseline d′ (log) for base32 (black) and omission0
 (blue); grey links join the same unit — weak units are smoothed, omission0 rescues them.
 ```
+
+## Blind-spot wiring, fuse width, and temporal variants
+
+The remaining Tier-2 levers change the network's wiring rather than its raw capacity. Read against the
+base32 band (4.277 ± 0.03), none of them moves detection:
+
+| lever | config | d′ | amp | vs base32 band |
+|---|---|---|---|---|
+| bigger / denser blind-spot branch | support_sd 4.313, support_all 4.312 | ~4.31 | 0.86 | top edge |
+| L2 on that wiring | support_all_l2 4.295 | 4.295 | 0.868 | inside |
+| widest fusion | fuse256 4.265, fuse512 4.244 | 4.24–4.27 | 0.85–0.86 | at / below |
+| deeper temporal hand-off | tmult8 4.257 | 4.257 | 0.857 | below |
+| no input normalisation | no_norm 4.284 | 4.284 | 0.856 | inside |
+| 1-frame blind spot, omission on | ho 4.272 | 4.272 | 0.852 | inside |
+
+The two `support_*` runs (a larger, denser blind-spot sub-network) sit marginally at the top of the
+band; everything else — including the *widest* fusion (`fuse512`), the lowest-d′ configuration in the
+whole table — is inside or below it, and none shifts amplitude off ~0.86. Widening or deepening the
+sub-networks is not where the detection budget is.
 
 ## The omission gap: an amplitude lever, not a detection lever
 
@@ -107,6 +148,22 @@ out-of-band +0.204** — and not even resolvable in L2. The **amplitude** gain, 
 the most significant effects in the whole study (t ≈ 30). So in-band `omission=0` is an
 **amplitude / waveform-fidelity** lever, not the detection lever it was billed as. *Where* that
 amplitude gain lands (next section) is what makes the two axes decouple.
+
+## Capacity × omission=0: stacking the two levers
+
+The two axes that *do* move things — capacity (detection) and `omission=0` (amplitude) — are combined
+for the first time in `base64_om0` and `arch_om0`:
+
+| pairing | d′ | amp | Δ vs its om1 twin |
+|---|---|---|---|
+| base64 → base64_om0 | 4.382 → 4.359 | 0.880 → 0.934 | d′ −0.023, amp +0.054 |
+| arch → arch_om0 | 4.409 → 4.367 | 0.871 → 0.936 | d′ −0.042, amp +0.065 |
+
+The trade seen on the base32 body holds at high capacity: `omission=0` lifts amplitude to ~0.935 — the
+best in the table, matching the dedicated `omission0` runs — for a small d′ cost. The combos land at
+d′ ≈ 4.36 with amp ≈ 0.935, so both `arch_om0` and `base64_om0` sit above base32 on *both* axes at once
+(base32 4.277 / 0.859). Per-unit, the amplitude rescue again concentrates on the weak units (unit 94
+0.81 → 0.97, unit 1129 0.69 → 0.82; [Appendix B](sections/05-appendix.md)).
 
 ## Per-unit amplitude: who gets smoothed, and why
 

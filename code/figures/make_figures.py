@@ -32,13 +32,33 @@ T = REPO / "results" / "tables"
 FIG = REPO / "figures"
 FIG.mkdir(exist_ok=True)
 
-# display name, seed-glob, loss
+# display name, seed-glob, loss  (single-seed Tier-2 rows use an exact label, no '*')
 CFG = [
+    # base32 body (Tier 1)
     ("base32", "ib_champion_s*", "charb"),
-    ("omission0", "ib_omission0_s*", "charb"),
     ("champ_l2", "ib_champ_l2_s*", "L2"),
+    ("omission0", "ib_omission0_s*", "charb"),
     ("omission0_l2", "ib_omission0_l2_s*", "L2"),
+    # capacity
     ("base64", "ib_base64_s*", "charb"),
+    ("base64_l2", "ib_base64_l2_s0", "L2"),
+    ("base64_om0", "ib_base64_om0_s0", "charb"),
+    ("arch", "ib_arch_s0", "charb"),
+    ("arch_l2", "ib_arch_l2_s0", "L2"),
+    ("arch_om0", "ib_arch_om0_s0", "charb"),
+    # SUPPORT blind-spot wiring
+    ("support_sd", "ib_support_sd_s0", "charb"),
+    ("support_all", "ib_support_all_s0", "charb"),
+    ("support_all_l2", "ib_support_all_l2_s0", "L2"),
+    # fuse width
+    ("fuse256", "ib_fuse256_s0", "charb"),
+    ("fuse256_l2", "ib_fuse256_l2_s0", "L2"),
+    ("fuse512", "ib_fuse512_s0", "charb"),
+    # temporal / norm / blind-spot frames
+    ("tmult8", "ib_tmult8_s0", "charb"),
+    ("no_norm", "ib_no_norm_s0", "charb"),
+    ("ho", "ib_ho_s0", "charb"),
+    # SUPPORT scale (long training)
     ("om0_scale", "ib_om0_scale", "L2"),
     ("om1_scale", "ib_om1_scale", "L2"),
 ]
@@ -85,9 +105,9 @@ def cfg_unit(pat, kind, col):
 dmean = [st.mean(per_seed(p, "dprime", "dprime_deep")) for p in PATS.values()]
 dsd = [(st.stdev(v) if len(v) > 1 else 0.0) for v in (per_seed(p, "dprime", "dprime_deep") for p in PATS.values())]
 order = np.argsort(dmean)[::-1]
-fig, ax = plt.subplots(figsize=(7, 4.2))
+fig, ax = plt.subplots(figsize=(10, 4.6))
 ax.bar(range(len(order)), [dmean[i] for i in order], yerr=[2 * dsd[i] for i in order],
-       capsize=4, color=["#d55e00" if NAMES[i] == "base64" else "#4c72b0" for i in order])
+       capsize=3, color=["#7f7f7f" if NAMES[i] == "base32" else "#4c72b0" for i in order])
 ax.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.3f})")
 ci = NAMES.index("base32")
 ax.axhspan(dmean[ci] - 2 * dsd[ci], dmean[ci] + 2 * dsd[ci], color="gray", alpha=0.25,
@@ -101,7 +121,7 @@ ax.legend(fontsize=8)
 fig.tight_layout(); fig.savefig(FIG / "f1_dprime_ranking.png", dpi=150); plt.close(fig)
 
 # ---- F4: SNR gain vs Δd' ----
-fig, ax = plt.subplots(figsize=(6, 4.5))
+fig, ax = plt.subplots(figsize=(8.5, 6))
 for name, pat in PATS.items():
     d = st.mean(per_seed(pat, "dprime", "dprime_deep"))
     sn = st.mean(per_seed(pat, "dprime", "snr_deep"))
@@ -140,7 +160,7 @@ def heatmap(kind, col, delta, fname, cmap, title, center=None):
             d = {u: d[u] - raw[u] for u in units}
         data[cn] = d
     M = np.array([[data[cn][u] for cn in NAMES] for u in units])
-    fig, ax = plt.subplots(figsize=(8.5, 5.2))
+    fig, ax = plt.subplots(figsize=(13, 5.5))
     if center is not None:
         vmax = np.nanmax(np.abs(M - center))
         im = ax.imshow(M, cmap=cmap, vmin=center - vmax, vmax=center + vmax, aspect="auto")
