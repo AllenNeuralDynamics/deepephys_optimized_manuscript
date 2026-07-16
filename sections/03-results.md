@@ -51,10 +51,10 @@ difference is real only if it clears ≈ 2σ (≈ 0.03 d′, ≈ 0.01 amp)**, co
 base32. The rule immediately disciplines the table — `champ_l2` carries by far the widest spread
 (σ = 0.041, ~3× base32), so its mid-table placement is seed scatter, not signal.
 
-**Read-out (a): denoising still lowers detectability in-band.** Every configuration — the best
+**Read-out (a): denoising still lowers detectability.** Every configuration — the best
 included — sits below the raw d′ of 4.497, by 0.11 to 0.22. Training in the model's own band does not
-remove the deficit, so the central puzzle of the prior study is a genuine property of the denoiser,
-not an out-of-domain artifact.
+remove the deficit, so the detection cost is a genuine property of the denoiser — the central problem
+this study targets.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
@@ -70,9 +70,9 @@ separately in the training-length section below.
 
 Switching Charbonnier → L2 on the base32 body moves d′ by only **+0.012 (t = 0.49, NS)** and does
 nothing for amplitude (0.859 → 0.861). `champ_l2` is the study's single noisiest replicate set
-(σ = 0.041): its occasional high draws are lucky seeds — exactly the pattern the prior report walked
-back after replication (its headline +0.13 collapsed to a non-significant mean). L2 stacked on the
-omission change is likewise flat (omission0_l2 − champ_l2 = +0.016, t = 0.67, NS). On the evidence so
+(σ = 0.041): its occasional high draws are lucky seeds — exactly why the ±2σ rule matters, since a
+single lucky L2 run would otherwise read as a real gain. L2 stacked on the omission change is likewise
+flat (omission0_l2 − champ_l2 = +0.016, t = 0.67, NS). On the evidence so
 far L2 is a free but negligible nudge: never worse, never clearing the band. The full six
 Charbonnier↔L2 matched pairs — which test whether loss stacks with capacity, fuse width, SUPPORT
 wiring, and the enlarged body — complete with Tier 2/3.
@@ -94,14 +94,13 @@ way to closing base32's deficit against raw, nudging amplitude up as well (0.859
 significantly above omission0 (+0.071, t = 6.8).
 
 Tier 2 adds the two larger bodies. The enlarged **`arch`** (base 64, depth 4, `bs_channels=128`,
-`bs_depth=7` — the configuration the prior out-of-band report found bought the most SNR yet the
-*worst* detection) is here the **top detector, d′ = 4.409**, corroborated by its L2 twin `arch_l2`
-(4.407). But the increment over `base64` is small — **+0.027, inside base64's ±2σ band** — even though
-`arch` roughly doubles the parameter count again. On the short screen the capacity axis therefore runs
-base32 (4.277) → base64 (4.382, +0.105) → arch (4.409, +0.027): monotone but **sharply diminishing**,
-and still 0.088 below raw. Whether `arch`'s larger body keeps climbing at a longer budget — a bigger
-network may simply converge more slowly — is what the training-length section below, and the planned
-scale-validation, are for.
+`bs_depth=7`) — the largest network in the sweep — is here the **top detector, d′ = 4.409**,
+corroborated by its L2 twin `arch_l2` (4.407). But the increment over `base64` is small — **+0.027,
+inside base64's ±2σ band** — even though `arch` roughly doubles the parameter count again. On the short
+screen the capacity axis therefore runs base32 (4.277) → base64 (4.382, +0.105) → arch (4.409, +0.027):
+monotone but **sharply diminishing**, and still 0.088 below raw. Whether `arch`'s larger body keeps
+climbing at a longer budget — a bigger network may simply converge more slowly — is what the
+training-length section below, and the planned scale-validation, are for.
 
 ```{figure} figures/f4_snr_vs_dprime.png
 :label: fig-snr-trap
@@ -135,20 +134,19 @@ sub-networks is not where the detection budget is.
 
 ## The omission gap: an amplitude lever, not a detection lever
 
-The temporal choice the prior report crowned "the largest single lever" is the omission gap — whether
-the temporal branch sees the immediately-adjacent frames t±1 (`omission=0`) or hides them
-(`omission=1`). In-band the two effects it drives come apart sharply:
+The temporal design choice the reference turns on is the omission gap — whether the temporal branch
+sees the immediately-adjacent frames t±1 (`omission=0`) or hides them (`omission=1`). It might be
+expected to matter most for detection; in-band the two effects it drives come apart sharply:
 
 | axis | Charbonnier (×5 vs ×5) | L2 (×3 vs ×3) |
 |---|---|---|
 | **detection** Δd′ | +0.035 (t = 4.6, p ≈ 0.003) | +0.016 (t = 0.67, NS) |
 | **amplitude** Δamp | +0.073 (t ≈ 30) | +0.071 |
 
-The **detection** gain is real in Charbonnier but small — **+0.035 d′, about one-sixth of the prior
-out-of-band +0.204** — and not even resolvable in L2. The **amplitude** gain, by contrast, is one of
-the most significant effects in the whole study (t ≈ 30). So in-band `omission=0` is an
-**amplitude / waveform-fidelity** lever, not the detection lever it was billed as. *Where* that
-amplitude gain lands (next section) is what makes the two axes decouple.
+The **detection** gain is real in Charbonnier but small — **+0.035 d′** — and not even resolvable in
+L2. The **amplitude** gain, by contrast, is one of the most significant effects in the whole study
+(t ≈ 30). So `omission=0` is an **amplitude / waveform-fidelity** lever, not a detection lever.
+*Where* that amplitude gain lands (next section) is what makes the two axes decouple.
 
 ## Capacity × omission=0: stacking the two levers
 
@@ -195,8 +193,7 @@ Denoising unambiguously improves signal-to-noise — base32 lifts mean per-unit 
 (raw) to 7.63 (+32%)** — and yet its detectability *falls* (4.497 → 4.277). Higher SNR and better
 detection are simply not the same axis, and optimising the former is actively misleading for sorting:
 the configuration that removes the most noise is not the one that is easiest to sort. This
-SNR/detection dissociation, first flagged out of band, reproduces cleanly in-band and is the crux of
-the whole detection deficit.
+SNR/detection dissociation is the crux of the whole detection deficit.
 
 ## Training length: amplitude saturates, detection does not
 
@@ -210,11 +207,11 @@ whether the short runs were undertrained. The two metrics behave **oppositely**:
   converged** even at 3.3 M.
 
 So the models are **undertrained for detection**: the short budget (~0.28 M) sits on the rising part
-of the d′ curve and *under-measures* it, biased toward faster-converging configs. (This reverses the
-out-of-band report's "converges in one epoch" reading, which was taken off the spike-blind validation
-loss.) Short-run d′ rankings are therefore a **convergence-speed-biased screen**, to be read only
-alongside the trajectory; near-converged comparisons need SUPPORT-scale training — and even 3.3 M is a
-lower bound for slow configs.
+of the d′ curve and *under-measures* it, biased toward faster-converging configs. (A spike-blind
+validation loss can look converged within one epoch precisely because spikes barely move it, so it is
+a poor readout of detection convergence.) Short-run d′ rankings are therefore a
+**convergence-speed-biased screen**, to be read only alongside the trajectory; near-converged
+comparisons need SUPPORT-scale training — and even 3.3 M is a lower bound for slow configs.
 
 This also nuances the omission gap. At 3.3 M the two arms meet (om0 4.361, om1 4.361) and the
 **amplitude gap persists** (0.931 vs 0.870) — but om0 has ~flattened while om1 is still rising, so the

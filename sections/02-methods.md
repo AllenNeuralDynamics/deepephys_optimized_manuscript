@@ -2,35 +2,69 @@
 
 ## Frozen hybrid benchmark
 
-Every model is scored on one fixed benchmark: a real Neuropixels 1.0 recording
-(`ecephys_681532`, ProbeC) into which **10 ground-truth units** were injected at known times and
-amplitudes (a *hybrid* recording). Because the true spike times and waveforms are known, detection
-and waveform fidelity are measured directly, without running a spike sorter (the matched-filter
-surrogate below stands in for one). The evaluation is identical for all models — the same 10 units
-and the same `seed=0` subsample of 100 spikes/unit and 200 background windows — so **every difference
-between models reflects training, not the evaluation.** Exact asset paths are in
-[Data & compute provenance](data/provenance.md).
+Every model is scored on one fixed benchmark built with the **hybrid ground-truth** approach
+[@buccino2020spikeinterface]: a real Neuropixels 1.0 recording (`ecephys_681532`, ProbeC) into which
+**10 ground-truth units** were injected at known times and amplitudes. Because the true spike times
+and waveforms are known, detection and waveform fidelity are measured directly, without running a
+spike sorter (the matched-filter surrogate below stands in for one). The evaluation is identical for
+all models — the same 10 units and the same `seed=0` subsample of 100 spikes/unit and 200 background
+windows — so **every difference between models reflects training, not the evaluation.** Exact asset
+paths are in [Data & compute provenance](data/provenance.md).
 
-## The in-domain rule (the correction)
+## The in-domain rule
 
-The prior study trained on **wide-band** data (retaining LFP) but scored on **high-passed AP-band**
-data: a power-spectral-density check shows ~21% of training-data power below 300 Hz versus ~0.4% in
-the AP-band evaluation recording. The denoiser therefore ran outside its training domain, and every
-prior absolute number and ranking is out-of-band.
-
-This manuscript enforces a single rule:
+DeepInterpolation is a self-supervised denoiser, so it must be evaluated in the band it is deployed
+in: a model trained on one frequency content and applied to another runs outside its training domain,
+and its behaviour there need not match. Because spike sorting operates on the high-passed **AP band**,
+we enforce a single rule throughout:
 
 > **Train and evaluate in the same band, on the same recording the model is deployed on**
 > (`681532` ProbeC `recording1_3`, AP-band).
 
 This is legitimate because DeepInterpolation is self-supervised (blind-spot): ground-truth spike
-labels are used only for *scoring*, never for training. Per-recording train = evaluate is the
-intended deployment, not label leakage.
+labels are used only for *scoring*, never for training. Per-recording train = evaluate is the intended
+deployment, not label leakage.
 
-<!-- ```{figure} figures/f10_psd_band_mismatch.png
-:label: fig-psd
-Power spectral density of the training data vs the AP-band evaluation recording — the band mismatch.
-``` -->
+## Architecture and the swept variants
+
+**The `base32` reference, layer by layer.** The input `(B, 63, 384)` (63 frames × 384 channels) is
+scattered onto the 192 × 4 probe grid and split into the two branches:
+
+| component | setting |
+|---|---|
+| geometry | `fold` — 4 probe columns folded into features; 1-D U-Net along the 192 depth rows |
+| temporal window | ±30 frames; `omission=1` hides the target and t±1, so 60 neighbour frames are used |
+| temporal U-Net | `base_channels=32`, `depth=3` (32 → 64 → 128 → 256 bottleneck, then decode with skips) |
+| spatial blind-spot | `bs_channels=64`, `bs_depth=5` dilated `ConvHole1D` (centre tap zeroed) over the `bs_frames=3` centre frames |
+| fuse head | pointwise 1×1, `fuse_channels=64` (blind-spot-safe merge of the two branches) |
+| loss | Charbonnier |
+| size | ~0.85 M parameters (U-Net ≈ 87%) |
+
+**How each swept variant is built.** Every variant changes exactly one part of this reference (all
+enumerated in [the pre-registered design](reproducibility/regeneration-plan.md)):
+
+| axis | variant(s) | change (override) |
+|---|---|---|
+| capacity (U-Net width) | `base64` | `base_channels=64` |
+| capacity (both branches) | `arch` | `base_channels=64 depth=4 bs_channels=128 bs_depth=7` (~12.6 M params) |
+| fuse-head width | `fuse256`, `fuse512` | `fuse_channels=256 / 512` |
+| temporal-feature width | `tmult8` | `temporal_mult=8` |
+| input normalisation | `no_norm` | `norm=none` |
+| blind-spot frames | `ho` | `bs_frames=1` (1-frame blind spot) |
+| SUPPORT wiring | `support_sd`, `support_all` | `bs_stage=1 bs_dense=1` (+ `bs_multiscale=1`) |
+| temporal omission | `omission0` | `omission=0` — the temporal branch sees t±1 (forces `bs_frames=1`) |
+| loss | `*_l2` pairs | `loss=l2` |
+| spike-aware loss | `weighted`, `l10g1/g2`, gate / hard | `spike_weight`, `spike_weight_gamma`, `spike_weight_thresh`, `spike_weight_car`, `spike_weight_hard` (below) |
+
+The **SUPPORT wiring** options restore three pieces the `fold` reference dropped relative to the
+published SUPPORT denoiser [@eom2023support]: dense re-injection of the centre input (`bs_dense`),
+staging the temporal feature into the blind-spot branch (`bs_stage`), and a parallel multi-scale
+stack (`bs_multiscale`). The **spike-aware loss** multiplies the reconstruction loss at spike-like
+samples by `1 + spike_weight·|nbr|^gamma`, where `|nbr|` is the centre-excluded neighbour amplitude (a
+spike detector that keeps the blind spot unbiased); a saturating position gate
+(`spike_weight_thresh > 0`, with `spike_weight_car` / `spike_weight_hard`) lets the weight grow large
+without biasing amplitude upward. Across the sweep, capacity and the enlarged `arch` body span
+**0.85 M → 12.6 M parameters**.
 
 ## Quantification (identical for every run)
 

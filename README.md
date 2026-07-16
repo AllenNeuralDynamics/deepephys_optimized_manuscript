@@ -1,20 +1,20 @@
 # DeepEphys Optimized — Manuscript & Reproducible Pipeline
 
-A [MyST Markdown](https://mystmd.org) publication: a strictly **in-domain** re-evaluation of the
-DeepInterpolation ephys denoiser for Neuropixels spike detection, together with a fully
-reproducible **train → score → figure** pipeline.
+A [MyST Markdown](https://mystmd.org) publication: an optimisation of the DeepInterpolation ephys
+denoiser for Neuropixels spike detection — with a focus on protecting the weaker, low-amplitude
+units — together with a fully reproducible **train → score → figure** pipeline.
 
-> **Status:** manuscript skeleton + pre-registered design. The in-domain (AP-band) results are
-> being regenerated; numbers land as scoring completes. See
+> **Status:** Tier 1 + Tier 2 scored; the spike-weighting sweep (Tier 3) is in progress. See
 > [`reproducibility/regeneration-plan.md`](reproducibility/regeneration-plan.md).
 
 ## Why this repo exists
 
-The prior internal report trained DeepInterpolation on **wide-band** data but evaluated it on
-**high-passed AP-band** data — the denoiser ran outside its training domain, so every absolute
-number and ranking is out-of-band. This repository re-does the study with one rule: **train and
-evaluate in the same band, on the same recording the model is deployed on.** It is organized so a
-reviewer can reproduce every table and figure from scratch.
+DeepInterpolation raises SNR but can *reduce* spike detectability, and the cost falls hardest on the
+weak units already near the sorting threshold. This repository optimises the ephys architecture to
+protect those units — sweeping capacity, loss, temporal design, and spike-aware weighting — measuring
+each choice directly against an injected hybrid ground-truth benchmark. Because the denoiser is
+self-supervised, every model is **trained and scored in its deployment band** (AP-band), and the whole
+pipeline is reproducible from scratch.
 
 ## Repository map
 
@@ -26,9 +26,8 @@ reviewer can reproduce every table and figure from scratch.
 | `reproducibility/regeneration-plan.md` | the pre-registered experimental design (jobs, quantification, figures) |
 | `data/provenance.md` | Code Ocean capsule/asset IDs, recording paths, HPC locations |
 | `code/` | scoring (HPC sbatch), figure-generation, and training-launch scripts + docs |
-| `figures/` | manuscript figure assets (generated in-band) |
+| `figures/` | manuscript figure assets |
 | `references.bib` | bibliography |
-| `archive/` | the superseded, out-of-band v1 report (kept for provenance) |
 
 ## Build
 

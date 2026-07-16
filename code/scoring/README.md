@@ -22,5 +22,5 @@ rsync -t --no-perms -e "ssh -o BatchMode=yes" \
   ./
 ```
 
-Aggregate = arithmetic mean over the 10 GT units (reproduces the prior report's anchors). Per-unit
+Aggregate = arithmetic mean over the 10 GT units. Per-unit
 rows are retained to build the per-unit × model matrices (appendix B/C).

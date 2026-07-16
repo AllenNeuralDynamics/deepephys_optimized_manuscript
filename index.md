@@ -2,28 +2,26 @@
 title: Optimizing DeepInterpolation for Neuropixels spike detection
 short_title: DeepEphys Optimized
 abstract: |
-  DeepInterpolation is a self-supervised, blind-spot denoiser proposed to improve
-  the signal-to-noise ratio of extracellular electrophysiology. A prior internal
-  study swept its architecture and training choices against a frozen hybrid
-  Neuropixels 1.0 benchmark and reported that denoising counter-intuitively tends
-  to *reduce* spike detectability (d′), while an overlooked temporal-design
-  choice — hiding the frames immediately adjacent to the predicted sample (the
-  "omission gap") — dominates every other lever. That study, however, trained on
-  wide-band data and evaluated on high-passed AP-band data, so the denoiser
-  operated outside its training domain and every reported number is out-of-band.
-  Here we re-run the entire evaluation strictly in-domain: every model is trained
-  and scored on the same AP-band recording it is deployed on, under a single
-  uniform quantification protocol (matched-filter d′, amplitude and waveform
-  fidelity, resolved per-unit and per-model, read against a replicate-derived
-  noise floor). The full design is pre-registered (see
-  [the pre-registered design](reproducibility/regeneration-plan.md)) and the entire train → score → figure
-  pipeline is reproducible from this repository.
-  **In-band, denoising still modestly lowers detectability (every model below raw); capacity is the
-  leading detection lever; and the previously-dominant "omission gap" is in-band an amplitude lever
-  whose detection advantage is a convergence-speed effect that vanishes only by 3.3 M updates.
-  Detection itself keeps rising with training (not converged even at 3.3 M), so training length is a
-  lever too. These revise the out-of-band conclusions; the remaining architecture/loss sweep is in
-  progress.**
+  DeepInterpolation [@lecoq2021deepinterpolation] is a self-supervised, blind-spot denoiser that
+  improves the signal-to-noise ratio of extracellular electrophysiology. A practically important
+  limitation, however, is that denoising can *reduce* spike **detectability** (d′) even as it raises
+  SNR — and the cost falls hardest on the weaker, low-amplitude units that are already near the
+  sorting threshold. Here we set out to optimise the ephys DeepInterpolation architecture to protect
+  those weak units, drawing on advances in self-supervised "blind-spot" denoising
+  [@eom2023support] and measuring detection directly against a frozen **hybrid ground-truth**
+  Neuropixels 1.0 benchmark [@buccino2020spikeinterface] — known units injected into a real recording,
+  so detection and waveform fidelity are read out without running a spike sorter. Because
+  DeepInterpolation is self-supervised, every model is **trained and scored in its deployment band**
+  (the high-passed AP band), under one uniform quantification protocol (matched-filter d′, amplitude
+  and waveform fidelity, resolved per-unit and per-model, read against a replicate-derived noise
+  floor). The full design is pre-registered (see
+  [the pre-registered design](reproducibility/regeneration-plan.md)) and the entire train → score →
+  figure pipeline is reproducible from this repository.
+  **We find that denoising still modestly lowers detectability (every model below raw); network
+  capacity is the leading detection lever; the temporal "omission" design is an amplitude / waveform
+  lever whose small detection advantage is a convergence-speed effect; and detection keeps rising with
+  training (not converged even at 3.3 M updates), so training length is a lever too. The architecture,
+  loss and spike-weighting sweep that targets weak-unit detection directly is in progress.**
 ---
 
 ```{include} sections/01-introduction.md

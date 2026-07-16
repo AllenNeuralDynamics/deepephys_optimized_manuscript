@@ -18,7 +18,7 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 | role | asset id | mount | notes |
 |---|---|---|---|
 | **In-domain training (AP-band hybrid)** | `384bf77c-f37b-4ab1-a008-03f10a0c49c9` | `hybrid_np1` | used for all in-band runs |
-| Superseded training (wide-band) | `51f9b4df…` (`ecephys_np1_benchmark`) | — | out-of-band; the source of the prior error |
+| Wide-band training asset | `51f9b4df…` (`ecephys_np1_benchmark`) | — | not used for in-band scoring |
 
 ## Recordings
 
