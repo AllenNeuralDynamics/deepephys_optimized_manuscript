@@ -1,0 +1,59 @@
+name: Deploy MyST site to GitHub Pages
+
+# Builds the MyST HTML site from the committed figures/tables and publishes it to
+# GitHub Pages. Runs on every push to `main` (which includes pull-request merges),
+# and can be triggered manually from the Actions tab.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # A project site is served under https://<org>.github.io/<repo>/ , so the site
+  # must be built with that sub-path as its base URL.
+  BASE_URL: /${{ github.event.repository.name }}
+
+# Least-privilege permissions needed to deploy to Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; don't cancel an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install MyST Markdown
+        run: npm install -g mystmd@1.10.1
+
+      - name: Build HTML
+        run: myst build --html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_build/html
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
