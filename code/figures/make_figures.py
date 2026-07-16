@@ -58,18 +58,26 @@ CFG = [
     ("tmult8", "ib_tmult8_s0", "charb"),
     ("no_norm", "ib_no_norm_s0", "charb"),
     ("ho", "ib_ho_s0", "charb"),
+    # published reference — the ORIGINAL DeepInterpolation ephys architecture (Lecoq 2021),
+    # temporal-only, no spatial blind spot; highlighted distinctly in F1.
+    ("origdi", "ib_origdi_s*", "orig"),
     # NOTE: the SUPPORT-scale runs (om0_scale / om1_scale) are trained ~7x longer and are
     # deliberately NOT ranked against the short-budget models here — they appear only in F8,
     # the training-length comparison.
 ]
-PATS = {c[0]: c[1] for c in CFG}
-NAMES = [c[0] for c in CFG]
 
 
 def labels(pat):
     if "*" in pat:
         return [Path(f).name[:-11] for f in sorted(glob.glob(str(S / (pat + "_dprime.csv"))))]
     return [pat] if (S / (pat + "_dprime.csv")).exists() else []
+
+
+# Keep only configurations with at least one scored seed, so runs still training (e.g. origdi
+# before it lands) don't break the plots — they appear automatically once their CSVs exist.
+CFG = [c for c in CFG if labels(c[1])]
+PATS = {c[0]: c[1] for c in CFG}
+NAMES = [c[0] for c in CFG]
 
 
 def load(lbl, kind):
@@ -105,17 +113,30 @@ def cfg_unit(pat, kind, col):
 dmean = [st.mean(per_seed(p, "dprime", "dprime_deep")) for p in PATS.values()]
 dsd = [(st.stdev(v) if len(v) > 1 else 0.0) for v in (per_seed(p, "dprime", "dprime_deep") for p in PATS.values())]
 order = np.argsort(dmean)[::-1]
+
+def _bar_color(name):
+    if name == "origdi":                     # published original-DI reference — highlighted
+        return "#c44e52"
+    if name == "base32":                     # our reference body
+        return "#7f7f7f"
+    return "#4c72b0"
+
 fig, ax = plt.subplots(figsize=(10, 4.6))
 ax.bar(range(len(order)), [dmean[i] for i in order], yerr=[2 * dsd[i] for i in order],
-       capsize=3, color=["#7f7f7f" if NAMES[i] == "base32" else "#4c72b0" for i in order])
+       capsize=3, color=[_bar_color(NAMES[i]) for i in order],
+       edgecolor=["k" if NAMES[i] == "origdi" else "none" for i in order],
+       linewidth=[1.4 if NAMES[i] == "origdi" else 0.0 for i in order])
 ax.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.3f})")
 ci = NAMES.index("base32")
 ax.axhspan(dmean[ci] - 2 * dsd[ci], dmean[ci] + 2 * dsd[ci], color="gray", alpha=0.25,
            label="base32 ±2σ (noise floor)")
+if "origdi" in NAMES:                        # legend swatch for the highlighted reference
+    ax.bar([0], [0], color="#c44e52", edgecolor="k", linewidth=1.4,
+           label="original DI (published reference)")
 ax.set_xticks(range(len(order)))
 ax.set_xticklabels([NAMES[i] for i in order], rotation=45, ha="right")
 ax.set_ylabel("d′  (mean ± 2σ over seeds)")
-ax.set_ylim(4.2, 4.55)
+ax.set_ylim(min(dmean) - 0.03, max(RAW, max(dmean)) + 0.03)
 ax.set_title("Detection d′ across architectures (in-band)")
 ax.legend(fontsize=8)
 fig.tight_layout(); fig.savefig(FIG / "f1_dprime_ranking.png", dpi=150); plt.close(fig)

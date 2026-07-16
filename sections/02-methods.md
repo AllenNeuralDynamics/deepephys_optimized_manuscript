@@ -40,6 +40,19 @@ scattered onto the 192 × 4 probe grid and split into the two branches:
 | loss | Charbonnier |
 | size | ~0.85 M parameters (U-Net ≈ 87%) |
 
+**Why `fold`.** A Neuropixels 1.0 probe is a long, narrow sensor: its 384 channels sit on a
+~192-row-deep × 4-column-wide grid, and a spike appears on a small cluster of *vertically* adjacent
+channels — so the informative spatial axis is **depth**, not the 4-wide axis. A full 2-D U-Net over
+the (192 × 4) grid would spend most of its convolutions on the width dimension, where there is little
+to learn. The `fold` geometry instead **folds the 4 width columns into the feature axis** and runs a
+**1-D U-Net along probe depth only**: every depth row carries its 4 columns as 4× the feature maps, so
+the network stays fully geometry-aware (no channel is discarded) while convolving along a single axis.
+In our geometry search this matched the accuracy of the 2-D grid model at a fraction of the cost,
+which is why every swept variant is built on the `fold` body. Two alternative geometries are kept as
+controls: `1d`, which orders channels by index and ignores the grid, and `2d` / `orig`, the full
+probe-grid 2-D U-Net — the latter being the original DeepInterpolation architecture (the `origdi`
+baseline).
+
 ```{mermaid}
 flowchart TD
     IN["Input context<br/>(B, 63, 384)"] --> SC["grid.scatter<br/>(B, 63, 192, 4)<br/>384 ch → 192×4 grid"]
