@@ -1,19 +1,21 @@
 # Results
 
 :::{note} Current state
-In-band scoring is complete for **Tier 1** (base32, omission0, champ_l2, omission0_l2, base64 — with
-seed replicates), all of **Tier 2** (SUPPORT blind-spot wiring, fuse width, the enlarged `arch` body,
-temporal / normalisation variants, and the capacity × `omission=0` combos), and the two **SUPPORT-scale**
-omission runs. Only the **Tier 3** spike-weight amp-lever family is still pending. All numbers below are
-in-band (train = eval on `recording1_3`, AP band); the raw-data reference is **d′ = 4.497**. Full
-ledger: `results/tables/master_table.csv`.
+In-band scoring is complete for the full sweep: **Tier 1** (base32, omission0, champ_l2, omission0_l2,
+base64 — with seed replicates), **Tier 2** (SUPPORT blind-spot wiring, fuse width, the enlarged `arch`
+body, temporal / normalisation variants, and the capacity × `omission=0` combos), **Tier 3** (the
+spike-aware loss sweep on the `arch_l2_om0` body), the original DeepInterpolation architecture
+(`origdi`, 3 seeds), and the two **SUPPORT-scale** omission runs. All numbers below are in-band
+(train = eval on `recording1_3`, AP band); the raw-data reference is **d′ = 4.497**. Full ledger:
+`results/tables/master_table.csv`.
 :::
 
 ## The master table and the noise floor
 
-Nineteen short-budget architectures are scored in-band (the two SUPPORT-scale runs, trained ~7×
-longer, are held for the training-length section below). The table is seed-averaged where replicated
-and sorted by detection d′, read against the raw-data reference of **d′ = 4.497**:
+Twenty short-budget architectures are scored in-band — the nineteen swept configurations plus the
+original DeepInterpolation network (`origdi`) as a published reference (the two SUPPORT-scale runs,
+trained ~7× longer, are held for the training-length section below). The table is seed-averaged where
+replicated and sorted by detection d′, read against the raw-data reference of **d′ = 4.497**:
 
 | config | loss | n | d′_self | d′_fixed | Δ vs raw | amp | fwhm | snr_deep |
 |---|---|---|---|---|---|---|---|---|
@@ -36,6 +38,7 @@ and sorted by detection d′, read against the raw-data reference of **d′ = 4.
 | fuse256 | charb | 1 | 4.265 | 4.296 | −0.232 | 0.853 | 1.003 | 7.50 |
 | tmult8 | charb | 1 | 4.257 | 4.286 | −0.240 | 0.857 | 1.003 | 7.61 |
 | fuse512 | charb | 1 | 4.244 | 4.266 | −0.253 | 0.859 | 1.003 | 7.57 |
+| **origdi** *(published ref.)* | charb | 3 | **4.135** | 4.139 | **−0.362** | 0.811 | 1.122 | **8.15** |
 
 (Single-seed rows — the Tier-2 configurations — carry no error bar and are judged against base32's
 noise floor below. Per-config seed spread on the replicated rows: base32 σ = 0.015, omission0 0.007,
@@ -52,19 +55,45 @@ base32. The rule immediately disciplines the table — `champ_l2` carries by far
 (σ = 0.041, ~3× base32), so its mid-table placement is seed scatter, not signal.
 
 **Read-out (a): denoising still lowers detectability.** Every configuration — the best
-included — sits below the raw d′ of 4.497, by 0.11 to 0.22. Training in the model's own band does not
-remove the deficit, so the detection cost is a genuine property of the denoiser — the central problem
-this study targets.
+included — sits below the raw d′ of 4.497, from **−0.09** (`arch`) to **−0.36** (the original `origdi`
+network). Training in the model's own band does not remove the deficit, so the detection cost is a
+genuine property of the denoiser — the central problem this study targets. How much of it the modern
+architecture has already recovered from the original is the next section.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across the 19 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
-over seeds; single-seed Tier-2 rows have no bar); base32 (grey bar) anchors its own 5-seed ±2σ band, the
-dotted line is raw data (4.497). The `arch` / `base64` capacity family sits at the top and the
-fuse-width / temporal variants at or below the band; `champ_l2`'s wide error bar is why single runs
-cannot be ranked. The two SUPPORT-scale runs (7× longer training) are excluded here and compared
-separately in the training-length section below.
+**d′ across the 20 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
+over seeds; single-seed Tier-2 rows have no bar); base32 (grey) anchors its own 5-seed ±2σ band, the
+original DeepInterpolation network (`origdi`, **crimson**) is the published reference, and the dotted
+line is raw data (4.497). The `arch` / `base64` capacity family sits at the top, the fuse-width /
+temporal variants at or below the band, and **`origdi` sits far below all of them** — the optimized
+architecture has climbed most of the way from the original toward raw. (The two SUPPORT-scale runs,
+7× longer training, are compared separately in the training-length section below.)
 ```
+
+## How far the architecture has come from the original
+
+Anchoring the ranking is the **original DeepInterpolation ephys network** (`origdi`; the faithful
+`unet_single_ephys_1024` of [@lecoq2021deepinterpolation] — a temporal-only 2-D U-Net with **no spatial
+blind-spot branch**, [Methods](sections/02-methods.md)), trained and scored identically to every other
+model. It is the **worst detector in the study — d′ = 4.135 ± 0.010, −0.362 below raw** — with the
+**lowest amplitude (0.811)**, yet the **highest SNR of any model (8.15 vs base32's 7.60)**. The original
+architecture removes the most noise and is the hardest to sort: the SNR trap in its starkest form, and
+precisely the limitation this study sets out to fix.
+
+Two architectural steps close most of that gap, at matched training and budget:
+
+| step | d′ | amp | weak-unit d′* |
+|---|---|---|---|
+| `origdi` — original, temporal-only | 4.135 | 0.811 | 1.35 |
+| **+ spatial blind-spot branch** → `base32` | 4.277 (+0.142) | 0.859 (+0.048) | 1.56 |
+| **+ capacity + omission=0** → `arch_l2_om0` | 4.360 (+0.225) | 0.937 (+0.126) | 1.71 |
+
+*mean d′ over the four weakest ground-truth units (baseline d′ ≤ 2.2). Adding the SUPPORT-style
+**spatial blind spot** (`origdi` → `base32`) alone buys **+0.14 d′ and +0.05 amp**; layering on capacity
+and the recovered t±1 frames (`arch_l2_om0`) reaches **+0.23 d′ / +0.13 amp** — and the gain is
+**largest on the weak units** (+0.36 d′, a 27 % lift on the hardest-to-sort cells). The optimized
+network is a markedly better *sorting* front-end than the original, even though its SNR is lower.
 
 ## The loss axis is neutral
 
@@ -163,6 +192,36 @@ best in the table, matching the dedicated `omission0` runs — for a small d′ 
 d′ ≈ 4.36 with amp ≈ 0.935, so both `arch_om0` and `base64_om0` sit above base32 on *both* axes at once
 (base32 4.277 / 0.859). Per-unit, the amplitude rescue again concentrates on the weak units (unit 94
 0.81 → 0.97, unit 1129 0.69 → 0.82; [Appendix B](sections/05-appendix.md)).
+
+## Spike-aware loss does not move detection
+
+The one lever left that directly targets the weak-unit detection deficit is the **spike-aware loss** —
+multiply the reconstruction loss at spike-like samples so the network is penalised for flattening the
+peak (Methods). We swept it on the best body, `arch_l2_om0` (d′ = 4.360 ± 0.019, amp 0.937): a soft
+magnitude weight at λ = 3/10/30, a focal variant (γ = 2), and a saturating position gate at
+λ = 100/300/1000 (soft and hard).
+
+| spike weight | d′ | Δ vs base | amp |
+|---|---|---|---|
+| — (baseline) | 4.360 | — | 0.937 |
+| soft λ = 3 / 10 / 30 | 4.372 / 4.377 / 4.378 | +0.01 to +0.02 | 0.94 |
+| gate λ = 100 / 300 | 4.319 / 4.369 | −0.04 / +0.01 | 0.94 |
+| focal γ = 2 (λ = 10) | **4.051** | **−0.31** | 0.94 |
+| gate λ = 1000 / hard | 4.102 / 4.219 | **−0.26 / −0.14** | 0.95 |
+
+**No setting clears the noise floor.** The best case — soft λ = 30 — is **+0.019 d′, inside the
+baseline's own ±0.019 σ** (not significant), and every aggressive setting (focal γ = 2, λ ≥ 1000) *hurts*
+detection sharply as the over-weighted loss distorts the waveform. Critically, the effect is null
+**even on the weak units it was designed to protect**: their mean d′ moves from 1.708 (baseline) to
+1.719 (λ = 30) to 1.724 (gate λ = 300) — a **+0.01–+0.02** nudge, versus the **+0.15** the blind-spot
+branch and the **+0.36** the full optimization already delivered there. The same holds on the base32
+body (`omission0_l2` + spike weight: +0.008 to +0.023, all within noise), and amplitude — already near-
+maximal from `omission=0` — barely moves.
+
+So the residual detection deficit **is not recoverable by loss-level spike emphasis**: once the
+architecture is optimized, up-weighting spikes cannot convert the recovered amplitude into
+detectability, which points to the deficit being intrinsic to the blind-spot objective rather than a
+loss-weighting oversight (Discussion).
 
 ## Per-unit amplitude: who gets smoothed, and why
 

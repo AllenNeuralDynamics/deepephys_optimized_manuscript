@@ -1,9 +1,10 @@
 # Introduction
 
 :::{note} Manuscript status
-Methods, Results and Discussion report scored results for Tier 1 (the noise-floor configurations),
-all of Tier 2, and the two SUPPORT-scale runs; the spike-weighting sweep (Tier 3) that targets
-weak-unit detection is in progress (see [the pre-registered design](reproducibility/regeneration-plan.md)).
+Methods, Results and Discussion report the complete in-band sweep — Tier 1 (noise-floor
+configurations), Tier 2, the Tier 3 spike-aware loss family, the original DeepInterpolation network as
+a published reference, and the two SUPPORT-scale runs (see
+[the pre-registered design](reproducibility/regeneration-plan.md)).
 :::
 
 ## Self-supervised denoising with a blind spot

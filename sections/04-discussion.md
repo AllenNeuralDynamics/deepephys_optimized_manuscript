@@ -1,8 +1,8 @@
 # Discussion
 
 :::{note}
-Conclusions from Tier 1 + Tier 2 + the SUPPORT-scale runs; the spike-weighting sweep (Tier 3) may
-refine them.
+Conclusions from the complete in-band sweep — Tier 1 + Tier 2 + the Tier 3 spike-aware loss family +
+the original-architecture reference + the SUPPORT-scale runs.
 :::
 
 Optimising DeepInterpolation for spike detection turns on a small number of levers, and measuring them
@@ -10,7 +10,9 @@ directly against injected ground truth — in the band the denoiser is deployed 
 Detection and waveform amplitude are two weakly-coupled axes driven by different knobs; denoising
 leaves a hard residual detection deficit; and the validation loss is effectively blind to spikes. The
 practical upshot is a short list of what actually moves detection versus what only moves amplitude —
-and where the remaining deficit lives (the weak units).
+and where the remaining deficit lives (the weak units). Measured against the **original**
+DeepInterpolation architecture, the optimised network recovers **+0.23 d′ and +0.13 amplitude** (and
++0.36 d′ on the weak units) — most of the way to raw — even as it gives up SNR.
 
 ## Two axes with different levers
 
@@ -33,29 +35,36 @@ detection ceiling; its real, large effect is on waveform amplitude, concentrated
 
 ## Denoising still costs detection
 
-Across every configuration, denoised output is less detectable than raw (−0.11 to −0.22 d′), even
-though SNR improves throughout. "Denoising helps SNR but hurts detection" is thus a genuine property
-of the blind-spot denoiser in its deployment band — and closing that gap is the real open problem,
-with SNR a misleading target for sorting.
+Across every configuration, denoised output is less detectable than raw (−0.09 to −0.36 d′), even
+though SNR improves throughout — most starkly in the **original architecture** (`origdi`), which posts
+the *highest* SNR yet the *lowest* detection of any model. "Denoising helps SNR but hurts detection" is
+thus a genuine property of the blind-spot denoiser in its deployment band — and closing that gap is the
+real open problem, with SNR a misleading target for sorting.
 
-## What would move the ceiling
+## What is left of the deficit
 
 The detection deficit is not spread evenly — it is concentrated on the marginal, low-SNR units that
 the shrinkage estimator flattens (the same units that dominate the amplitude undershoot). Capacity
 helps because it gives the network more power to separate those units; the omission gap helps their
-*amplitude* but not, at convergence, their *detectability*. That points the search for the remaining
-−0.11 to −0.22 d′ at interventions that specifically protect weak-unit separability — spike-aware
-losses and larger receptive fields — which is exactly what Tier 2/3 probes. The trajectories add a
-further lever: **d′ is still rising at 3.3 M updates** (om1 by +0.30 past 14 k, steepest at its final
-checkpoint), so **training length itself is a detection lever** — and the short-budget rankings are a
-convergence-speed-biased screen, not converged values. Whether any of these clears the band, or
-whether a residual denoising cost is intrinsic to the blind-spot objective, is the open question this
-manuscript sets up.
+*amplitude* but not their *detectability*. The most direct remaining intervention — a **spike-aware
+loss** that up-weights the reconstruction error at spikes — was designed precisely to protect weak-unit
+separability, and it **fails to**: swept across two orders of magnitude on the best body, no setting
+clears the noise floor, aggressive weighting *hurts*, and the weak units it targets do not move
+(+0.01–+0.02 d′; Results). That the residual deficit resists even a loss aimed straight at it suggests
+it is **intrinsic to the blind-spot objective** — the estimator cannot report a peak it is structurally
+forbidden from seeing — rather than a tuning oversight. One lever does remain unexhausted: **training
+length** — d′ is still rising at 3.3 M updates (om1 by +0.30 past 14 k, steepest at its final
+checkpoint), so the short-budget rankings are a convergence-speed-biased screen and a fully-converged
+model may recover more. Whether that closes the last −0.09 to −0.36 d′, or whether a residual cost is
+permanent, is the open question this manuscript leaves.
 
 ## Recommended configuration
 
-On the evidence so far, the pragmatic pick is **capacity** — the `base64` / `arch` family carries the
-only clear, replicated detection gain — optionally with `omission=0` where waveform fidelity on weak
-units matters more than the last fraction of detectability. L2 is a harmless default. The final
-recommendation awaits the spike-weighting sweep (Tier 3), which targets weak-unit detection directly
-and will either move the deficit or confirm it as a property of the blind-spot objective.
+The recommendation is now settled by the full sweep: pick **capacity** — the `base64` / `arch` family
+carries the only clear, replicated detection gain — and add **`omission=0`** when waveform fidelity on
+weak units matters (it lifts amplitude to ~0.94 for a detection cost inside the noise floor); the best
+all-round body is `arch_l2_om0`. L2 is a harmless default, and **spike-aware weighting is not
+recommended** — it does not help detection and, past small weights, degrades it. Every one of these is
+a large gain over the original architecture; the residual sub-raw deficit is, on current evidence, a
+property of the blind-spot objective, addressable (if at all) only by longer training or a change to
+the objective itself.
