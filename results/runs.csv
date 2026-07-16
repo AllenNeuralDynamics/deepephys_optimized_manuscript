@@ -32,12 +32,18 @@ ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_de
 ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,268ef4a5-de9a-486d-87da-96dd536ad5db,running,,,
 ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,4fe25467-e63f-49b3-8d01-0894d6eb6392,running,,,capacity + weak-unit amplitude rescue (deployment candidate); retry prev 26341aa2 failed ~1.3h infra (exit0 no results)
 ib_arch_om0_s0,2,arch_om0,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 omission=0,260da9a6-1900-46af-a7f7-798987d95c35,running,,,max capacity + rescue
-ib_weighted_s0,3,weighted,0,charbonnier,4,spike_weight=3,,pending,,,
-ib_l10g1_s0,3,l10g1,0,charbonnier,4,spike_weight=10 spike_weight_gamma=1,,pending,,,
-ib_l10g2_s0,3,l10g2,0,charbonnier,4,spike_weight=10 spike_weight_gamma=2,,pending,,,
-ib_archL10_s0,3,archL10,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 spike_weight=10,,pending,,,
-ib_hard1000_s0,3,hard1000,0,charbonnier,4,spike_weight=1000 spike_weight_hard=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
-ib_uL100_s0,3,uL100,0,charbonnier,4,spike_weight=100 spike_weight_car=1 spike_weight_thresh=TBD,,pending,,,thresh from original run
-ib_uL100_om0_s0,3,uL100_om0,0,charbonnier,4,spike_weight=100 spike_weight_car=1 spike_weight_thresh=TBD omission=0,,pending,,,thresh from original run; loss+temporal weak-unit protection
+ib_arch_l2_om0_s0,3,arch_l2_om0,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,94a48016-146f-46ea-9ce0-c108a5b5dbb8,running,,,arch+L2+om0 baseline (dose anchor + noise floor)
+ib_arch_l2_om0_s1,3,arch_l2_om0,1,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,e30257da-9f6b-428a-ae45-147515e9da31,running,,,
+ib_arch_l2_om0_s2,3,arch_l2_om0,2,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,0ac379c8-c9cf-42da-86ae-32baac33d78b,running,,,
+ib_arch_l2_om0_w3_s0,3,arch_l2_om0_w3,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=3,6684a5c0-82cf-4b5b-a548-a68e4318f3d8,running,,,soft magnitude |nbr|^1
+ib_arch_l2_om0_w10_s0,3,arch_l2_om0_w10,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=10,1e38fad0-5551-4e49-b808-9fced65d48bc,running,,,soft magnitude |nbr|^1
+ib_arch_l2_om0_w30_s0,3,arch_l2_om0_w30,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=30,19cbcc85-278e-4180-84bf-40c6c5045800,running,,,soft magnitude |nbr|^1
+ib_arch_l2_om0_w10g2_s0,3,arch_l2_om0_w10g2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=10 spike_weight_gamma=2,dad254a9-e68f-4e64-a53e-5fc6af6200a7,running,,,focal gamma=2 (peakier)
+ib_arch_l2_om0_g100_s0,3,arch_l2_om0_g100,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=100 spike_weight_thresh=5 spike_weight_car=1,2bfd1eaa-8bbf-4c29-ae55-8bdd88244c44,running,,,saturating gate thresh=5 car=1
+ib_arch_l2_om0_g300_s0,3,arch_l2_om0_g300,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=300 spike_weight_thresh=5 spike_weight_car=1,4f05db1f-3b44-4ed8-8075-3ef6dc5dc91c,running,,,saturating gate thresh=5 car=1
+ib_arch_l2_om0_g1000_s0,3,arch_l2_om0_g1000,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=1000 spike_weight_thresh=5 spike_weight_car=1,cc17fa89-3cd5-4292-af37-16516a890be8,running,,,saturating gate thresh=5 car=1
+ib_arch_l2_om0_g1000h_s0,3,arch_l2_om0_g1000h,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=1000 spike_weight_thresh=8 spike_weight_hard=1 spike_weight_car=1,287e5075-fb3c-4bfd-a650-9fbccbadd384,running,,,hard binary gate thresh=8 car=1
+ib_omission0_l2_w10_s0,3,omission0_l2_w10,0,l2,4,loss=l2 omission=0 spike_weight=10,61f83b06-73a0-4b6e-b429-aeae04931c36,running,,,base32-capacity control (vs omission0_l2)
+ib_omission0_l2_g100_s0,3,omission0_l2_g100,0,l2,4,loss=l2 omission=0 spike_weight=100 spike_weight_thresh=5 spike_weight_car=1,1d200eaa-04d0-4184-9422-86aa9d1eb5d1,running,,,base32-capacity control (vs omission0_l2)
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
 ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,yes,RUN4 in-band trajectory scored (13 ckpts)
