@@ -50,3 +50,9 @@ ib_origdi_s1,orig,origdi,1,charbonnier,4,geometry=orig base_channels=64 depth=4 
 ib_origdi_s2,orig,origdi,2,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,74f2d2ee-826d-45f3-9c03-6bf2ea264c21,running,,,
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
 ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,yes,RUN4 in-band trajectory scored (13 ckpts)
+ib_r0_base,recipe,r0_base,0,charbonnier,4,base_channels=64 omission=0,dd244a69-368f-4ff0-9bad-698df611e4fb,running,,,R0 baseline adamw cosine lr1e-3 (base64_om0 body; trajectory; should reproduce base64_om0 4.359)
+ib_r1_warmup,recipe,r1_warmup,0,charbonnier,4,base_channels=64 omission=0 warmup_frac=0.03,30779079-aabd-470c-ab23-3daa0ceca096,running,,,R1 adamw cosine + 3pct linear warmup
+ib_r2_onecycle,recipe,r2_onecycle,0,charbonnier,4,base_channels=64 omission=0 lr_scheduler=onecycle lr=0.003 warmup_frac=0.1,4d126406-0905-46df-b265-ade07e130c56,running,,,R2 one-cycle peak lr 3e-3 pct_start 0.1
+ib_r3_adamw2e3,recipe,r3_adamw2e3,0,charbonnier,4,base_channels=64 omission=0 lr=0.002 warmup_frac=0.05 weight_decay=0.05 beta2=0.98,f5e91631-c7b2-4161-ab91-abcea68a4062,running,,,R3 tuned adamw lr2e-3 wd0.05 beta2 0.98 warmup5pct
+ib_r4_lion,recipe,r4_lion,0,charbonnier,4,base_channels=64 omission=0 optimizer=lion lr=0.0003 warmup_frac=0.03 weight_decay=0.1,a37f8cdf-9fff-417a-a86c-c86abefa5b03,running,,,R4 lion lr3e-4 wd0.1 warmup3pct
+ib_r5_bs256,recipe,r5_bs256,0,charbonnier,4,base_channels=64 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05,34d44d68-a706-45c2-ab56-f0f3afaa80b4,running,,,R5 large batch 256 lr2e-3 warmup5pct
