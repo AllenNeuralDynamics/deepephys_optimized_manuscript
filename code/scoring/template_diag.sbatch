@@ -13,9 +13,12 @@
 set -eo pipefail
 BASE=/allen/aind/scratch/jeromel/ephys_denoising
 FORGE=/allen/aind/scratch/jeromel/astro_voltage_deepinterp/miniforge3
-CKPT="${1:?pass checkpoint path}"
-PREFIX="${2:?pass output prefix}"
+CKPT_ARG="${1:?pass checkpoint path}"
+PREFIX_ARG="${2:?pass output prefix}"
+[[ "$CKPT_ARG" = /* ]] && CKPT="$CKPT_ARG" || CKPT="${SLURM_SUBMIT_DIR:-$PWD}/$CKPT_ARG"
+[[ "$PREFIX_ARG" = /* ]] && PREFIX="$PREFIX_ARG" || PREFIX="$BASE/$PREFIX_ARG"
 mkdir -p "$BASE/logs"
+mkdir -p "$(dirname "$PREFIX")"
 source "$FORGE/etc/profile.d/conda.sh"
 conda activate "$BASE/env"
 echo "host=$(hostname) job=$SLURM_JOB_ID ckpt=$CKPT prefix=$PREFIX date=$(date -Is)"
@@ -26,5 +29,5 @@ srun python "$BASE/template_diag.py" \
     --rec-url "s3://$S/recording.zarr" \
     --gt-url  "s3://$S/sorting.zarr" \
     --checkpoint "$CKPT" --n-spikes 200 --batch-size 512 \
-    --out "$BASE/${PREFIX}_diag.csv" --npz "$BASE/${PREFIX}_diag.npz"
+    --out "${PREFIX}_diag.csv" --npz "${PREFIX}_diag.npz"
 echo "DONE"

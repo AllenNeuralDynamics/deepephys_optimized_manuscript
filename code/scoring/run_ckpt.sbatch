@@ -13,9 +13,12 @@
 set -eo pipefail
 BASE=/allen/aind/scratch/jeromel/ephys_denoising
 FORGE=/allen/aind/scratch/jeromel/astro_voltage_deepinterp/miniforge3
-CKPT="${1:?pass checkpoint path as arg 1}"
-OUT="${2:?pass output csv as arg 2}"
+CKPT_ARG="${1:?pass checkpoint path as arg 1}"
+OUT_ARG="${2:?pass output csv as arg 2}"
+[[ "$CKPT_ARG" = /* ]] && CKPT="$CKPT_ARG" || CKPT="${SLURM_SUBMIT_DIR:-$PWD}/$CKPT_ARG"
+[[ "$OUT_ARG" = /* ]] && OUT="$OUT_ARG" || OUT="$BASE/$OUT_ARG"
 mkdir -p "$BASE/logs"
+mkdir -p "$(dirname "$OUT")"
 source "$FORGE/etc/profile.d/conda.sh"
 conda activate "$BASE/env"
 echo "host=$(hostname) job=$SLURM_JOB_ID ckpt=$CKPT date=$(date -Is)"
