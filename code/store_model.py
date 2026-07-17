@@ -21,6 +21,8 @@ import sys
 import time
 from pathlib import Path
 
+import torch
+
 REPO = Path(__file__).resolve().parents[1]
 STORE = REPO / "models"
 
@@ -59,16 +61,33 @@ def main() -> int:
     meta = run_meta(label)
 
     ckpts = []
-    for pt in sorted(src.glob("*.pt")):
+    source_checkpoints = sorted(src.glob("*.pt"))
+    source_names = {path.name for path in source_checkpoints}
+    for stale in dst.glob("*.pt"):
+        if stale.name not in source_names:
+            stale.unlink()
+    resolved_config = None
+    checkpoint_git_sha = None
+    for pt in source_checkpoints:
         target = dst / pt.name
-        if not target.exists() or target.stat().st_size != pt.stat().st_size:
-            shutil.copy2(pt, target)
-        ckpts.append({
+        shutil.copy2(pt, target)
+        item = {
             "file": pt.name,
             "step": step_of(pt.name),
             "bytes": target.stat().st_size,
             "sha256": sha256(target),
-        })
+        }
+        try:
+            payload = torch.load(target, map_location="cpu", weights_only=False)
+            resolved_config = resolved_config or payload.get("config")
+            checkpoint_git_sha = checkpoint_git_sha or payload.get("git_sha")
+            if payload.get("training_progress"):
+                item.update(payload["training_progress"])
+            if payload.get("step") is not None:
+                item["step"] = int(payload["step"])
+        except Exception as exc:
+            item["metadata_error"] = str(exc)
+        ckpts.append(item)
     if not ckpts:
         print(f"no *.pt found in {src}")
         return 1
@@ -80,10 +99,17 @@ def main() -> int:
         "loss": meta.get("loss"),
         "override": meta.get("override"),
         "co_id": meta.get("co_id"),
+        "resolved_config": resolved_config,
+        "checkpoint_git_sha": checkpoint_git_sha,
         "n_checkpoints": len(ckpts),
         "stored_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "checkpoints": sorted(ckpts, key=lambda c: (c["step"] is None, c["step"] or 0)),
     }
+    for name in ("checkpoint_manifest.json", "gradient_diagnostics.jsonl",
+                 "losses.jsonl", "metrics.json"):
+        source = src / name
+        if source.exists():
+            shutil.copy2(source, dst / name)
     (dst / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
     print(f"stored {len(ckpts)} checkpoint(s) -> {dst}")
     print(f"  config={manifest['config']} loss={manifest['loss']} co_id={manifest['co_id']}")

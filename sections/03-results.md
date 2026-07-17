@@ -194,13 +194,13 @@ d′ ≈ 4.36 with amp ≈ 0.935, so both `arch_om0` and `base64_om0` sit above 
 (base32 4.277 / 0.859). Per-unit, the amplitude rescue again concentrates on the weak units (unit 94
 0.81 → 0.97, unit 1129 0.69 → 0.82; [Appendix B](sections/05-appendix.md)).
 
-## Spike-aware loss does not move detection
+## Legacy spike-aware sweep is implementation-confounded
 
-The one lever left that directly targets the weak-unit detection deficit is the **spike-aware loss** —
-multiply the reconstruction loss at spike-like samples so the network is penalised for flattening the
-peak (Methods). We swept it on the best body, `arch_l2_om0` (d′ = 4.360 ± 0.019, amp 0.937): a soft
-magnitude weight at λ = 3/10/30, a focal variant (γ = 2), and a saturating position gate at
-λ = 100/300/1000 (soft and hard).
+The Tier 3 sweep attempted to test a **spike-aware loss** on the `arch_l2_om0` body: a soft magnitude
+weight at λ = 3/10/30, a focal variant (γ = 2), and a saturating position gate at λ = 100/300/1000
+(soft and hard). A subsequent implementation audit found that every weighted run used a Charbonnier
+elementwise residual despite requesting `loss=l2`; the unweighted reference used L2. The observations
+below are therefore descriptive compound loss-plus-weight results, not an L2 weighting dose response.
 
 | spike weight | d′ | Δ vs base | amp |
 |---|---|---|---|
@@ -210,27 +210,17 @@ magnitude weight at λ = 3/10/30, a focal variant (γ = 2), and a saturating pos
 | focal γ = 2 (λ = 10) | **4.051** | **−0.31** | 0.94 |
 | gate λ = 1000 / hard | 4.102 / 4.219 | **−0.26 / −0.14** | 0.95 |
 
-**No setting clears the noise floor.** The best case — soft λ = 30 — is **+0.019 d′, inside the
-baseline's own ±0.019 σ** (not significant), and every aggressive setting (focal γ = 2, λ ≥ 1000) *hurts*
-detection sharply as the over-weighted loss distorts the waveform. Critically, the effect is null
-**even on the weak units it was designed to protect**: their mean d′ moves from 1.708 (baseline) to
-1.719 (λ = 30) to 1.724 (gate λ = 300) — a **+0.01–+0.02** nudge, versus the **+0.15** the blind-spot
-branch and the **+0.36** the full optimization already delivered there. The same holds on the base32
-body (`omission0_l2` + spike weight: +0.008 to +0.023, all within noise), and amplitude — already near-
-maximal from `omission=0` — barely moves.
-
-So the residual detection deficit **is not recoverable by loss-level spike emphasis**: once the
-architecture is optimized, up-weighting spikes cannot convert the recovered amplitude into
-detectability, which points to the deficit being intrinsic to the blind-spot objective rather than a
-loss-weighting oversight (Discussion).
+The legacy points show no improvement beyond the reference uncertainty, while several aggressive
+compound configurations score substantially lower. Because loss family changed simultaneously, they
+cannot establish that weighting caused either outcome, cannot rule out matched-L2 weighting, and do
+not show that the residual deficit is intrinsic to the blind-spot objective. The configured-loss bug
+has been corrected; this question remains open pending matched-objective reruns.
 
 ```{figure} figures/f9_spike_weight.png
 :label: fig-spike-weight
-**Spike-aware loss does not move detection.** d′ vs spike weight λ (log) on the `arch_l2_om0` body:
-soft magnitude weighting (blue), the saturating position gate (orange), the focal γ = 2 variant (red
-cross), and the hard gate (purple), read against the baseline ±2σ band (grey) and raw (dotted). Every
-point sits in or below the band — the soft sweep is flat within noise, and the aggressive settings
-(focal γ = 2, gate λ = 1000) collapse detection.
+**Legacy spike-aware sweep (confounded).** d′ vs nominal spike weight λ on the `arch_l2_om0` body.
+Weighted runs silently used Charbonnier residuals while the reference used L2, so the curves cannot
+isolate weighting and are retained only as an audit trail.
 ```
 
 ## Per-unit amplitude: who gets smoothed, and why
@@ -299,10 +289,13 @@ is beaten by its own final checkpoint (4.361), the spike-blind-loss signature.
 
 The architecture sweep was conducted under a fixed training recipe (AdamW, cosine annealing,
 batch 64, lr 1e-3). A separate six-run sweep asks: **given the best body (`base64_om0`), which
-optimizer and schedule reaches the performance target fastest?** Each recipe trains for the same
-~3.3 M windows (train\_chunks=4) with 12 log-spaced checkpoints to resolve the convergence curve.
+tested recipe reaches the performance target fastest?** Each recipe processes the same ~18.0 M
+training windows (train\_chunks=4), with 12 log-spaced checkpoints. All runs use one training seed.
+Checkpoint times were not recorded directly in this sweep; GPU-hours below are estimated by
+apportioning each run's total runtime by checkpoint step and linearly interpolating threshold
+crossings. They are descriptive estimates rather than measured time-to-target values.
 
-| recipe | final d′ | GPU-h to d′ = 4.30 | GPU-h to d′ = 4.35 |
+| recipe | final d′ | estimated GPU-h to d′ = 4.30 | estimated GPU-h to d′ = 4.35 |
 |---|---|---|---|
 | R0 baseline (AdamW / cosine / lr 1e-3) | 4.350 | 1.44 h | 2.73 h |
 | R1 +3 % warmup | 4.365 | 0.65 h | 2.22 h |
@@ -311,29 +304,36 @@ optimizer and schedule reaches the performance target fastest?** Each recipe tra
 | R4 Lion (lr 3e-4, wd 0.1) | 4.219 | — (never) | — (never) |
 | **R5 batch 256, lr 2e-3, 5 % warmup** | **4.358** | **0.33 h** | **2.42 h** |
 
-Two findings stand out. First, **R5 (batch 256) is the efficiency winner**: it reaches d′ = 4.30
-in **0.33 GPU-hours — 4.4× faster than the baseline's 1.44 h** — and converges to the same ceiling
-(4.36 ≈ R0's 4.35). Larger batches provide a richer gradient per update, compressing the steep
-early learning phase without sacrificing the final ceiling reached by cosine annealing.
+R5 is the fastest **observed compound recipe** to d′ = 4.30: its interpolated estimate is 0.33
+GPU-hours versus 1.44 h for R0 (4.4×). This comparison changes batch size, learning rate, and warmup
+together, so it does not identify batch size as the cause. R0's rapid onset is consistent with its
+full learning rate from the first update; R1 and R5 use warmup. The apparent convergence near
+0.1 GPU-hours overlaps the end of warmup (0.084 h for R1 and 0.133 h for R5), while R0 has no
+checkpoint between ~0.089 and ~0.279 h. The trajectories therefore do not resolve a common
+task-intrinsic transition at 0.1 h.
 
-Second, **Lion (R4) is definitively ruled out** for this setting: its ceiling is 4.22, it never
-reaches d′ = 4.30, and converges slower than all AdamW variants up to ~3000 updates. The
-sign-momentum update with lr 3e-4 is poorly matched to this loss landscape at this scale. One-cycle
-(R2) and the tuned AdamW (R3) are both capped at ~4.32, below the 4.35 target.
+R0, R1, and R5 finish within 0.015 d′. A paired bootstrap over the ten GT units gives R1 − R5 =
+0.0076 d′ (95% interval −0.0020 to 0.0236) and R5 − R0 = 0.0075 (−0.0076 to 0.0240); this does not
+include training-seed variation. Their endpoint ordering is consequently unresolved. The tested
+Lion configuration underperforms (final d′ = 4.219), but one learning-rate/weight-decay setting does
+not rule out the optimizer family. Likewise, R2 and R3 describe the tested compound configurations,
+not optimizer-wide ceilings.
 
 ```{figure} figures/recipe_convergence.png
 :label: fig-recipe-convergence
-**Training-efficiency recipe sweep.** d′ vs windows seen (left) and GPU-hours (right) for six
-recipes on the `base64_om0` body. Dashed grey = anchor (base64\_om0 4.359). R5 (batch 256,
-purple) reaches d′ = 4.30 in 0.33 GPU-h — 4.4× faster than the AdamW/cosine baseline (black).
-Lion (R4, red) is eliminated: ceiling 4.22, never reaches d′ = 4.30.
+**Training-efficiency recipe sweep.** d′ vs windows seen (left) and estimated GPU-hours (right) for
+six single-seed compound recipes on the `base64_om0` body. Dashed grey = anchor (base64\_om0 4.359).
+R5 reaches d′ = 4.30 at an interpolated 0.33 GPU-h versus 1.44 h for R0; exact checkpoint timing and
+replicated seeds are required to estimate the acceleration reliably. The tested R4 configuration
+does not reach d′ = 4.30.
 ```
 
 ```{figure} figures/recipe_convergence_loglog.png
 :label: fig-recipe-convergence-loglog
 **Training-efficiency — log–log deficit view.** Detection deficit (raw d′ − d′_deep, lower = better)
 vs windows seen (left) and GPU-hours (right), both axes log scale. Dotted lines = target d′ thresholds.
-R0 (black) drops fastest per window seen (small-batch data efficiency), but **R5 (purple, batch 256)
-and R1 (blue, +warmup) converge to the lowest deficit in wall-clock** after the ~0.01–0.1 GPU-h
-crossing point. R4 Lion (red) plateaus visibly above d′ = 4.20, confirming its elimination.
+R0 (black) drops fastest initially, consistent with having no warmup. R1 (blue) and R5 (purple)
+finish close to R0; their relative endpoints are unresolved by the available ten units and one
+training seed. GPU-hours are step-proportional estimates, and the sparse checkpoints do not localize
+a shared transition at ~0.1 GPU-h.
 ```

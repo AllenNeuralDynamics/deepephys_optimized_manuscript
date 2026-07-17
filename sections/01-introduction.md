@@ -2,8 +2,10 @@
 
 :::{note} Manuscript status
 Methods, Results and Discussion report the complete in-band sweep — Tier 1 (noise-floor
-configurations), Tier 2, the Tier 3 spike-aware loss family, the original DeepInterpolation network as
-a published reference, and the two SUPPORT-scale runs (see
+configurations), Tier 2, the original DeepInterpolation network as a published reference, and the two
+SUPPORT-scale runs. The legacy Tier 3 spike-aware family is reported descriptively but excluded from
+causal interpretation after an implementation audit found a configured-loss mismatch (see Results;
+corrected reruns pending). See
 [the pre-registered design](reproducibility/regeneration-plan.md)).
 :::
 

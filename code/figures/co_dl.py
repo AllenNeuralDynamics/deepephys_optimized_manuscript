@@ -4,7 +4,8 @@
 Usage:
     python co_dl.py <computation_id> <out_dir> [glob ...]
 
-Downloads every result file whose name matches any glob (default: ``*.pt``).
+Downloads every result file whose name matches any glob. By default this includes
+checkpoints plus optimization telemetry needed for exact convergence plots.
 Reads ``CODEOCEAN_DOMAIN`` and ``CODEOCEAN_TOKEN`` from the environment, e.g.::
 
     set -a; source ~/.codeocean.env; set +a
@@ -28,7 +29,10 @@ def main() -> int:
         return 2
     cid = sys.argv[1]
     out_dir = sys.argv[2]
-    patterns = sys.argv[3:] or ["*.pt"]
+    patterns = sys.argv[3:] or [
+        "*.pt", "checkpoint_manifest.json", "gradient_diagnostics.jsonl",
+        "losses.jsonl", "metrics.json",
+    ]
 
     client = CodeOcean(
         domain=os.environ["CODEOCEAN_DOMAIN"],
@@ -44,7 +48,7 @@ def main() -> int:
             continue
         if not any(fnmatch.fnmatch(name, p) for p in patterns):
             continue
-        url = client.computations.get_result_file_download_url(cid, item.path).url
+        url = client.computations.get_result_file_urls(cid, item.path).download_url
         out_path = os.path.join(out_dir, name)
         print(f"  {name} ({getattr(item, 'size', '?')} B)")
         urllib.request.urlretrieve(url, out_path)

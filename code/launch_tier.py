@@ -96,7 +96,13 @@ def main() -> None:
         params = build_params(row["override"], row["seed"])
         if args.dry_run:
             print(f"{row['label']:22s} loss={params['loss']:11s} omission={params['omission']} "
-                  f"bs_frames={params['bs_frames']} base_channels={params['base_channels']} seed={params['seed']}")
+                f"batch={params['batch_size']} lr={params['lr']} "
+                f"warmup={params.get('warmup_frac', '0')} "
+                f"accum={params.get('grad_accum_mode', 'none')}:"
+                f"{params.get('grad_accum_max', '1')} "
+                f"diag={params.get('grad_noise_diag_steps', '0')} "
+                f"importance={params.get('importance_pool_mult', '1')}x "
+                f"seed={params['seed']}")
             continue
         try:
             resp = post_computation(domain, token, params)

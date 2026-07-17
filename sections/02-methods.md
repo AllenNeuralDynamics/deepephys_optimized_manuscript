@@ -118,6 +118,12 @@ spike detector that keeps the blind spot unbiased); a saturating position gate
 without biasing amplitude upward. Across the sweep, capacity and the enlarged `arch` body span
 **0.85 M → 12.6 M parameters**.
 
+An implementation audit after the legacy Tier 3 sweep found that enabling `spike_weight` always
+constructed a Charbonnier elementwise residual, even when the run requested `loss=l2`. Consequently,
+those rows compare a weighted Charbonnier objective with an unweighted L2 reference and cannot isolate
+the effect of weighting. The implementation now applies the configured L1, L2, or Charbonnier
+residual before weighting; corrected matched-objective reruns are required for inference.
+
 ## Quantification (identical for every run)
 
 All models are scored by one uniform protocol (full catalog and formulas in

@@ -30,8 +30,9 @@ probe-axis blind-spot branch). Every override is defined in
 - **om0_scale / om1_scale** — the two SUPPORT-scale runs (`support_all` wiring, L2, ~3.3 M updates)
   with `omission=0` / `omission=1`; the saturation A/B. Final-step d′ 4.361 / 4.361; amp 0.939 / 0.870.
 
-**Pending (Tier 3).** The spike-weight amp-lever family (`weighted`, `l10g1/g2`, `archL10`, `hard1000`,
-`uL100`, and the `uL100_om0` combo) plus L2 pairs — defined in the plan, not yet scored.
+**Confounded (legacy Tier 3).** The spike-weight family was scored, but an implementation audit found
+that weighted runs used Charbonnier residuals despite requesting L2. These rows are retained for
+provenance and excluded from matched-L2 inference; corrected reruns are pending.
 
 ## B. Per-unit amplitude across models
 

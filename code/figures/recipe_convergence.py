@@ -11,8 +11,8 @@ Because the recipes use different batch sizes, three budget axes are computed:
 * updates      -- optimizer steps (the raw checkpoint step).
 * samples seen -- updates x batch size (apples-to-apples: all recipes cover the
                   same ~18 M windows, so this is the fair convergence axis).
-* GPU-hours    -- measured wall-clock, apportioned across the run in proportion
-                  to the checkpoint step (constant time/update within a run).
+* GPU-hours    -- exact checkpoint elapsed time for telemetry-enabled runs;
+                  otherwise a clearly marked step-proportional estimate.
 
 Emits ``figures/recipe_convergence.png`` (d' vs samples-seen and vs GPU-hours)
 and ``results/tables/recipe_convergence_summary.{csv,md}`` (final/peak d' and the
@@ -24,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import itertools
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -48,6 +49,40 @@ ANCHOR = 4.359  # base64_om0 best_model d' (sanity reference for R0)
 METRIC = "dprime_deep"
 
 
+def endpoint_units(label: str) -> pd.Series | None:
+    path = REPO / "results" / "scores" / label / f"{label}_best_dprime.csv"
+    if not path.exists():
+        return None
+    frame = pd.read_csv(path)
+    if "unit_id" not in frame or METRIC not in frame:
+        return None
+    return frame.set_index("unit_id")[METRIC]
+
+
+def paired_endpoint_bootstrap(labels: list[tuple[str, str]]) -> pd.DataFrame:
+    rng = np.random.default_rng(20260717)
+    units = {label: endpoint_units(label) for label, _ in labels}
+    rows = []
+    for (label_a, name_a), (label_b, name_b) in itertools.combinations(labels, 2):
+        if units[label_a] is None or units[label_b] is None:
+            continue
+        paired = pd.concat([units[label_a], units[label_b]], axis=1, join="inner").dropna()
+        difference = (paired.iloc[:, 0] - paired.iloc[:, 1]).to_numpy()
+        if not len(difference):
+            continue
+        draws = difference[rng.integers(0, len(difference), size=(100_000, len(difference)))]
+        bootstrap_mean = draws.mean(axis=1)
+        low, high = np.quantile(bootstrap_mean, [0.025, 0.975])
+        rows.append({
+            "recipe_a": name_a, "recipe_b": name_b,
+            "mean_dprime_difference": float(difference.mean()),
+            "unit_bootstrap_95_low": float(low),
+            "unit_bootstrap_95_high": float(high),
+            "n_paired_units": int(len(difference)),
+        })
+    return pd.DataFrame(rows)
+
+
 def load(label: str, batch: int, run_min: float) -> pd.DataFrame | None:
     path = TABLES / f"{label}_trajectory.csv"
     if not path.exists():
@@ -58,8 +93,18 @@ def load(label: str, batch: int, run_min: float) -> pd.DataFrame | None:
         return None
     df["step"] = df["step"].astype(int)
     df = df.sort_values("step", ignore_index=True)
-    df["samples"] = df["step"] * batch
-    df["gpu_h"] = (run_min / 60.0) * df["step"] / df["step"].max()
+    inferred_samples = df["step"] * batch
+    if "samples_seen" in df and df["samples_seen"].notna().any():
+        df["samples"] = df["samples_seen"].fillna(inferred_samples)
+    else:
+        df["samples"] = inferred_samples
+    inferred_gpu_h = (run_min / 60.0) * df["step"] / df["step"].max()
+    if "elapsed_s" in df and df["elapsed_s"].notna().any():
+        df["gpu_h"] = (df["elapsed_s"] / 3600.0).fillna(inferred_gpu_h)
+        df["time_source"] = np.where(df["elapsed_s"].notna(), "measured", "inferred")
+    else:
+        df["gpu_h"] = inferred_gpu_h
+        df["time_source"] = "inferred"
     return df
 
 
@@ -102,7 +147,7 @@ def main() -> None:
         for ax, xcol in zip(axes1, ("samples", "gpu_h")):
             ax.plot(df[xcol], df[METRIC], "-o", ms=4, lw=1.6, color=col, label=name)
     for ax, xcol, xlabel in zip(axes1, ("samples", "gpu_h"),
-                                ("windows seen (updates × batch)", "GPU-hours")):
+                                ("windows seen", "GPU-hours (estimated for R0–R5)")):
         ax.axhline(ANCHOR, ls="--", lw=1, color="grey", alpha=0.7,
                    label=f"base64_om0 anchor {ANCHOR:.3f}")
         ax.set_xscale("log")
@@ -128,7 +173,7 @@ def main() -> None:
             ax.plot(df[xcol], deficit, "-o", ms=4, lw=1.6, color=col, label=name)
 
     for ax, xcol, xlabel in zip(axes2, ("samples", "gpu_h"),
-                                ("windows seen (updates × batch)", "GPU-hours")):
+                                ("windows seen", "GPU-hours (estimated for R0–R5)")):
         for t in args.targets:
             tdef = raw_dp - t
             ax.axhline(tdef, ls=":", lw=1.2, color="grey", alpha=0.7)
@@ -162,6 +207,7 @@ def main() -> None:
             "final_step": int(final["step"]),
             "final_dprime": round(float(final[METRIC]), 4),
             "peak_dprime": round(float(df[METRIC].max()), 4),
+            "time_source": "measured" if (df["time_source"] == "measured").all() else "inferred",
         }
         for t in args.targets:
             s = cross(df, "samples", t)
@@ -180,6 +226,11 @@ def main() -> None:
     out.with_suffix(".md").write_text(md + "\n")
     print(summ.to_string(index=False))
     print(f"\nwrote {out.with_suffix('.csv')}")
+
+    endpoint = paired_endpoint_bootstrap([(lab, name) for lab, _, _, name, _, _ in data])
+    endpoint_path = TABLES / "recipe_endpoint_pairwise.csv"
+    endpoint.to_csv(endpoint_path, index=False)
+    print(f"wrote {endpoint_path}")
 
 
 if __name__ == "__main__":

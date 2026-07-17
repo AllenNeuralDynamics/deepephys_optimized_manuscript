@@ -6,8 +6,11 @@ re-committed here so the figures regenerate deterministically.
 
 | script | purpose |
 |---|---|
-| `co_dl.py` | download a named file (`best_model.pt`, `ckpt_step_*.pt`) from a Code Ocean computation's results |
+| `co_dl.py` | download checkpoints plus exact optimization telemetry from a Code Ocean computation |
 | `collate.py` | collate per-unit CSVs → master table + per-unit amp / Δd′ matrices (mean over 10 units) |
+| `collate_trajectory.py` | merge checkpoint scores with measured elapsed time, LR, samples, optimizer steps, and effective batch |
+| `recipe_convergence.py` | compare recipe trajectories and bootstrap paired GT-unit endpoint differences |
+| `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `make_ranking_fig.py` | F1 d′-ranking vs ±2σ band |
 | `make_loss_pairs_fig.py` | F3 the six Charbonnier↔L2 matched pairs |
 | `make_perunit_heatmaps.py` | F6/F7 per-unit amplitude and Δd′ heatmaps (units × models) |

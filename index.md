@@ -22,8 +22,9 @@ abstract: |
   detection advantage is a convergence-speed effect; and detection keeps rising with training (not
   converged even at 3.3 M updates), so training length is a lever too. Against the original
   DeepInterpolation architecture the optimized network recovers +0.23 d′ and +0.13 amplitude — most of
-  it on the weak units — while a spike-aware loss aimed directly at those units does not move detection,
-  indicating the residual sub-raw deficit is intrinsic to the blind-spot objective.**
+  it on the weak units. Whether the residual sub-raw deficit reflects incomplete optimization or an
+  intrinsic limit of the blind-spot objective remains unresolved; the legacy spike-weighted sweep is
+  excluded from that inference after a configured-loss implementation mismatch was discovered.**
 ---
 
 ```{include} sections/01-introduction.md

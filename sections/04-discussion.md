@@ -46,14 +46,11 @@ real open problem, with SNR a misleading target for sorting.
 The detection deficit is not spread evenly — it is concentrated on the marginal, low-SNR units that
 the shrinkage estimator flattens (the same units that dominate the amplitude undershoot). Capacity
 helps because it gives the network more power to separate those units; the omission gap helps their
-*amplitude* but not their *detectability*. The most direct remaining intervention — a **spike-aware
-loss** that up-weights the reconstruction error at spikes — was designed precisely to protect weak-unit
-separability, and it **fails to**: swept across two orders of magnitude on the best body, no setting
-clears the noise floor, aggressive weighting *hurts*, and the weak units it targets do not move
-(+0.01–+0.02 d′; Results). That the residual deficit resists even a loss aimed straight at it suggests
-it is **intrinsic to the blind-spot objective** — the estimator cannot report a peak it is structurally
-forbidden from seeing — rather than a tuning oversight. One lever does remain unexhausted: **training
-length** — d′ is still rising at 3.3 M updates (om1 by +0.30 past 14 k, steepest at its final
+*amplitude* but not their *detectability*. Spike-aware weighting remains unresolved: the legacy Tier 3
+runs changed the effective loss from L2 to Charbonnier whenever weighting was enabled, so they cannot
+test matched-objective weighting or establish that the residual deficit is intrinsic to the blind-spot
+objective. One lever also remains unexhausted: **training length** — d′ is still rising at 3.3 M
+updates (om1 by +0.30 past 14 k, steepest at its final
 checkpoint), so the short-budget rankings are a convergence-speed-biased screen and a fully-converged
 model may recover more. Whether that closes the last −0.09 to −0.36 d′, or whether a residual cost is
 permanent, is the open question this manuscript leaves.
@@ -63,13 +60,16 @@ permanent, is the open question this manuscript leaves.
 The recommendation is now settled by the full sweep: pick **capacity** — the `base64` / `arch` family
 carries the only clear, replicated detection gain — and add **`omission=0`** when waveform fidelity on
 weak units matters (it lifts amplitude to ~0.94 for a detection cost inside the noise floor); the best
-all-round body is `arch_l2_om0`. L2 is a harmless default, and **spike-aware weighting is not
-recommended** — it does not help detection and, past small weights, degrades it. Every one of these is
-a large gain over the original architecture; the residual sub-raw deficit is, on current evidence, a
-property of the blind-spot objective, addressable (if at all) only by longer training or a change to
-the objective itself.
+all-round body is `arch_l2_om0`. L2 is a reasonable default. No recommendation is made for or against
+spike-aware weighting until corrected matched-L2 runs are scored. Every validated architecture result
+is a large gain over the original architecture; whether the remaining sub-raw deficit reflects
+optimization, training duration, or the blind-spot objective remains open.
 
-For the **training recipe**, the efficiency sweep adds one clear recommendation: **batch 256 with lr
-2e-3 and 5 % warmup** is 4.4× faster to the d′ = 4.30 operating point than the AdamW/cosine baseline
-with no cost to the final ceiling. Lion, one-cycle, and the tuned AdamW variants are either slower or
-cap below the target — prefer the large-batch AdamW recipe for any new training run.
+For the **training recipe**, batch 256 with lr 2e-3 and 5% warmup is the best observed candidate for
+rapidly reaching d′ = 4.30, while R0, R1, and R5 have statistically unresolved final performance.
+The reported 4.4× ratio uses step-interpolated total runtime from single-seed runs, and R5 changes
+batch size, learning rate, and warmup jointly. It should therefore be treated as a provisional
+deployment recipe, not an isolated or replicated batch-size effect. Future comparisons record exact
+checkpoint elapsed time and optimizer state, repeat seeds, and measure the gradient-noise scale
+before selecting an integration horizon. The tested Lion, one-cycle, and tuned-AdamW configurations
+underperform; the sweep does not rule out those optimizer families under different tuning.
