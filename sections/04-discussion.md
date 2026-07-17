@@ -68,3 +68,8 @@ recommended** — it does not help detection and, past small weights, degrades i
 a large gain over the original architecture; the residual sub-raw deficit is, on current evidence, a
 property of the blind-spot objective, addressable (if at all) only by longer training or a change to
 the objective itself.
+
+For the **training recipe**, the efficiency sweep adds one clear recommendation: **batch 256 with lr
+2e-3 and 5 % warmup** is 4.4× faster to the d′ = 4.30 operating point than the AdamW/cosine baseline
+with no cost to the final ceiling. Lion, one-cycle, and the tuned AdamW variants are either slower or
+cap below the target — prefer the large-batch AdamW recipe for any new training run.

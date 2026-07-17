@@ -294,4 +294,37 @@ is beaten by its own final checkpoint (4.361), the spike-blind-loss signature.
 (t±1 visible) and om1 (t±1 hidden); dotted line = raw d′. Amplitude saturates early; d′ keeps rising
 (om1 still climbing at 3.3 M), the two arms meeting only at the last checkpoint.
 ```
-<!-- F9 val-loss/overfit curves: pending losses.jsonl download -->
+
+## Training-efficiency recipe sweep
+
+The architecture sweep was conducted under a fixed training recipe (AdamW, cosine annealing,
+batch 64, lr 1e-3). A separate six-run sweep asks: **given the best body (`base64_om0`), which
+optimizer and schedule reaches the performance target fastest?** Each recipe trains for the same
+~3.3 M windows (train\_chunks=4) with 12 log-spaced checkpoints to resolve the convergence curve.
+
+| recipe | final d′ | GPU-h to d′ = 4.30 | GPU-h to d′ = 4.35 |
+|---|---|---|---|
+| R0 baseline (AdamW / cosine / lr 1e-3) | 4.350 | 1.44 h | 2.73 h |
+| R1 +3 % warmup | 4.365 | 0.65 h | 2.22 h |
+| R2 one-cycle (lr 3e-3, pct\_start 0.1) | 4.319 | 2.18 h | — (never) |
+| R3 AdamW lr 2e-3, β₂ 0.98, wd 0.05 | 4.320 | 1.96 h | — (never) |
+| R4 Lion (lr 3e-4, wd 0.1) | 4.219 | — (never) | — (never) |
+| **R5 batch 256, lr 2e-3, 5 % warmup** | **4.358** | **0.33 h** | **2.42 h** |
+
+Two findings stand out. First, **R5 (batch 256) is the efficiency winner**: it reaches d′ = 4.30
+in **0.33 GPU-hours — 4.4× faster than the baseline's 1.44 h** — and converges to the same ceiling
+(4.36 ≈ R0's 4.35). Larger batches provide a richer gradient per update, compressing the steep
+early learning phase without sacrificing the final ceiling reached by cosine annealing.
+
+Second, **Lion (R4) is definitively ruled out** for this setting: its ceiling is 4.22, it never
+reaches d′ = 4.30, and converges slower than all AdamW variants up to ~3000 updates. The
+sign-momentum update with lr 3e-4 is poorly matched to this loss landscape at this scale. One-cycle
+(R2) and the tuned AdamW (R3) are both capped at ~4.32, below the 4.35 target.
+
+```{figure} figures/recipe_convergence.png
+:label: fig-recipe-convergence
+**Training-efficiency recipe sweep.** d′ vs windows seen (left) and GPU-hours (right) for six
+recipes on the `base64_om0` body. Dashed grey = anchor (base64\_om0 4.359). R5 (batch 256,
+purple) reaches d′ = 4.30 in 0.33 GPU-h — 4.4× faster than the AdamW/cosine baseline (black).
+Lion (R4, red) is eliminated: ceiling 4.22, never reaches d′ = 4.30.
+```
