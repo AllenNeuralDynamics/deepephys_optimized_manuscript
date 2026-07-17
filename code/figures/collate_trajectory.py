@@ -54,7 +54,8 @@ def main() -> None:
                     else meta_by_step.get(step, {}))
         for key in ("micro_step", "optimizer_step", "samples_seen", "candidates_scored",
                 "elapsed_s", "wall_elapsed_s", "nontraining_overhead_s", "lr",
-                "physical_batch", "accumulation_target", "effective_batch"):
+                    "physical_batch", "accumulation_target", "effective_batch",
+                    "effective_weight_decay"):
             if metadata.get(key) is not None:
                 row[key] = metadata[key]
         row.update(means(dp, DPRIME))
@@ -70,7 +71,8 @@ def main() -> None:
     df = pd.DataFrame(rows).sort_values(by="step", na_position="last", ignore_index=True)
     telemetry = ["micro_step", "optimizer_step", "samples_seen", "candidates_scored",
                  "elapsed_s", "wall_elapsed_s", "nontraining_overhead_s", "lr",
-                 "physical_batch", "accumulation_target", "effective_batch"]
+                 "physical_batch", "accumulation_target", "effective_batch",
+                 "effective_weight_decay"]
     df = df[[c for c in ["label", "tag", "step", *telemetry, *DPRIME, *DIAG]
              if c in df.columns]]
 
