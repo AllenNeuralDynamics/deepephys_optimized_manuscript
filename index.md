@@ -3,28 +3,24 @@ title: Optimizing DeepInterpolation for Neuropixels spike detection
 short_title: DeepEphys Optimized
 abstract: |
   DeepInterpolation [@lecoq2021deepinterpolation] is a self-supervised, blind-spot denoiser that
-  improves the signal-to-noise ratio of extracellular electrophysiology. A practically important
-  limitation, however, is that denoising can *reduce* spike **detectability** (d′) even as it raises
-  SNR — and the cost falls hardest on the weaker, low-amplitude units that are already near the
-  sorting threshold. Here we set out to optimise the ephys DeepInterpolation architecture to protect
-  those weak units, drawing on advances in self-supervised "blind-spot" denoising
-  [@eom2023support] and measuring detection directly against a frozen **hybrid ground-truth**
-  Neuropixels 1.0 benchmark [@buccino2020spikeinterface] — known units injected into a real recording,
-  so detection and waveform fidelity are read out without running a spike sorter. Because
-  DeepInterpolation is self-supervised, every model is **trained and scored in its deployment band**
-  (the high-passed AP band), under one uniform quantification protocol (matched-filter d′, amplitude
-  and waveform fidelity, resolved per-unit and per-model, read against a replicate-derived noise
-  floor). The full design is pre-registered (see
-  [the pre-registered design](reproducibility/regeneration-plan.md)) and the entire train → score →
+  can raise peak-channel template signal-to-noise ratio (SNR), but that metric need not track how well
+  spike and background events separate. We evaluated DeepInterpolation variants on one frozen hybrid
+  Neuropixels 1.0 recording containing 10 injected ground-truth units [@buccino2020spikeinterface].
+  Models were trained self-supervised and scored in the high-passed AP band using multichannel
+  matched-filter d′ and empirical-template waveform metrics. Across 21 short-budget architectures,
+  every denoised output had lower mean d′ than raw data. The complete modernization from the original
+  ephys network to the two-branch `base32` model improved d′ by 0.14; the best observed modern body
+  improved it by 0.27, although several high-capacity results are single-seed screens. Width produced
+  the largest replicated gain in the all-unit mean (+0.105 d′), whereas the compound `omission0`
+  configuration, which routes t±1 through the temporal branch, produced the larger gain among four
+  weak units (+0.148 d′) and improved amplitude preservation toward raw. Across architectures,
+  change in template SNR did not rank change in d′ (Spearman
+  ρ = 0.02). A single-seed recipe screen identified a promising large-physical-batch configuration,
+  but its timing estimate is provisional and combines batch, learning-rate, and warmup changes. In two
+  longer `support_all` trajectories, amplitude stabilized early while d′ remained duration-sensitive
+  at 3.3 M updates. These results are specific to one hybrid benchmark and a matched-filter proxy;
+  held-out recordings and sorter-level validation remain necessary. The versioned train → score →
   figure pipeline is reproducible from this repository.
-  **We find that denoising still lowers detectability (every model below raw); network capacity is the
-  leading detection lever; the temporal "omission" design is an amplitude / waveform lever whose small
-  detection advantage is a convergence-speed effect; and detection keeps rising with training (not
-  converged even at 3.3 M updates), so training length is a lever too. Against the original
-  DeepInterpolation architecture the optimized network recovers +0.23 d′ and +0.13 amplitude — most of
-  it on the weak units. Whether the residual sub-raw deficit reflects incomplete optimization or an
-  intrinsic limit of the blind-spot objective remains unresolved; the legacy spike-weighted sweep is
-  excluded from that inference after a configured-loss implementation mismatch was discovered.**
 ---
 
 ```{include} sections/01-introduction.md

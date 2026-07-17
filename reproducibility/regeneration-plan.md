@@ -1,7 +1,14 @@
-# In-Domain Report Regeneration — Master Plan
+# In-Domain Regeneration and Analysis Plan
 
-**Status: PLANNING — nothing launched yet. Launch only after this is reviewed.**
-Last updated: 2026-07-13
+:::{note}
+This is a versioned working plan, not an immutable preregistration. It preserves the original
+decisions and later report-driven reprioritization. The authoritative execution ledger is
+`results/runs.csv`; the manuscript states which analyses are confirmatory, exploratory, or confounded.
+:::
+
+**Status:** architecture and initial recipe screens executed; later replication and optimization
+experiments tracked in `results/runs.csv`.
+Last updated: 2026-07-17
 
 ---
 
@@ -54,7 +61,7 @@ This is legitimate because DeepInterpolation is **self-supervised** (blind-spot;
 | batch_size / lr / lr_scheduler | 64 / 0.001 / cosine |
 | traces_dtype | float16 |
 | **short run** | `train_chunks=4` (~0.28 M updates, ~1.5 h) |
-| **SUPPORT-scale** | `train_chunks=47` (~3.3 M updates, ~17 h) |
+| **long-duration diagnostic** | `train_chunks=47` (~3.3 M updates, ~17 h) |
 
 **Champion base config** (all short runs start here, override as noted):
 `base_channels=32, depth=3, bs_frames=3, bs_channels=64, bs_depth=5, fuse_channels=64, loss=charbonnier (eps=0.4), omission=1`.
@@ -68,7 +75,7 @@ The **loss axis is now first-class**: every headline config is run in **both** c
 ### Tier 1 — decides whether the thesis survives (19 runs)
 | # | label | seeds | override vs champion | training loss | dur | why |
 |---|---|---|---|---|---|---|
-| 1 | ib_champion | 5 (s0–4) | — (reference) | charbonnier (eps=0.4) | ~1.5 h | noise floor, DI-vs-raw |
+| 1 | ib_champion | 5 (s0–4) | — (reference) | charbonnier (eps=0.4) | ~1.5 h | seed variability, DI-vs-raw |
 | 2 | ib_omission0 | 5 (s0–4) | `omission=0` (forces bs_frames=1) | charbonnier (eps=0.4) | ~1.5 h | omission gap (charbonnier) |
 | 3 | ib_champ_l2 | 3 (s0–2) | `loss=l2` | **L2 (MSE)** | ~1.5 h | loss axis + L2 reference |
 | 4 | ib_omission0_l2 | 3 (s0–2) | `omission=0 loss=l2` | **L2 (MSE)** | ~1.5 h | omission gap (L2) → loss×omission 2×2 |
@@ -87,8 +94,8 @@ The **loss axis is now first-class**: every headline config is run in **both** c
 | 13 | ib_base64_l2 | 1 | `base_channels=64 loss=l2` | **L2 (MSE)** | ~1.5 h | loss×capacity 2×2 (§4.1) |
 | 14 | ib_no_norm | 1 | `norm=none` | charbonnier (eps=0.4) | ~1.5 h | normalization (§4.7) |
 | 15 | ib_ho | 1 | `bs_frames=1` (omission stays 1) | charbonnier (eps=0.4) | ~1.5 h | blind-spot width (§4.6) |
-| 16 | ib_arch | 1 | `base_channels=64 depth=4 bs_channels=128 bs_depth=7` | charbonnier (eps=0.4) | ~1.5 h | SNR trap 15× (§4.2) |
-| 17 | ib_arch_l2 | 1 | `base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2` | **L2 (MSE)** | ~1.5 h | SNR trap × L2 |
+| 16 | ib_arch | 1 | `base_channels=64 depth=4 bs_channels=128 bs_depth=7` | charbonnier (eps=0.4) | ~1.5 h | enlarged body (§4.2) |
+| 17 | ib_arch_l2 | 1 | `base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2` | **L2 (MSE)** | ~1.5 h | enlarged body × L2 |
 
 ### Tier 3 — spike-weight amp lever (§4.4) — 6 runs
 Only spike-weighting moved the amp axis in the old report (0.85 → 1.47). Re-map that response curve in-band.
@@ -104,13 +111,14 @@ All keep the **charbonnier (eps=0.4)** base loss; the spike-weight only re-weigh
 
 **⚠ Exact `spike_weight_thresh` for #22/#23 must be copied verbatim from the original `hard1000` / `uL100` runs before launch (see §9 gate 2).**
 
-### Already running — SUPPORT-scale saturation (2 runs)
+### Long-duration diagnostic launched during execution (2 runs)
 | # | label | CO id | override | training loss | dur | why |
 |---|---|---|---|---|---|---|
 | 24 | RUN3 ib_om0_scale | `ccf82c60-…` | support_all + `loss=l2` + `omission=0`, train_chunks=47 | **L2 (MSE)** | ~17 h | saturation §7 |
 | 25 | RUN4 ib_om1_scale | `5eec6d19-…` | support_all + `loss=l2` + `omission=1 bs_frames=3`, train_chunks=47 | **L2 (MSE)** | ~17 h | saturation §7 |
 
-**Counts:** 37 short (~1.5 h) + 2 SUPPORT-scale (running) = **39 total**. Short runs parallelize on CO (~6 concurrent → ~9 h wall).
+**Original planned counts:** 37 short + 2 long-duration runs = **39 total**. Later adaptive additions
+are recorded in `results/runs.csv`.
 **Loss coverage:** 6 charbonnier↔L2 matched pairs (base, omission, capacity, best-arch, fuse, SNR-trap); pure L2 = 10 short + 2 scale; charbonnier = 27 short (6 of them spike-weighted).
 
 ### Deliberately excluded (were within-noise "does X stack on Y" combos in the old report)
@@ -137,7 +145,9 @@ The in-band Tier-1 + scale results reframe both the sweep and its training durat
 
 ## 5. Quantification & comparison — IDENTICAL for every run
 
-Every checkpoint of every run is scored by the **same** protocol, on the **same** frozen substrate, and compared on the **same** axes. This is the previous report's best quantification, applied uniformly so all 39 runs are directly comparable.
+Every checkpoint is scored by the same protocol on the same frozen substrate. This makes metric
+values comparable, but does not make interventions interchangeable: training budgets, bodies,
+replication, and the legacy weighted-loss implementation differ and are separated in the manuscript.
 
 ### 5.1 Frozen evaluation substrate (never varies)
 - **Recording:** `681532 ProbeC recording1_3` (AP-band) — the deployment recording (= the training recording; self-supervised).
@@ -152,26 +162,26 @@ The **union** of the old report's quantifications (nothing new invented). All pe
 | quantity | level | meaning |
 |---|---|---|
 | `dprime_deep` (d′_self) | per-unit → mean | matched-filter d′, template from **denoised** data — **PRIMARY** |
-| `dprime_deep_fixed` (d′_fixed) | per-unit → mean | matched-filter d′, **raw/true** template — artifact control (gain is real only if this moves too) |
+| `dprime_deep_fixed` (d′_fixed) | per-unit → mean | matched-filter d′ using the empirical raw-domain template — raw-template compatibility control |
 | `dprime_raw` | per-unit → mean | raw (undenoised) baseline (old out-of-band = 4.497; **re-measure in-band**) |
 | **Δd′ = dprime_deep − dprime_raw** | per-unit | change from denoising — **help (+) / hurt (−)** |
 
 **Waveform fidelity — `template_diag.sbatch`**
 | quantity | level | meaning |
 |---|---|---|
-| `amp_ratio` | per-unit → mean | denoised ÷ true peak-to-peak on the peak channel — **the amp lever** |
+| `amp_ratio` | per-unit → mean | denoised-template ÷ raw-template peak-to-peak on the empirical raw peak channel |
 | `fwhm_ratio` | per-unit → mean | trough-width ratio (peak sharpness) |
 | `temporal_cos` | per-unit → mean | denoised-vs-true waveform temporal-shape correlation |
 | `spatial_cos` | per-unit → mean | denoised-vs-true spatial-footprint correlation |
 | `snr_deep` | per-unit → mean | SNR of the denoised spike |
 
-**Noise floor & significance — derived from replicates**
+**Seed variability — derived from replicates**
 | quantity | level | meaning |
 |---|---|---|
 | seed replicates (mean ± SD) | per config | champion×5, omission0×5, champ_l2×3, omission0_l2×3, base64×3 |
-| σ_d′, σ_amp | global | champion 5-seed SD (old: σ≈0.03–0.06 d′, ≈0.01 amp) |
-| 2σ decision band | global | a delta is "real" only if it clears ~2σ (old: ~0.07 d′, ~0.02 amp) |
-| Welch t-test p vs champion | per config | old report used this (base64 p=0.019 real; L2/fuse256 NS) |
+| SD_d′, SD_amp | per config | training-seed spread |
+| base32 ±2-SD band | descriptive | screening reference, not a confidence interval or electrophysiological noise floor |
+| Welch t-test p vs base32 | exploratory | unadjusted comparison for replicated configurations only |
 
 **Validation-loss headroom (§2.4 decomposition) — offline, GT-time based**
 | quantity | meaning |
@@ -209,17 +219,19 @@ The headline "who gets smoothed / who gets harder to detect" view (old report Ap
 - **Per-unit values (10 per metric) always retained** → feed the §5.3 matrices, heatmaps and paired stats.
 - Saved as `traj_scores/ib_<label>_{dprime.csv,_diag.csv}`; collated by the `/tmp/collate_traj.py` pattern.
 
-### 5.5 Replicates & noise floor (defines "real")
+### 5.5 Replicates and descriptive seed variability
 - Multi-seed configs — champion×5, omission0×5, champ_l2×3, omission0_l2×3, base64×3 — report **mean ± SD**.
-- **σ_d′, σ_amp from champion's 5 seeds = the significance scale;** a delta counts only if |Δ| > 2σ, confirmed by a Welch t-test vs champion (same procedure as the old report).
+- Report mean ± seed SD. The base32 ±2-SD band is a descriptive screen reference; Welch comparisons
+	are exploratory and unadjusted, and single-seed rows receive no inferential error bar.
 
 ### 5.6 Comparison procedure (the same questions for every config)
 1. **vs raw** — Δd′, amp_ratio, fwhm_ratio: does DI help or hurt?
-2. **vs champion** — Δ on every metric: does the knob matter beyond the noise floor?
+2. **vs base32** — Δ on every metric: how large is the observation relative to seed variability?
 3. **loss pairs (charbonnier ↔ L2)** — the six matched pairs: does the loss change the outcome?
 4. **per-unit (§5.3)** — where does the effect land on the quality gradient (shrinkage: Spearman amp vs baseline d′)?
 5. **trajectories** — ordering and saturation over training updates.
-A difference is reported only if it clears the §5.5 noise floor; otherwise "within noise."
+Differences are reported with their replication and uncertainty status rather than converted to a
+binary "real/within noise" label.
 
 ### 5.7 Aggregation & provenance
 - **Aggregate = arithmetic mean over the 10 GT units** (verified to reproduce the previous report's anchors).
@@ -234,18 +246,18 @@ Every §5 quantification gets a table and/or a plot. This is the in-band regener
 
 ### 6.1 Tables
 - **T1 — Master results** (sorted by d′_self, read against ±2σ): per model → `amp_ratio`, `d′_self`, `d′_fixed`, `fwhm_ratio`, `temporal_cos`, `spatial_cos`, `snr_deep`, `params`, **`training loss`**.
-- **T2 — Noise floor**: σ_d′, σ_amp from champion 5 seeds + Welch t-test vs champion for each multi-seed config.
+- **T2 — Seed variability**: SD_d′ and SD_amp for replicated configurations plus exploratory Welch comparisons.
 - **T3 — §2.4 headroom** (re-measured in-band): p_spike, dL, dL ÷ seed-noise — may flip the "val-loss is spike-blind" claim.
 - **T4 — Per-unit amp matrix** (App B) and **T5 — Per-unit d′ / Δd′ matrix** (App C): 10 units × all models, mean row.
 
 ### 6.2 Figure collection (one+ per quantification family)
 | fig | plot | quantification (§5) | old fig / asset |
 |---|---|---|---|
-| F1 | d′ ranking vs noise band — all 39 models, champion ±2σ, raw line | detection + noise floor | Fig 3 / `fig1_dprime_ranking` |
+| F1 | d′ ranking — 21 short-budget architectures, base32 ±2 seed SD, raw line | detection + seed variability | Fig 3 / `fig1_dprime_ranking` |
 | F2 | loss × capacity 2×2 | detection, loss axis | Fig 4 / `fig2_loss_capacity_2x2` |
 | F3 | **loss-axis pairs — 6 charbonnier↔L2 Δ (NEW)** | loss axis (added pairs) | new |
-| F4 | SNR-gain vs Δd′ "trap" | detection-vs-SNR mechanism | Fig 5 / `fig4_snr_vs_dprime` |
-| F5 | amp vs unit quality (shrinkage scatter) | per-unit amp / Spearman | Fig 7 / `fig3_amp_vs_quality` |
+| F4 | peak-channel template-SNR change vs matched-filter Δd′ | metric dissociation | Fig 5 / `f4_snr_vs_dprime` |
+| F5 | amp vs unit quality: all architectures + omission contrast | per-unit amp / Spearman | Fig 7 / `f5_amp_vs_quality` |
 | F6 | per-unit amp heatmap (units × all models) | §5.3 per-unit (App B) | Fig 9 / `fig6_perunit_heatmap` |
 | F7 | per-unit Δd′ heatmap (units × all models) | §5.3 per-unit (App C) | Fig 10 / `fig7_dprime_delta_heatmap` |
 | F8 | loss×omission trajectories — d′ & amp vs updates | training progress / saturation | Fig 8 / `fig_trajectory` |
@@ -285,6 +297,6 @@ The outline is **conditional on the Tier-1 read-out**:
 3. **[ ] Launch Tier 1 (19 runs)** + let RUN3/RUN4 finish.
 4. **[ ] Score Tier 1 + RUN3/RUN4 → read the two decision questions.**
 5. **[ ] Gate:** thesis survives? → set Tier 2/3 scope + report structure.
-6. **[ ] Launch Tier 2 + Tier 3, score, re-measure §2.4 + noise floor in-band.**
+6. **[x] Launch Tier 2 + Tier 3 and score; legacy weighted-loss rows later marked confounded.**
 7. **[ ] Regenerate figures/tables from in-band scores.**
 8. **[ ] Write `di_ephys_report_v2.md`, build PDF, verify.**

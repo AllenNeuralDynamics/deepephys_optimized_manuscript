@@ -4,12 +4,17 @@
 
 Every model is scored on one fixed benchmark built with the **hybrid ground-truth** approach
 [@buccino2020spikeinterface]: a real Neuropixels 1.0 recording (`ecephys_681532`, ProbeC) into which
-**10 ground-truth units** were injected at known times and amplitudes. Because the true spike times
-and waveforms are known, detection and waveform fidelity are measured directly, without running a
-spike sorter (the matched-filter surrogate below stands in for one). The evaluation is identical for
-all models — the same 10 units and the same `seed=0` subsample of 100 spikes/unit and 200 background
-windows — so **every difference between models reflects training, not the evaluation.** Exact asset
-paths are in [Data & compute provenance](data/provenance.md).
+**10 ground-truth units** were injected at known event times. Detection is evaluated without running
+a spike sorter; waveform diagnostics compare empirical spike-triggered templates in raw and denoised
+domains rather than using a noise-free injected template. Every model uses the same units and
+`seed=0` extraction: up to 100 spikes/unit plus 200 spike-excluded background windows for d′, and up
+to 200 spikes/unit for waveform diagnostics. Exact asset paths are in
+[Data & compute provenance](data/provenance.md).
+
+Fixing the extraction removes evaluation-sampling noise from model comparisons. It does not provide
+external validation: architectures and recipes were selected iteratively using this same recording
+and unit set. Conclusions are therefore conditional on this benchmark until repeated on held-out
+sessions.
 
 ## The in-domain rule
 
@@ -24,6 +29,19 @@ we enforce a single rule throughout:
 This is legitimate because DeepInterpolation is self-supervised (blind-spot): ground-truth spike
 labels are used only for *scoring*, never for training. Per-recording train = evaluate is the intended
 deployment, not label leakage.
+
+## Three experiment families
+
+The study contains three related but non-equivalent experiments:
+
+| family | model body | training budget | replication | question |
+|---|---|---|---|---|
+| architecture screen | 21 short-budget configurations | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
+| recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; replications running | which tested compound recipe reaches a d′ target fastest? |
+| duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
+
+The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
+uses a different body. Likewise, the recipe screen does not establish an architecture ordering.
 
 ## Architecture and the swept variants
 
@@ -89,11 +107,18 @@ flowchart TD
 its immediate t±1 neighbours excluded — drive the **temporal U-Net** along probe depth; the three
 centre frames drive the **blind-spot branch** of five dilated `ConvHole1D` layers whose centre kernel
 tap is forced to zero (the "holes"), so a channel's prediction never uses its own value. A
-pointwise-only (1×1) fuse head merges the two branches, which keeps the blind spot intact. Each swept
-variant below changes exactly one piece of this diagram.
+pointwise-only (1×1) fuse head merges the two branches, which keeps the blind spot intact.
 
-**How each swept variant is built.** Every variant changes exactly one part of this reference (all
-enumerated in [the pre-registered design](reproducibility/regeneration-plan.md)):
+The name `omission0` is shorthand for a compound routing change, not the simple addition of two
+frames. In base32 (`omission=1`, `bs_frames=3`), the temporal U-Net receives t−31…t−2 and t+2…t+31,
+while t−1, t, and t+1 enter only the spatial hole-convolution branch. In `omission0`, the temporal
+U-Net instead receives t−30…t−1 and t+1…t+30, and the spatial branch receives only t. Thus the
+comparison moves t±1 into the temporal branch, removes t±31, changes spatial-branch input, and reduces
+total input frames from 63 to 61. Effects cannot be attributed to t±1 visibility alone.
+
+**How each swept variant is built.** Most screen variants change one intended axis of this reference;
+explicit combination rows test whether selected effects stack. All runs are enumerated in the
+[versioned analysis plan](reproducibility/regeneration-plan.md):
 
 | axis | variant(s) | change (override) |
 |---|---|---|
@@ -104,7 +129,7 @@ enumerated in [the pre-registered design](reproducibility/regeneration-plan.md))
 | input normalisation | `no_norm` | `norm=none` |
 | blind-spot frames | `ho` | `bs_frames=1` (1-frame blind spot) |
 | SUPPORT wiring | `support_sd`, `support_all` | `bs_stage=1 bs_dense=1` (+ `bs_multiscale=1`) |
-| temporal omission | `omission0` | `omission=0` — the temporal branch sees t±1 (forces `bs_frames=1`) |
+| temporal omission | `omission0` | route t±1 through the temporal U-Net, drop t±31, and reduce the spatial branch from {t−1,t,t+1} to {t} |
 | loss | `*_l2` pairs | `loss=l2` |
 | spike-aware loss | `weighted`, `l10g1/g2`, gate / hard | `spike_weight`, `spike_weight_gamma`, `spike_weight_thresh`, `spike_weight_car`, `spike_weight_hard` (below) |
 
@@ -113,9 +138,10 @@ published SUPPORT denoiser [@eom2023support]: dense re-injection of the centre i
 staging the temporal feature into the blind-spot branch (`bs_stage`), and a parallel multi-scale
 stack (`bs_multiscale`). The **spike-aware loss** multiplies the reconstruction loss at spike-like
 samples by `1 + spike_weight·|nbr|^gamma`, where `|nbr|` is the centre-excluded neighbour amplitude (a
-spike detector that keeps the blind spot unbiased); a saturating position gate
-(`spike_weight_thresh > 0`, with `spike_weight_car` / `spike_weight_hard`) lets the weight grow large
-without biasing amplitude upward. Across the sweep, capacity and the enlarged `arch` body span
+proxy designed to avoid direct target-channel leakage); a saturating position gate
+(`spike_weight_thresh > 0`, with `spike_weight_car` / `spike_weight_hard`) limits dependence of weight
+on event magnitude. Centre exclusion does not guarantee statistical independence under correlated
+noise. Across the sweep, capacity and the enlarged `arch` body span
 **0.85 M → 12.6 M parameters**.
 
 An implementation audit after the legacy Tier 3 sweep found that enabling `spike_weight` always
@@ -127,42 +153,47 @@ residual before weighting; corrected matched-objective reruns are required for i
 ## Quantification (identical for every run)
 
 All models are scored by one uniform protocol (full catalog and formulas in
-[the pre-registered design](reproducibility/regeneration-plan.md), §5). Per-unit metrics are computed on each of the 10
+[the versioned analysis plan](reproducibility/regeneration-plan.md), §5). Per-unit metrics are computed on each of the 10
 GT units, then averaged.
 
-**Detection (primary).** Matched-filter d′: a per-unit template is slid over the trace as a matched
-filter, and d′ is the standardized separation between the filter's response at true spike times and
-at background — higher means easier to detect. It is computed two ways. `d′_self` uses a template
-built from the *denoised* data (what a sorter operating on denoised traces actually sees), while
-`d′_fixed` uses the *true/raw* template as a control: if `d′_self` rises but `d′_fixed` does not, the
-apparent gain is a self-consistent artifact (the denoiser sharpened its own template) rather than
-real recoverable signal. The raw-data reference is **d′ = 4.497**, and **Δd′ = d′_deep − d′_raw**
-measures the change from denoising — negative means denoising made a unit *harder* to detect.
+**Detection (primary).** For each unit, up to 100 GT-centered event windows and 200 sampled
+spike-excluded background windows are projected onto normalized empirical templates; d′ is the
+standardized separation between event and background projection scores. This is a GT-time
+event-versus-background surrogate, not a continuously sliding detector. `d′_self` uses a denoised-domain
+template, analogous to an adaptive sorter, while `d′_fixed` scores denoised windows with the empirical
+raw-domain template. The event windows used to estimate each template are also used as hit windows,
+so absolute d′ is optimistically in-sample; the identical procedure is used for all model comparisons.
+`d′_fixed` measures compatibility with the raw waveform, not agreement with a noise-free injected
+template. Agreement between rankings indicates that template adaptation is not driving the
+architecture ordering; disagreement can reflect either representation adaptation or distortion. The
+raw-data reference is **d′ = 4.497**, and **Δd′ = d′_deep − d′_raw** measures the change from
+denoising under this surrogate.
 
-**Waveform fidelity.** `amp_ratio` (denoised ÷ true peak-to-peak on the peak channel), `fwhm_ratio`
-(trough width), `temporal_cos` / `spatial_cos` (shape and footprint correlation), and `snr_deep`.
+**Waveform and SNR metrics.** `amp_ratio` is denoised-template ÷ raw-template peak-to-peak amplitude
+on the empirical raw peak channel; `fwhm_ratio` is the corresponding trough-width ratio;
+`temporal_cos` / `spatial_cos` compare rank-1 temporal shape and spatial footprint. `snr_deep` is the
+denoised empirical-template peak-to-peak amplitude divided by the standard deviation of denoised,
+spike-excluded background windows on that single channel. It combines amplitude preservation and
+background variance and is not a direct measure of "noise removed." In contrast, d′ separates
+multichannel temporal matched-filter scores at spike and background events.
 
 **Per-unit × per-model resolution.** Both amplitude and detection are reported as matrices — rows =
 the 10 units sorted by baseline separability, columns = every model — so an intervention's effect is
 read across the whole unit population, not just at the 10-unit mean (appendix
 [Appendix B/C](sections/05-appendix.md)).
 
-## The noise floor: why single runs cannot be trusted
+## Replication, checkpoint choice, and descriptive uncertainty
 
-Two facts make any single training run an unreliable ranking. First, training is stochastic — GPU
-non-determinism, random initialisation and data order. Second, the validation loss is nearly flat
-with respect to spikes: because spikes occupy only ~0.065% of (channel, sample) points, reconstructing
-every spike *perfectly* would move the whole-frame validation loss by a rounding error, far below its
-seed-to-seed noise. The loss-selected "best" checkpoint is therefore effectively a random draw along a
-plateau — which is exactly why models are scored with the spike-level d′ surrogate, not the loss.
+Training is stochastic because of initialization, data order, and GPU nondeterminism. Key
+configurations were therefore retrained across **3–5 seeds**. We report means and seed SDs; the
+base32 ±2-SD interval (d′ SD 0.015; amplitude SD 0.004) is used as a descriptive screening reference,
+not as a confidence interval or an electrophysiological noise floor. Welch tests are exploratory,
+unadjusted comparisons among replicated configurations; single-seed Tier 2 rows carry no inferential
+error bar.
 
-We therefore retrain the key configurations across **3–5 seeds**; base32's 5-seed standard
-deviation defines the significance scale (σ), and a difference is treated as real only if it clears
-**~2σ**, confirmed by a Welch t-test against base32. The spike-fraction decomposition that makes
-the loss spike-blind is **re-measured in-band** (Tier 2/3), since removing the LFP changes the
-fraction of variance spikes occupy and could sharpen — though not eliminate — the effect.
-
-:::{note} In-band anchors
-Raw-data reference **d′ = 4.497**; in-band base32 **d′ = 4.277 ± 0.015** (5 seeds) → decision band
-**±2σ ≈ 0.03 d′** (σ_amp ≈ 0.004). See Results.
-:::
+The short-budget screen saved a validation-loss-selected `best_model` and a terminal model. For all
+33 available Tier 1/2/original runs with both manifests, the selected checkpoint was the terminal
+step, so the architecture table is effectively a common terminal-budget comparison. That equivalence
+does not hold generally: in the long om1 trajectory, the validation-best checkpoint has lower d′ than
+the final checkpoint. We therefore use d′ trajectories, not reconstruction loss alone, to assess
+detection convergence.

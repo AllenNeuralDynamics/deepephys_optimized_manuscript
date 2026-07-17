@@ -8,7 +8,7 @@ reference architecture (``base_channels=32``) is labelled ``base32`` (there is n
 
 Figures produced (data permitting):
   F1  d' ranking with base32 ±2σ variability band + raw line
-  F4  SNR-gain vs Δd' ("the SNR trap")
+    F4  peak-channel template-SNR change vs multichannel matched-filter Δd'
   F5  amplitude vs unit quality (the shrinkage law)
   F6  per-unit amplitude heatmap (units × models)          [colored table]
   F7  per-unit Δd' heatmap (units × models)                [colored table]
@@ -25,6 +25,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import spearmanr
 
 REPO = Path(__file__).resolve().parents[2]
 S = REPO / "results" / "scores"
@@ -36,7 +37,7 @@ FIG.mkdir(exist_ok=True)
 CFG = [
     # base32 body (Tier 1)
     ("base32", "ib_champion_s*", "charb"),
-    ("champ_l2", "ib_champ_l2_s*", "L2"),
+    ("base32_l2", "ib_champ_l2_s*", "L2"),
     ("omission0", "ib_omission0_s*", "charb"),
     ("omission0_l2", "ib_omission0_l2_s*", "L2"),
     # capacity
@@ -62,9 +63,8 @@ CFG = [
     # published reference — the ORIGINAL DeepInterpolation ephys architecture (Lecoq 2021),
     # temporal-only, no spatial blind spot; highlighted distinctly in F1.
     ("origdi", "ib_origdi_s*", "orig"),
-    # NOTE: the SUPPORT-scale runs (om0_scale / om1_scale) are trained ~7x longer and are
-    # deliberately NOT ranked against the short-budget models here — they appear only in F8,
-    # the training-length comparison.
+    # NOTE: the 3.30-M-update support_all runs (om0_scale / om1_scale) are deliberately
+    # not ranked against the short-budget models here; they appear only in F8.
 ]
 
 
@@ -130,46 +130,97 @@ ax.bar(range(len(order)), [dmean[i] for i in order], yerr=[2 * dsd[i] for i in o
 ax.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.3f})")
 ci = NAMES.index("base32")
 ax.axhspan(dmean[ci] - 2 * dsd[ci], dmean[ci] + 2 * dsd[ci], color="gray", alpha=0.25,
-           label="base32 ±2σ (noise floor)")
+           label="base32 ±2 seed SD (screening reference)")
 if "origdi" in NAMES:                        # legend swatch for the highlighted reference
     ax.bar([0], [0], color="#c44e52", edgecolor="k", linewidth=1.4,
            label="original DI (published reference)")
 ax.set_xticks(range(len(order)))
 ax.set_xticklabels([NAMES[i] for i in order], rotation=45, ha="right")
-ax.set_ylabel("d′  (mean ± 2σ over seeds)")
+ax.set_ylabel("d′  (mean ± 2 seed SD where replicated)")
 ax.set_ylim(min(dmean) - 0.03, max(RAW, max(dmean)) + 0.03)
 ax.set_title("Detection d′ across architectures (in-band)")
 ax.legend(fontsize=8)
 fig.tight_layout(); fig.savefig(FIG / "f1_dprime_ranking.png", dpi=150); plt.close(fig)
 
-# ---- F4: SNR gain vs Δd' ----
-fig, ax = plt.subplots(figsize=(8.5, 6))
+# ---- F4: peak-channel template SNR vs multichannel matched-filter d' ----
+fig, ax = plt.subplots(figsize=(8.8, 6))
+snr_x, detect_y = [], []
 for name, pat in PATS.items():
     d = st.mean(per_seed(pat, "dprime", "dprime_deep"))
     sn = st.mean(per_seed(pat, "dprime", "snr_deep"))
-    ax.scatter(sn - RAW_SNR, d - RAW, s=70, color="#4c72b0")
-    ax.annotate(name, (sn - RAW_SNR, d - RAW), fontsize=8, xytext=(4, 3), textcoords="offset points")
+    snr_x.append(sn - RAW_SNR); detect_y.append(d - RAW)
+    if name == "origdi":
+        color, size, marker = "#c44e52", 90, "D"
+    elif name == "base32":
+        color, size, marker = "#333333", 85, "s"
+    elif name in {"omission0", "omission0_l2", "base64_om0", "arch_om0", "arch_l2_om0"}:
+        color, size, marker = "#dd8452", 72, "o"
+    elif name in {"base64", "base64_l2", "arch", "arch_l2"}:
+        color, size, marker = "#4c72b0", 72, "o"
+    else:
+        color, size, marker = "#a9a9a9", 50, "o"
+    ax.scatter(sn - RAW_SNR, d - RAW, s=size, color=color, marker=marker,
+               edgecolor="white", linewidth=0.5, zorder=2)
+    if name in {"origdi", "base32", "omission0", "base64", "arch", "base64_om0", "arch_l2_om0"}:
+        offsets = {"origdi": (5, 2), "base32": (5, -12), "omission0": (5, 4),
+                   "base64": (5, 4), "arch": (5, 4), "base64_om0": (5, -12),
+                   "arch_l2_om0": (5, 4)}
+        ax.annotate(name, (sn - RAW_SNR, d - RAW), fontsize=8,
+                    xytext=offsets[name], textcoords="offset points")
 ax.axhline(0, ls=":", c="k")
-ax.set_xlabel("SNR gain  (snr_deep − snr_raw)")
-ax.set_ylabel("Δd′  (d′_deep − d′_raw)")
-ax.set_title("The SNR trap: more denoising ≠ better detection")
+rho_all = float(spearmanr(snr_x, detect_y)[0])
+rho_no_orig = float(spearmanr(snr_x[:-1], detect_y[:-1])[0])
+ax.text(0.02, 0.04, f"Spearman ρ = {rho_all:.2f} (all 21)\nρ = {rho_no_orig:.2f} (without origdi)",
+        transform=ax.transAxes, fontsize=9, va="bottom",
+        bbox=dict(fc="white", ec="0.8", alpha=0.9))
+ax.set_xlabel("Change in peak-channel template SNR  (denoised − raw)")
+ax.set_ylabel("Change in multichannel matched-filter d′  (denoised − raw)")
+ax.set_title("Template SNR does not rank matched-filter detectability")
+ax.grid(alpha=0.2)
 fig.tight_layout(); fig.savefig(FIG / "f4_snr_vs_dprime.png", dpi=150); plt.close(fig)
 
-# ---- F5: amplitude vs unit quality ----
+# ---- F5: amplitude vs unit quality, full screen + paired omission contrast ----
 amp32 = cfg_unit("ib_champion_s*", "diag", "amp_ratio")
 ampom = cfg_unit("ib_omission0_s*", "diag", "amp_ratio")
-fig, ax = plt.subplots(figsize=(6, 4.5))
 xs = [baseD[u] for u in units]
+all_amp = {name: cfg_unit(pat, "diag", "amp_ratio") for name, pat in PATS.items()}
+rho_by_config = [float(spearmanr(xs, [all_amp[name][u] for u in units])[0])
+                 for name in NAMES]
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.8), sharey=True)
+
+rng = np.random.default_rng(20260717)
+for model_index, name in enumerate(NAMES):
+    jitter = np.exp(rng.normal(0, 0.014, len(units)))
+    a1.scatter(np.asarray(xs) * jitter, [all_amp[name][u] for u in units],
+               s=16, color="#a9a9a9", alpha=0.35, linewidth=0)
 for u in units:
-    ax.plot([baseD[u], baseD[u]], [amp32[u], ampom[u]], c="lightgray", lw=0.8, zorder=1)
-ax.scatter(xs, [amp32[u] for u in units], c="k", label="base32", zorder=2)
-ax.scatter(xs, [ampom[u] for u in units], c="#4c72b0", label="omission0", zorder=2)
-ax.axhline(1.0, ls=":", c="k")
-ax.set_xscale("log")
-ax.set_xlabel("baseline d′  (unit quality, log scale)")
-ax.set_ylabel("amp_ratio")
-ax.set_title("Amplitude preservation follows unit quality (Spearman 0.94)")
-ax.legend(fontsize=8)
+    values = np.asarray([all_amp[name][u] for name in NAMES])
+    a1.errorbar(baseD[u], np.median(values),
+                yerr=[[np.median(values) - np.quantile(values, 0.1)],
+                      [np.quantile(values, 0.9) - np.median(values)]],
+                fmt="D", ms=4, color="#333333", capsize=2, zorder=3)
+a1.axhline(1.0, ls=":", c="k")
+a1.set_xscale("log")
+a1.set_xlabel("raw matched-filter d′  (unit quality, log scale)")
+a1.set_ylabel("denoised/raw empirical-template amplitude")
+a1.set_title("A  All 21 short-budget architectures")
+a1.text(0.03, 0.04,
+        f"Per-model Spearman ρ:\nmedian {np.median(rho_by_config):.2f} "
+        f"(range {min(rho_by_config):.2f}–{max(rho_by_config):.2f})",
+        transform=a1.transAxes, fontsize=8, va="bottom",
+        bbox=dict(fc="white", ec="0.8", alpha=0.9))
+
+for u in units:
+    a2.plot([baseD[u], baseD[u]], [amp32[u], ampom[u]], c="lightgray", lw=0.8, zorder=1)
+a2.scatter(xs, [amp32[u] for u in units], c="k", label="base32", zorder=2)
+a2.scatter(xs, [ampom[u] for u in units], c="#dd8452", label="omission0", zorder=2)
+a2.axhline(1.0, ls=":", c="k")
+a2.set_xscale("log")
+a2.set_xlabel("raw matched-filter d′  (unit quality, log scale)")
+a2.set_title("B  Matched omission contrast")
+a2.legend(fontsize=8)
+fig.suptitle("Amplitude preservation depends on unit quality; omission0 lifts weak units",
+             fontweight="bold")
 fig.tight_layout(); fig.savefig(FIG / "f5_amp_vs_quality.png", dpi=150); plt.close(fig)
 
 # ---- F6 / F7: per-unit heatmaps ----
@@ -217,8 +268,8 @@ def traj(label):
 
 
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
-for lab, name, c in [("ib_om0_scale", "om0 (t±1 visible)", "#4c72b0"),
-                     ("ib_om1_scale", "om1 (t±1 hidden)", "#d55e00")]:
+for lab, name, c in [("ib_om0_scale", "om0 (t±1 in temporal branch)", "#4c72b0"),
+                     ("ib_om1_scale", "om1 (t±1 in spatial branch)", "#d55e00")]:
     tr = traj(lab)
     if tr:
         s, d, amp = tr

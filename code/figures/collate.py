@@ -95,7 +95,7 @@ def main() -> None:
     master = pd.DataFrame(master_rows).sort_values("dprime_deep", ascending=False, ignore_index=True)
     _write(master, "master_table")
 
-    # Noise floor: sigma over seed replicates of each config.
+    # Descriptive training-seed variability for each replicated config.
     nf = (master.groupby("config")
                 .agg(n=("seed", "count"),
                      dprime_deep_sd=("dprime_deep", "std"),

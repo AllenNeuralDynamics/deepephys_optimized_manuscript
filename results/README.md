@@ -19,13 +19,14 @@ results/scores/<label>_dprime.csv   +   <label>_diag.csv      ◄── one pair
 results/tables/{master_table,perunit_amp,perunit_dprime,perunit_dprime_delta,noise_floor}.{csv,md}
         │  figure scripts (code/figures/make_*.py)  +  {include} of the .md tables
         ▼
-figures/f1…f10.png   +   manuscript tables      ──►   the HTML site
+figures/*.png   +   manuscript tables      ──►   the HTML site
 ```
 
 ## The run manifest — [`runs.csv`](runs.csv)
 
-One row per planned run (39 total), matching the pre-registered design in
-[the plan](../reproducibility/regeneration-plan.md) §4. Columns:
+One row per run, including later adaptive additions and aborted/confounded experiments. The original
+plan is preserved in [the versioned plan](../reproducibility/regeneration-plan.md); `runs.csv` is the
+authoritative current ledger. Columns:
 `label, tier, config, seed, loss, train_chunks, override, co_id, state, ckpt_downloaded, scored, notes`.
 
 Update `co_id`/`state`/`scored` as runs launch and land. `label` uses the `ib_<config>_s<seed>`

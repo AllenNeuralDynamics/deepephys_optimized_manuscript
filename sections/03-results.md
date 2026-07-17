@@ -1,20 +1,18 @@
 # Results
 
 :::{note} Current state
-In-band scoring is complete for the full sweep: **Tier 1** (base32, omission0, champ_l2, omission0_l2,
-base64 — with seed replicates), **Tier 2** (SUPPORT blind-spot wiring, fuse width, the enlarged `arch`
-body, temporal / normalisation variants, and the capacity × `omission=0` combos), **Tier 3** (the
-spike-aware loss sweep on the `arch_l2_om0` body), the original DeepInterpolation architecture
-(`origdi`, 3 seeds), and the two **SUPPORT-scale** omission runs. All numbers below are in-band
-(train = eval on `recording1_3`, AP band); the raw-data reference is **d′ = 4.497**. Full ledger:
-`results/tables/master_table.csv`.
+The 21-configuration architecture screen, initial six-recipe screen, original-network reference, and
+two long-duration trajectories are scored. Legacy spike-weighted runs are excluded from inference
+because of a configured-loss mismatch (Appendix D). Recipe replications and gradient diagnostics are
+running and are not included below. All results use the same AP-band `recording1_3` hybrid benchmark;
+the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
 :::
 
-## The master table and the noise floor
+## Fixed-budget architecture screen
 
 Twenty-one short-budget architectures are scored in-band — the twenty swept configurations plus the
-original DeepInterpolation network (`origdi`) as a published reference (the two SUPPORT-scale runs,
-trained ~7× longer, are held for the training-length section below). The table is seed-averaged where
+original DeepInterpolation network (`origdi`) as a published reference. The two `support_all`
+duration runs process ~11.8× more updates and are held for the final section. The table is seed-averaged where
 replicated and sorted by detection d′, read against the raw-data reference of **d′ = 4.497**:
 
 | config | loss | n | d′_self | d′_fixed | Δ vs raw | amp | fwhm | snr_deep |
@@ -31,7 +29,7 @@ replicated and sorted by detection d′, read against the raw-data reference of 
 | omission0 | charb | 5 | 4.312 | 4.354 | −0.185 | 0.932 | 0.976 | 6.89 |
 | omission0_l2 | L2 | 3 | 4.305 | 4.346 | −0.192 | 0.931 | 0.976 | 6.89 |
 | support_all_l2 | L2 | 1 | 4.295 | 4.320 | −0.202 | 0.868 | 1.034 | 7.59 |
-| champ_l2 | L2 | 3 | 4.289 | 4.313 | −0.208 | 0.861 | 1.007 | 7.60 |
+| base32_l2 | L2 | 3 | 4.289 | 4.313 | −0.208 | 0.861 | 1.007 | 7.60 |
 | no_norm | charb | 1 | 4.284 | 4.310 | −0.213 | 0.856 | 1.023 | 7.55 |
 | fuse256_l2 | L2 | 1 | 4.282 | 4.311 | −0.215 | 0.857 | 1.023 | 7.59 |
 | base32 | charb | 5 | 4.277 | 4.300 | −0.220 | 0.859 | 1.007 | 7.60 |
@@ -41,299 +39,241 @@ replicated and sorted by detection d′, read against the raw-data reference of 
 | fuse512 | charb | 1 | 4.244 | 4.266 | −0.253 | 0.859 | 1.003 | 7.57 |
 | **origdi** *(published ref.)* | charb | 3 | **4.135** | 4.139 | **−0.362** | 0.811 | 1.122 | **8.15** |
 
-(Single-seed rows — the Tier-2 configurations — carry no error bar and are judged against base32's
-noise floor below. Per-config seed spread on the replicated rows: base32 σ = 0.015, omission0 0.007,
-champ_l2 **0.041**, omission0_l2 0.004, base64 0.017. `d′_fixed` tracks `d′_self` throughout — the
-gains are real signal, not self-consistent template sharpening.)
+(Single-seed Tier-2 rows carry no inferential error bar. Per-config seed spread on the replicated
+rows: base32 SD = 0.015, omission0 0.007,
+base32_l2 **0.041**, omission0_l2 0.004, base64 0.017. `d′_fixed` tracks `d′_self` throughout — the
+architecture ordering is not driven by whether the filter adapts to the denoised template.)
 
-Two facts make any *single* run an unreliable ranking, and both recur in-band: training is stochastic
-(GPU non-determinism, initialisation, data order), and the validation loss is nearly flat with respect
-to spikes, so the loss-selected "best" checkpoint is effectively drawn from a plateau. We therefore
-retrained the key configurations 3–5 times, changing only the seed. base32's five seeds scatter
-with **σ_d′ = 0.015** and **σ_amp = 0.004**, which fixes the decision rule for everything below: **a
-difference is real only if it clears ≈ 2σ (≈ 0.03 d′, ≈ 0.01 amp)**, confirmed by a Welch t-test against
-base32. The rule immediately disciplines the table — `champ_l2` carries by far the widest spread
-(σ = 0.041, ~3× base32), so its mid-table placement is seed scatter, not signal.
+Training is stochastic because of GPU nondeterminism, initialization, and data order, so key
+configurations were retrained 3–5 times. Validation reconstruction loss is also not the downstream d′
+objective. In the short screen it selected the terminal step in all 33 Tier 1/2 runs with both
+manifests; in the long om1 run it did not select the best observed d′ checkpoint. base32's five seeds scatter with
+**SD_d′ = 0.015** and **SD_amp = 0.004**. Its ±2-SD interval (~0.03 d′, ~0.01 amplitude) is shown as a
+descriptive screening reference, not a confidence interval. Exploratory Welch comparisons are used
+only for replicated rows and are not corrected for multiple testing. `base32_l2` has the widest seed
+spread (SD = 0.041), so its mean is particularly uncertain.
 
 **Read-out (a): denoising still lowers detectability.** Every configuration — the best
-included — sits below the raw d′ of 4.497, from **−0.09** (`arch`) to **−0.36** (the original `origdi`
-network). Training in the model's own band does not remove the deficit, so the detection cost is a
-genuine property of the denoiser — the central problem this study targets. How much of it the modern
-architecture has already recovered from the original is the next section.
+included — sits below the raw d′ of 4.497, from **−0.09** (`arch`) to **−0.36** (`origdi`). Thus every
+tested short-budget denoised output reduces the all-unit matched-filter mean on this benchmark. This
+does not establish the same effect on other recordings or under a complete spike sorter.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across the 21 short-budget architectures vs the base32 ±2σ noise floor.** Bars are d′ (mean ± 2σ
-over seeds; single-seed Tier-2 rows have no bar); base32 (grey) anchors its own 5-seed ±2σ band, the
+**d′ across the 21 short-budget architectures.** Bars are d′ (mean ± 2 seed SD where replicated;
+single-seed Tier-2 rows have no bar); base32 (grey) anchors a descriptive 5-seed ±2-SD band, the
 original DeepInterpolation network (`origdi`, **crimson**) is the published reference, and the dotted
 line is raw data (4.497). The `arch` / `base64` capacity family sits at the top, the fuse-width /
 temporal variants at or below the band, and **`origdi` sits far below all of them** — the optimized
-architecture has climbed most of the way from the original toward raw. (The two SUPPORT-scale runs,
-7× longer training, are compared separately in the training-length section below.)
+architecture has climbed most of the way from the original toward raw. The two 3.30-M-update
+`support_all` runs are compared separately in the final duration section.
 ```
 
-## How far the architecture has come from the original
+## The modern model package improves detection despite lower template SNR
 
 Anchoring the ranking is the **original DeepInterpolation ephys network** (`origdi`; the faithful
 `unet_single_ephys_1024` of [@lecoq2021deepinterpolation] — a temporal-only 2-D U-Net with **no spatial
 blind-spot branch**, [Methods](sections/02-methods.md)), trained and scored identically to every other
 model. It is the **worst detector in the study — d′ = 4.135 ± 0.010, −0.362 below raw** — with the
-**lowest amplitude (0.811)**, yet the **highest SNR of any model (8.15 vs base32's 7.60)**. The original
-architecture removes the most noise and is the hardest to sort: the SNR trap in its starkest form, and
-precisely the limitation this study sets out to fix.
+**lowest empirical-template amplitude (0.811)**, yet the **highest peak-channel template SNR of any
+model (8.15 vs base32's 7.60)**. This does not prove that `origdi` removes the most noise: template SNR
+also depends on spike amplitude. It shows that the single-channel SNR ratio does not rank the
+multichannel event-separation metric.
 
-Two architectural steps close most of that gap, at matched training and budget:
+Two model-package comparisons close most of that gap at matched training budget:
 
 | step | d′ | amp | weak-unit d′* |
 |---|---|---|---|
 | `origdi` — original, temporal-only | 4.135 | 0.811 | 1.35 |
-| **+ spatial blind-spot branch** → `base32` | 4.277 (+0.142) | 0.859 (+0.048) | 1.56 |
-| **+ capacity + omission=0** → `arch_l2_om0` | 4.360 (+0.225) | 0.937 (+0.126) | 1.71 |
+| complete modernization → `base32` | 4.277 (+0.142) | 0.859 (+0.048) | 1.56 |
+| larger body + omission0 routing → `arch_l2_om0` | 4.360 (+0.225) | 0.937 (+0.126) | 1.71 |
 
-*mean d′ over the four weakest ground-truth units (baseline d′ ≤ 2.2). Adding the SUPPORT-style
-**spatial blind spot** (`origdi` → `base32`) alone buys **+0.14 d′ and +0.05 amp**; layering on capacity
-and the recovered t±1 frames (`arch_l2_om0`) reaches **+0.23 d′ / +0.13 amp** — and the gain is
-**largest on the weak units** (+0.36 d′, a 27 % lift on the hardest-to-sort cells). The optimized
-network is a markedly better *sorting* front-end than the original, even though its SNR is lower.
+*Descriptive mean over the four units with raw d′ ≤ 2.2. `origdi` and `base32` differ in geometry,
+branch structure, and parameterization, so their +0.14 d′ difference cannot be assigned to the spatial
+branch alone. The full modern package, followed by the larger omission0 body, reaches +0.23 d′ and
++0.13 empirical-template amplitude relative to `origdi`; the weak-unit subgroup rises by +0.36 d′.
+This is evidence for the matched-filter proxy on this benchmark, not yet for sorter-level yield.
 
-## The loss axis is neutral
-
-Switching Charbonnier → L2 on the base32 body moves d′ by only **+0.012 (t = 0.49, NS)** and does
-nothing for amplitude (0.859 → 0.861). `champ_l2` is the study's single noisiest replicate set
-(σ = 0.041): its occasional high draws are lucky seeds — exactly why the ±2σ rule matters, since a
-single lucky L2 run would otherwise read as a real gain. L2 stacked on the omission change is likewise
-flat (omission0_l2 − champ_l2 = +0.016, t = 0.67, NS). On the evidence so
-far L2 is a free but negligible nudge: never worse, never clearing the band. The full six
-Charbonnier↔L2 matched pairs — which test whether loss stacks with capacity, fuse width, SUPPORT
-wiring, and the enlarged body — complete with Tier 2/3.
-
-<!-- ```{figure} figures/f3_loss_pairs.png
-:label: fig-loss-pairs
-The six Charbonnier↔L2 matched pairs (Δ per axis).
-```
-```{figure} figures/f2_loss_capacity_2x2.png
-:label: fig-loss-capacity
-Loss × capacity 2×2.
-``` (F2/F3 pending Tier 2/3) -->
-
-## Capacity is the leading detection lever
-
-Doubling the U-Net base width (`base64`, 32 → 64 channels) is the largest reproducible move on the
-base32 body: **d′ 4.277 → 4.382, +0.105 (Welch t = 8.7, p < 10⁻³)** — roughly three-quarters of the
-way to closing base32's deficit against raw, nudging amplitude up as well (0.859 → 0.880), and
-significantly above omission0 (+0.071, t = 6.8).
-
-Tier 2 adds the two larger bodies. The enlarged **`arch`** (base 64, depth 4, `bs_channels=128`,
-`bs_depth=7`) — the largest network in the sweep — is here the **top detector, d′ = 4.409**,
-corroborated by its L2 twin `arch_l2` (4.407). But the increment over `base64` is small — **+0.027,
-inside base64's ±2σ band** — even though `arch` roughly doubles the parameter count again. On the short
-screen the capacity axis therefore runs base32 (4.277) → base64 (4.382, +0.105) → arch (4.409, +0.027):
-monotone but **sharply diminishing**, and still 0.088 below raw. Whether `arch`'s larger body keeps
-climbing at a longer budget — a bigger network may simply converge more slowly — is what the
-training-length section below, and the planned scale-validation, are for.
+Across all 21 short-budget architectures, every template-SNR change is positive (+1.09 to +2.34),
+while every d′ change is negative (−0.09 to −0.36). More importantly, the two changes have almost no
+rank association (**Spearman ρ = 0.02**; ρ = 0.18 after excluding `origdi`). Template SNR is therefore
+useful as a waveform/noise summary, but not as a selection objective for matched-filter detection.
 
 ```{figure} figures/f4_snr_vs_dprime.png
-:label: fig-snr-trap
-**The SNR trap.** SNR gain (snr_deep − snr_raw) vs Δd′ (deep − raw) per architecture — removing more
-noise does not buy detectability.
+:label: fig-snr-dprime
+**Peak-channel template SNR does not rank multichannel matched-filter detectability.** All 21
+short-budget architectures are shown. Blue marks capacity variants, orange marks omission0
+variants, black is base32, red is the original architecture, and grey marks the remaining screen.
+SNR is empirical-template peak-to-peak divided by spike-excluded background SD on one channel; d′
+uses multichannel temporal event scores. Their architecture-level changes are essentially
+uncorrelated.
 ```
+
+## The tested L2 substitutions are small and inconsistent
+
+Across seven matched bodies, L2-minus-Charbonnier changes range from −0.017 to +0.017 d′ and from
+−0.001 to +0.006 amplitude, with no consistent direction:
+
+| body | Δd′ (L2 − Charb.) | Δamp | replication |
+|---|---:|---:|---|
+| base32 | +0.012 | +0.002 | 5 vs 3 seeds |
+| omission0 | −0.007 | −0.000 | 5 vs 3 seeds |
+| base64 | −0.017 | −0.001 | 3 vs 1 seed |
+| arch | −0.002 | +0.006 | 1 vs 1 seed |
+| arch_om0 | −0.007 | +0.001 | 1 vs 3 seeds |
+| support_all | −0.017 | +0.004 | 1 vs 1 seed |
+| fuse256 | +0.017 | +0.004 | 1 vs 1 seed |
+
+The replicated base32 comparison is uncertain (`base32_l2` SD = 0.041 d′), and most other pairs are
+single-seed. The supported conclusion is not that L2 is universally neutral, but that none of the
+tested substitutions produces a robust improvement on this screen.
+
+## Capacity leads the all-unit mean, with diminishing returns
+
+Doubling the U-Net base width (`base64`, 32 → 64 channels) is the largest reproducible move on the
+base32 body in the **ten-unit mean**: **d′ 4.277 → 4.382, +0.105** (5 vs 3 seeds; exploratory Welch
+p = 0.0010), with amplitude 0.859 → 0.880.
+
+Tier 2 adds the two larger bodies. The enlarged **`arch`** (base 64, depth 4, `bs_channels=128`,
+`bs_depth=7`) has the highest observed single-run mean, d′ = 4.409, with its L2 twin at 4.407. The
+increment over replicated `base64` is only +0.027, however, and neither `arch` row is replicated.
+Thus the fixed-budget capacity sequence is monotone but sharply diminishing; `arch` is a promising
+screen result, not a demonstrated optimum or a long-budget conclusion.
+
+## The leading intervention depends on which units are averaged
+
+The ten-unit mean obscures the study's stated target: the four units with raw d′ ≤ 2.2. Their
+response reverses the simple "capacity versus omission" summary:
+
+| configuration | all-unit d′ | Δ vs base32 | weak-unit d′* | Δ vs base32 | mean amp |
+|---|---:|---:|---:|---:|---:|
+| base32 | 4.277 | — | 1.562 | — | 0.859 |
+| omission0 | 4.312 | +0.035 | **1.710** | **+0.148** | 0.932 |
+| base64 | **4.382** | **+0.105** | 1.596 | +0.034 | 0.880 |
+| arch | 4.409† | +0.132 | 1.551† | −0.012 | 0.871 |
+| arch_l2_om0 | 4.360 | +0.083 | **1.711** | **+0.149** | **0.937** |
+
+*Descriptive subgroup of units 94, 664, 720, and 1129; †single-seed screen. Among replicated rows,
+omission0 and arch_l2_om0 reproduce the ~+0.15 weak-unit gain, whereas base64 gives +0.034. Width
+improves the all-unit mean substantially, but much of that advantage comes from already-strong units;
+the omission0 routing produces the larger change in the weak subgroup and in empirical-template
+amplitude. Because omission0 changes temporal offsets and the spatial-branch input together, this
+effect cannot be assigned to t±1 alone.
+Because the subgroup threshold was chosen during analysis and contains only four units, it is
+descriptive rather than a population-level confirmatory test.
+
+The amplitude pattern is not confined to base32 and omission0. Across all 21 short-budget
+architectures, the per-model Spearman correlation between empirical-template amplitude and raw d′
+ranges from 0.66 to 0.94 (median 0.88). This is consistent with conditional-mean shrinkage: waveforms
+that are poorly constrained by surrounding samples are attenuated more. It is not direct evidence
+that neighbouring samples are pure noise or that regression-to-the-mean is the only mechanism.
+
 ```{figure} figures/f5_amp_vs_quality.png
 :label: fig-amp-quality
-**Amplitude follows unit quality.** amp_ratio vs baseline d′ (log) for base32 (black) and omission0
-(blue); grey links join the same unit — weak units are smoothed, omission0 rescues them.
+**Amplitude preservation across the complete short-budget architecture screen.** **A**, all 21
+architectures (grey points) with the per-unit median and 10th–90th percentile across models (black).
+The unit-quality gradient persists across the full screen. **B**, the matched base32–omission0
+compound contrast: moving t±1 into the temporal branch while changing the spatial input and outer
+context raises amplitude primarily for weak units. Values are denoised/raw empirical
+template peak-to-peak ratios, not amplitudes relative to a noise-free injected waveform.
 ```
+
+Combining the two design choices yields a useful compromise. `base64_om0` and `arch_om0` preserve
+amplitude near 0.935 and weak-unit d′ near 1.71 while retaining an all-unit d′ near 4.36. Relative to
+their t±1-hidden twins, however, their all-unit means are lower (base64: −0.023; arch: −0.042), again
+because gains on weak units coexist with losses on some strong units. `arch_l2_om0` is therefore a
+balanced candidate on this benchmark, not a configuration that dominates every unit or metric.
 
 ## Blind-spot wiring, fuse width, and temporal variants
 
-The remaining Tier-2 levers change the network's wiring rather than its raw capacity. Read against the
-base32 band (4.277 ± 0.03), none of them moves detection:
+The remaining Tier-2 levers change wiring rather than raw capacity. Each is a single-seed screen;
+their distance from the base32 mean is shown descriptively against base32's ±2-seed-SD reference:
 
-| lever | config | d′ | amp | vs base32 band |
+| lever | config | d′ | amp | position relative to base32 reference |
 |---|---|---|---|---|
-| bigger / denser blind-spot branch | support_sd 4.313, support_all 4.312 | ~4.31 | 0.86 | top edge |
-| L2 on that wiring | support_all_l2 4.295 | 4.295 | 0.868 | inside |
-| widest fusion | fuse256 4.265, fuse512 4.244 | 4.24–4.27 | 0.85–0.86 | at / below |
-| deeper temporal hand-off | tmult8 4.257 | 4.257 | 0.857 | below |
-| no input normalisation | no_norm 4.284 | 4.284 | 0.856 | inside |
-| 1-frame blind spot, omission on | ho 4.272 | 4.272 | 0.852 | inside |
+| bigger / denser blind-spot branch | support_sd, support_all | 4.313, 4.312 | 0.857, 0.864 | just above |
+| L2 on that wiring | support_all_l2 | 4.295 | 0.868 | inside |
+| widest fusion | fuse256, fuse512 | 4.265, 4.244 | 0.853, 0.859 | inside / just below |
+| deeper temporal hand-off | tmult8 | 4.257 | 0.857 | inside |
+| no input normalisation | no_norm | 4.284 | 0.856 | inside |
+| 1-frame blind spot, omission on | ho | 4.272 | 0.852 | inside |
 
-The two `support_*` runs (a larger, denser blind-spot sub-network) sit marginally at the top of the
-band; everything else — including the *widest* fusion (`fuse512`), the lowest-d′ configuration in the
-whole table — is inside or below it, and none shifts amplitude off ~0.86. Widening or deepening the
-sub-networks is not where the detection budget is.
+The `support_*` observations sit just above the upper edge of that reference; fuse256, tmult8,
+no_norm, and ho lie inside it, while fuse512 is just below. All leave amplitude near 0.86. These rows
+are unreplicated, so the two `support_*` observations are leads rather than confirmed gains.
+`fuse512` is the lowest modern architecture in the
+short screen, but `origdi` is lower overall. These single runs provide no evidence that wider fusion,
+the tested temporal hand-off, or normalization removal improves the endpoint.
 
-## The omission gap: an amplitude lever, not a detection lever
+## Training-efficiency recipe screen
 
-The temporal design choice the reference turns on is the omission gap — whether the temporal branch
-sees the immediately-adjacent frames t±1 (`omission=0`) or hides them (`omission=1`). It might be
-expected to matter most for detection; in-band the two effects it drives come apart sharply:
-
-| axis | Charbonnier (×5 vs ×5) | L2 (×3 vs ×3) |
-|---|---|---|
-| **detection** Δd′ | +0.035 (t = 4.6, p ≈ 0.003) | +0.016 (t = 0.67, NS) |
-| **amplitude** Δamp | +0.073 (t ≈ 30) | +0.071 |
-
-The **detection** gain is real in Charbonnier but small — **+0.035 d′** — and not even resolvable in
-L2. The **amplitude** gain, by contrast, is one of the most significant effects in the whole study
-(t ≈ 30). So `omission=0` is an **amplitude / waveform-fidelity** lever, not a detection lever.
-*Where* that amplitude gain lands (next section) is what makes the two axes decouple.
-
-## Capacity × omission=0: stacking the two levers
-
-The two axes that *do* move things — capacity (detection) and `omission=0` (amplitude) — are combined
-for the first time in `base64_om0` and `arch_om0`:
-
-| pairing | d′ | amp | Δ vs its om1 twin |
-|---|---|---|---|
-| base64 → base64_om0 | 4.382 → 4.359 | 0.880 → 0.934 | d′ −0.023, amp +0.054 |
-| arch → arch_om0 | 4.409 → 4.367 | 0.871 → 0.936 | d′ −0.042, amp +0.065 |
-
-The trade seen on the base32 body holds at high capacity: `omission=0` lifts amplitude to ~0.935 — the
-best in the table, matching the dedicated `omission0` runs — for a small d′ cost. The combos land at
-d′ ≈ 4.36 with amp ≈ 0.935, so both `arch_om0` and `base64_om0` sit above base32 on *both* axes at once
-(base32 4.277 / 0.859). Per-unit, the amplitude rescue again concentrates on the weak units (unit 94
-0.81 → 0.97, unit 1129 0.69 → 0.82; [Appendix B](sections/05-appendix.md)).
-
-## Legacy spike-aware sweep is implementation-confounded
-
-The Tier 3 sweep attempted to test a **spike-aware loss** on the `arch_l2_om0` body: a soft magnitude
-weight at λ = 3/10/30, a focal variant (γ = 2), and a saturating position gate at λ = 100/300/1000
-(soft and hard). A subsequent implementation audit found that every weighted run used a Charbonnier
-elementwise residual despite requesting `loss=l2`; the unweighted reference used L2. The observations
-below are therefore descriptive compound loss-plus-weight results, not an L2 weighting dose response.
-
-| spike weight | d′ | Δ vs base | amp |
-|---|---|---|---|
-| — (baseline) | 4.360 | — | 0.937 |
-| soft λ = 3 / 10 / 30 | 4.372 / 4.377 / 4.378 | +0.01 to +0.02 | 0.94 |
-| gate λ = 100 / 300 | 4.319 / 4.369 | −0.04 / +0.01 | 0.94 |
-| focal γ = 2 (λ = 10) | **4.051** | **−0.31** | 0.94 |
-| gate λ = 1000 / hard | 4.102 / 4.219 | **−0.26 / −0.14** | 0.95 |
-
-The legacy points show no improvement beyond the reference uncertainty, while several aggressive
-compound configurations score substantially lower. Because loss family changed simultaneously, they
-cannot establish that weighting caused either outcome, cannot rule out matched-L2 weighting, and do
-not show that the residual deficit is intrinsic to the blind-spot objective. The configured-loss bug
-has been corrected; this question remains open pending matched-objective reruns.
-
-```{figure} figures/f9_spike_weight.png
-:label: fig-spike-weight
-**Legacy spike-aware sweep (confounded).** d′ vs nominal spike weight λ on the `arch_l2_om0` body.
-Weighted runs silently used Charbonnier residuals while the reference used L2, so the curves cannot
-isolate weighting and are retained only as an audit trail.
-```
-
-## Per-unit amplitude: who gets smoothed, and why
-
-The single "0.86 amplitude" is a mean over a steep quality gradient, and that gradient — not the
-architecture — is the dominant structure. Ranking the ten ground-truth units by intrinsic
-separability (raw d′, spanning 1.0–12.5) and reading base32 amplitude down the ranking gives a
-textbook law: **Spearman(amp, baseline d′) = +0.94**. Loud, well-isolated units come back at full
-height (unit 2143, raw d′ 12.5 → amp 1.00; unit 793, 8.6 → 1.00); faint units near the sorting floor
-are smoothed hard (unit 1129, raw d′ 2.1 → 0.67; unit 664, 1.0 → 0.77; unit 720, 2.2 → 0.78).
-
-The mechanism is **regression to the mean**. The blind spot rebuilds each peak from its neighbours;
-for a strong unit those neighbours pin the peak down and it returns intact, but for a weak unit the
-neighbours are mostly noise, so the estimator hedges toward baseline and flattens the peak. The
-undershoot therefore lives almost entirely on the marginal units that are hardest to sort to begin
-with — a shrinkage estimator, resolved unit by unit.
-
-This is precisely why `omission=0` is an amplitude lever: recovering t±1 undoes the shrinkage **where
-it costs the most**. Its per-unit amplitude gain is monotone in weakness — strong units are unchanged
-or slightly lower (2143 −0.01, 793 −0.04) while the weak units are rescued: unit 94 (raw d′ 2.2)
-0.81 → 0.97 (+0.16), unit 1129 0.67 → 0.83 (+0.16), unit 720 0.78 → 0.89 (+0.12), unit 664 0.77 → 0.89
-(+0.12). The mean +0.07 is a floor-lifting effect concentrated on the bottom of the quality ladder.
-The full per-unit amplitude and Δd′ matrices across all models are in
-[Appendix B/C](sections/05-appendix.md).
-
-## The SNR trap
-
-Denoising unambiguously improves signal-to-noise — base32 lifts mean per-unit SNR from **5.80
-(raw) to 7.63 (+32%)** — and yet its detectability *falls* (4.497 → 4.277). Higher SNR and better
-detection are simply not the same axis, and optimising the former is actively misleading for sorting:
-the configuration that removes the most noise is not the one that is easiest to sort. This
-SNR/detection dissociation is the crux of the whole detection deficit.
-
-## Training length: amplitude saturates, detection does not
-
-Two matched runs trained ~7× longer (SUPPORT scale, ~3.3 M updates, 12 log-spaced checkpoints) test
-whether the short runs were undertrained. The two metrics behave **oppositely**:
-
-- **Amplitude saturates early** — flat to ±0.02 after ~10³–10⁵ updates (om0 −0.016, om1 +0.027 across
-  the final 2.4 decades). For amplitude the short budget is well past convergence.
-- **Detection does not.** d′ keeps climbing to 3.3 M: **om0 +0.11, om1 +0.30** from 14 k onward, and
-  om1's *largest late gain is its final step* (+0.11 from 844 k → 3.3 M). om1 (t±1 hidden) has **not
-  converged** even at 3.3 M.
-
-So the models are **undertrained for detection**: the short budget (~0.28 M) sits on the rising part
-of the d′ curve and *under-measures* it, biased toward faster-converging configs. (A spike-blind
-validation loss can look converged within one epoch precisely because spikes barely move it, so it is
-a poor readout of detection convergence.) Short-run d′ rankings are therefore a
-**convergence-speed-biased screen**, to be read only alongside the trajectory; near-converged
-comparisons need SUPPORT-scale training — and even 3.3 M is a lower bound for slow configs.
-
-This also nuances the omission gap. At 3.3 M the two arms meet (om0 4.361, om1 4.361) and the
-**amplitude gap persists** (0.931 vs 0.870) — but om0 has ~flattened while om1 is still rising, so the
-*asymptotic* d′ ordering is unresolved (with more training om1 could match or overtake om0). And the
-validation-loss-selected `best_model` is a poor ruler for spike quality — om1's best-by-loss (d′ 4.275)
-is beaten by its own final checkpoint (4.361), the spike-blind-loss signature.
-
-```{figure} figures/f8_trajectory.png
-:label: fig-trajectory
-**SUPPORT-scale omission A/B.** d′ (left) and amplitude (right) vs training updates (log) for om0
-(t±1 visible) and om1 (t±1 hidden); dotted line = raw d′. Amplitude saturates early; d′ keeps rising
-(om1 still climbing at 3.3 M), the two arms meeting only at the last checkpoint.
-```
-
-## Training-efficiency recipe sweep
-
-The architecture sweep was conducted under a fixed training recipe (AdamW, cosine annealing,
-batch 64, lr 1e-3). A separate six-run sweep asks: **given the best body (`base64_om0`), which
-tested recipe reaches the performance target fastest?** Each recipe processes the same ~18.0 M
-training windows (train\_chunks=4), with 12 log-spaced checkpoints. All runs use one training seed.
-Checkpoint times were not recorded directly in this sweep; GPU-hours below are estimated by
-apportioning each run's total runtime by checkpoint step and linearly interpolating threshold
-crossings. They are descriptive estimates rather than measured time-to-target values.
+A separate six-run screen uses `base64_om0` as a fixed candidate body and processes the same ~18.0 M
+training windows under different compound recipes. The initial screen has one seed per recipe and 12
+log-spaced checkpoints. Checkpoint times were not recorded directly; GPU-hours are estimated by
+apportioning total runtime by checkpoint step and linearly interpolating threshold crossings.
 
 | recipe | final d′ | estimated GPU-h to d′ = 4.30 | estimated GPU-h to d′ = 4.35 |
 |---|---|---|---|
-| R0 baseline (AdamW / cosine / lr 1e-3) | 4.350 | 1.44 h | 2.73 h |
-| R1 +3 % warmup | 4.365 | 0.65 h | 2.22 h |
-| R2 one-cycle (lr 3e-3, pct\_start 0.1) | 4.319 | 2.18 h | — (never) |
-| R3 AdamW lr 2e-3, β₂ 0.98, wd 0.05 | 4.320 | 1.96 h | — (never) |
-| R4 Lion (lr 3e-4, wd 0.1) | 4.219 | — (never) | — (never) |
-| **R5 batch 256, lr 2e-3, 5 % warmup** | **4.358** | **0.33 h** | **2.42 h** |
+| R0 AdamW / cosine / lr 1e-3 | 4.350 | 1.44 h | 2.73 h |
+| R1 +3% warmup | 4.365 | 0.65 h | 2.22 h |
+| R2 one-cycle (lr 3e-3) | 4.319 | 2.18 h | — |
+| R3 AdamW lr 2e-3, β₂ 0.98, wd 0.05 | 4.320 | 1.96 h | — |
+| R4 tested Lion setting | 4.219 | — | — |
+| **R5 batch 256, lr 2e-3, 5% warmup** | **4.358** | **0.33 h** | **2.42 h** |
 
-R5 is the fastest **observed compound recipe** to d′ = 4.30: its interpolated estimate is 0.33
-GPU-hours versus 1.44 h for R0 (4.4×). This comparison changes batch size, learning rate, and warmup
-together, so it does not identify batch size as the cause. R0's rapid onset is consistent with its
-full learning rate from the first update; R1 and R5 use warmup. The apparent convergence near
-0.1 GPU-hours overlaps the end of warmup (0.084 h for R1 and 0.133 h for R5), while R0 has no
-checkpoint between ~0.089 and ~0.279 h. The trajectories therefore do not resolve a common
-task-intrinsic transition at 0.1 h.
+R5 has the lowest estimated time to d′ = 4.30 among these six single runs: 0.33 versus 1.44 GPU-h
+for R0. The nominal 4.4× ratio is not an isolated batch-size effect because R5 also changes learning
+rate and warmup, and the checkpoint times are inferred. R0 starts at full learning rate; R1 and R5
+warm up. Their apparent convergence near 0.1 GPU-h overlaps the end of warmup, while R0 has no
+checkpoint between ~0.089 and ~0.279 h, so the curves do not localize a shared task transition.
 
-R0, R1, and R5 finish within 0.015 d′. A paired bootstrap over the ten GT units gives R1 − R5 =
-0.0076 d′ (95% interval −0.0020 to 0.0236) and R5 − R0 = 0.0075 (−0.0076 to 0.0240); this does not
-include training-seed variation. Their endpoint ordering is consequently unresolved. The tested
-Lion configuration underperforms (final d′ = 4.219), but one learning-rate/weight-decay setting does
-not rule out the optimizer family. Likewise, R2 and R3 describe the tested compound configurations,
-not optimizer-wide ceilings.
+R0, R1, and R5 finish within 0.015 d′. A paired bootstrap over the same ten units gives R1 − R5 =
+0.0076 d′ (95% interval −0.0020 to 0.0235) and R5 − R0 = 0.0075 (−0.0076 to 0.0240). These intervals
+do not include training-seed variation. Replicated R0/R1/R5 runs with exact telemetry are in progress;
+until they land, endpoint ordering and acceleration remain provisional. The R4 result pertains only
+to its tested Lion hyperparameters, not to the optimizer family.
 
 ```{figure} figures/recipe_convergence.png
 :label: fig-recipe-convergence
-**Training-efficiency recipe sweep.** d′ vs windows seen (left) and estimated GPU-hours (right) for
-six single-seed compound recipes on the `base64_om0` body. Dashed grey = anchor (base64\_om0 4.359).
-R5 reaches d′ = 4.30 at an interpolated 0.33 GPU-h versus 1.44 h for R0; exact checkpoint timing and
-replicated seeds are required to estimate the acceleration reliably. The tested R4 configuration
-does not reach d′ = 4.30.
+**Single-seed compound-recipe screen.** d′ versus windows seen (left) and estimated GPU-hours (right)
+on the fixed `base64_om0` body. R5 has the lowest interpolated time to 4.30, but exact timing,
+replication, and batch-only controls are required to attribute the difference.
 ```
 
 ```{figure} figures/recipe_convergence_loglog.png
 :label: fig-recipe-convergence-loglog
-**Training-efficiency — log–log deficit view.** Detection deficit (raw d′ − d′_deep, lower = better)
-vs windows seen (left) and GPU-hours (right), both axes log scale. Dotted lines = target d′ thresholds.
-R0 (black) drops fastest initially, consistent with having no warmup. R1 (blue) and R5 (purple)
-finish close to R0; their relative endpoints are unresolved by the available ten units and one
-training seed. GPU-hours are step-proportional estimates, and the sparse checkpoints do not localize
-a shared transition at ~0.1 GPU-h.
+**The same recipe screen on log–log deficit axes.** Deficit is raw d′ − denoised d′ (lower is better).
+R0 descends earliest; R1 and R5 finish close together. Legacy GPU-hours are step-proportional
+estimates, and the sparse checkpoints do not resolve a common transition near 0.1 GPU-h.
+```
+
+## Do the two omission trajectories stabilize with longer training?
+
+Two single-seed `support_all` + L2 runs extend the omission comparison to 3.30 M updates, ~11.8× the
+short-screen update budget, with 12 log-spaced checkpoints. They are duration diagnostics for this
+body, not long-budget validations of `base64`, `arch`, or the recipe winner.
+
+- **Empirical-template amplitude stabilizes early in both trajectories** — changing by −0.016 (om0)
+  and +0.027 (om1) across the final 2.4 decades of updates.
+- **All-unit d′ remains duration-sensitive.** From 14 k to 3.3 M updates, d′ rises by +0.11 for om0
+  and +0.30 for om1. The last om1 interval (844 k → 3.3 M) adds another +0.11, so om1 is not visibly
+  flat at the final checkpoint.
+
+These trajectories demonstrate that a reconstruction-loss endpoint need not imply a stable detection
+metric and that fixed-budget screens can mix optimization speed with endpoint quality. They do not
+show that every screened architecture is undertrained or predict how the capacity and recipe winners
+would rank after 3.3 M updates.
+
+At the final sampled checkpoint the two all-unit means happen to be equal (4.361), while amplitude
+remains separated (0.931 om0 versus 0.870 om1). Because om1 is still rising, equality at that one point
+does not establish equal asymptotes or that omission affects only convergence speed. The om1
+validation-best checkpoint (d′ 4.275) is also below its final checkpoint (4.361), showing directly
+that validation-loss selection can miss the best observed detection checkpoint on a long run.
+
+```{figure} figures/f8_trajectory.png
+:label: fig-trajectory
+**Long-duration `support_all` omission diagnostic.** d′ (left) and empirical-template amplitude
+(right) versus updates for one om0 and one om1 run; dotted line is raw d′. Amplitude stabilizes much
+earlier than d′, and om1 is still rising at 3.3 M. Transfer of this behavior to the capacity and
+recipe candidates is untested.
 ```

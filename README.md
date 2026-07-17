@@ -4,17 +4,17 @@ A [MyST Markdown](https://mystmd.org) publication: an optimisation of the DeepIn
 denoiser for Neuropixels spike detection — with a focus on protecting the weaker, low-amplitude
 units — together with a fully reproducible **train → score → figure** pipeline.
 
-> **Status:** Tier 1 + Tier 2 scored; the spike-weighting sweep (Tier 3) is in progress. See
-> [`reproducibility/regeneration-plan.md`](reproducibility/regeneration-plan.md).
+> **Status:** the architecture screen, initial recipe screen, original-network reference, and two
+> long-duration trajectories are scored. Recipe replications and gradient diagnostics are running.
+> Legacy weighted-loss runs are retained as confounded audit data.
 
 ## Why this repo exists
 
-DeepInterpolation raises SNR but can *reduce* spike detectability, and the cost falls hardest on the
-weak units already near the sorting threshold. This repository optimises the ephys architecture to
-protect those units — sweeping capacity, loss, temporal design, and spike-aware weighting — measuring
-each choice directly against an injected hybrid ground-truth benchmark. Because the denoiser is
-self-supervised, every model is **trained and scored in its deployment band** (AP-band), and the whole
-pipeline is reproducible from scratch.
+DeepInterpolation can raise peak-channel template SNR while reducing matched-filter detectability.
+This repository evaluates architecture and training choices against an injected hybrid benchmark,
+with special attention to weak units. Because the denoiser is self-supervised, models are trained and
+scored in the AP band; benchmark-specific conclusions still require held-out-recording and sorter-level
+validation.
 
 ## Repository map
 
@@ -23,7 +23,7 @@ pipeline is reproducible from scratch.
 | `index.md` | the manuscript (abstract + `{include}` of `sections/`) |
 | `sections/` | manuscript sections (introduction, methods, results, discussion, appendix) |
 | `reproducibility/reproduce.md` | step-by-step: environment → launch → score → figures → PDF |
-| `reproducibility/regeneration-plan.md` | the pre-registered experimental design (jobs, quantification, figures) |
+| `reproducibility/regeneration-plan.md` | versioned experimental and analysis plan (including adaptive reprioritization) |
 | `data/provenance.md` | Code Ocean capsule/asset IDs, recording paths, HPC locations |
 | `code/` | scoring (HPC sbatch), figure-generation, and training-launch scripts + docs |
 | `figures/` | manuscript figure assets |

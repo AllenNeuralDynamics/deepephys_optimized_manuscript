@@ -38,12 +38,15 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 | Conda init | `/allen/aind/scratch/jeromel/astro_voltage_deepinterp/miniforge3/etc/profile.d/conda.sh` |
 | Login | `ssh -o BatchMode=yes jeromel@hpc-login` |
 
-## Runs in flight (in-domain SUPPORT-scale omission A/B)
+## Long-duration omission diagnostic
 
 | run | computation id | override | loss |
 |---|---|---|---|
 | RUN3 (om0) | `ccf82c60-43c4-4829-9984-8d41e4639fc2` | support_all, `omission=0 bs_frames=1`, `train_chunks=47` | L2 |
 | RUN4 (om1) | `5eec6d19-f063-4f9d-a17a-b11da5a65869` | support_all, `omission=1 bs_frames=3`, `train_chunks=47` | L2 |
+
+Both computations completed and their trajectories are scored. Live and staged optimization runs
+are tracked in `results/runs.csv`, which supersedes static status prose here.
 
 ## Checkpoint schedule (`n_ckpt=12`)
 

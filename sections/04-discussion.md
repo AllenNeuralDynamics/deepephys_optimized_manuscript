@@ -1,75 +1,68 @@
 # Discussion
 
-:::{note}
-Conclusions from the complete in-band sweep — Tier 1 + Tier 2 + the Tier 3 spike-aware loss family +
-the original-architecture reference + the SUPPORT-scale runs.
-:::
+On this hybrid benchmark, replacing the original temporal-only network with the modern two-branch
+package substantially improves matched-filter detection and empirical waveform amplitude. Yet every
+short-budget denoised output remains below the raw all-unit d′. The important qualification is that
+the answer depends on which units are averaged: width leads the ten-unit mean, whereas the compound
+omission0 routing has the larger effect on the four weakest units and on their waveform amplitude.
 
-Optimising DeepInterpolation for spike detection turns on a small number of levers, and measuring them
-directly against injected ground truth — in the band the denoiser is deployed in — sorts them cleanly.
-Detection and waveform amplitude are two weakly-coupled axes driven by different knobs; denoising
-leaves a hard residual detection deficit; and the validation loss is effectively blind to spikes. The
-practical upshot is a short list of what actually moves detection versus what only moves amplitude —
-and where the remaining deficit lives (the weak units). Measured against the **original**
-DeepInterpolation architecture, the optimised network recovers **+0.23 d′ and +0.13 amplitude** (and
-+0.36 d′ on the weak units) — most of the way to raw — even as it gives up SNR.
+## The optimization target changes the apparent winner
 
-## Two axes with different levers
+The replicated `base64` comparison gives the largest fixed-budget gain in the all-unit mean (+0.105
+d′). It does not give the largest weak-unit gain: base64 improves that subgroup by +0.034, while
+omission0 and `arch_l2_om0` improve it by ~+0.15. Capacity's mean advantage is partly driven by large
+positive changes in already-strong units. Conversely, omission0 can help weak units while reducing
+the gains of strong units, yielding only +0.035 in the all-unit mean. Because omission0 moves t±1 into
+the temporal branch, removes t±31, and changes spatial-branch input, the effect is not attributable to
+one frame pair alone.
 
-Detection and waveform amplitude are two real, weakly-coupled axes, and each is moved by a different
-knob. Detection is moved most by **capacity** (base64 +0.105 d′, ~7σ); the training loss is neutral
-(L2 +0.012, NS); and the temporal **omission** design barely moves detection (+0.035 d′ Charbonnier,
-nil in L2). Amplitude, by contrast, is moved almost entirely by the omission design (+0.07) and is
-flat to capacity and loss. The decoupling has a concrete mechanism: amplitude is governed by a
-per-unit **shrinkage estimator** (Spearman 0.94 with unit quality; see Results), so it moves only
-under interventions that change what the blind spot can see *locally* — the adjacent t±1 frames —
-whereas detection tracks the model's overall capacity to separate spike from background.
+This is not a contradiction; it is an aggregation issue. A deployment objective that values total
+mean d′ favors width in this screen. An objective that protects marginal units favors adjacent-frame
+context. Empirical-template amplitude follows raw unit quality across the complete architecture set
+(median per-model Spearman ρ = 0.88), consistent with conditional-mean shrinkage, and t±1 context
+raises the lower end of that distribution. The four-unit threshold was selected during analysis, so
+the subgroup result should be replicated on a larger, prespecified weak-unit cohort.
 
-## The omission gap is an amplitude lever, not a detection lever
+## Template SNR is not a detection objective
 
-Hiding versus revealing the adjacent t±1 frames (`omission`) is often assumed to be the decisive
-temporal choice for detection. It is not: in-band its detection effect is small (+0.035 d′), and at
-SUPPORT scale the d′ gap **closes by 3.3 M** (om0 = om1 = 4.361 — though om1 is still rising there).
-Revealing t±1 mainly **accelerates convergence** and **improves amplitude** rather than raising the
-detection ceiling; its real, large effect is on waveform amplitude, concentrated on the weak units.
+The former "SNR trap" phrasing conflated template SNR with the amount of noise removed. Here template
+SNR is peak-to-peak empirical-template amplitude divided by background SD on one channel; it changes
+if either numerator or denominator changes. Matched-filter d′ instead separates multichannel temporal
+event scores. Across 21 architectures their changes are essentially uncorrelated (Spearman ρ = 0.02),
+and `origdi` combines the highest template SNR with the lowest d′. The appropriate conclusion is not
+that greater noise suppression necessarily harms detection, but that this SNR ratio cannot select a
+model for the matched-filter objective.
 
-## Denoising still costs detection
+## Training optimization remains open
 
-Across every configuration, denoised output is less detectable than raw (−0.09 to −0.36 d′), even
-though SNR improves throughout — most starkly in the **original architecture** (`origdi`), which posts
-the *highest* SNR yet the *lowest* detection of any model. "Denoising helps SNR but hurts detection" is
-thus a genuine property of the blind-spot denoiser in its deployment band — and closing that gap is the
-real open problem, with SNR a misleading target for sorting.
+The initial recipe experiment is a single-seed compound screen. R5 has the lowest estimated time to
+d′ = 4.30, but it changes physical batch, learning rate, and warmup together, and legacy checkpoint
+times are inferred. Replications with exact telemetry and batch-only/fixed-effective-batch controls
+are underway. Until those results land, no recipe is established as faster in expectation.
 
-## What is left of the deficit
+The duration evidence is narrower still: it consists of one om0 and one om1 `support_all` + L2
+trajectory. In those runs amplitude stabilizes early while d′ remains duration-sensitive, and om1 is
+still rising at 3.3 M updates. This motivates long-budget validation, but does not show that `arch`,
+`base64`, or R5 has the same trajectory. Equality of the two d′ means at their last checkpoint also
+does not establish equal asymptotes.
 
-The detection deficit is not spread evenly — it is concentrated on the marginal, low-SNR units that
-the shrinkage estimator flattens (the same units that dominate the amplitude undershoot). Capacity
-helps because it gives the network more power to separate those units; the omission gap helps their
-*amplitude* but not their *detectability*. Spike-aware weighting remains unresolved: the legacy Tier 3
-runs changed the effective loss from L2 to Charbonnier whenever weighting was enabled, so they cannot
-test matched-objective weighting or establish that the residual deficit is intrinsic to the blind-spot
-objective. One lever also remains unexhausted: **training length** — d′ is still rising at 3.3 M
-updates (om1 by +0.30 past 14 k, steepest at its final
-checkpoint), so the short-budget rankings are a convergence-speed-biased screen and a fully-converged
-model may recover more. Whether that closes the last −0.09 to −0.36 d′, or whether a residual cost is
-permanent, is the open question this manuscript leaves.
+## Limitations
 
-## Recommended configuration
+First, architecture and recipe choices were developed and evaluated on one recording with ten
+injected units. Fixed extraction makes comparisons reproducible but does not protect against adaptive
+overfitting of design decisions to this benchmark. Second, matched-filter d′ is a detection surrogate
+measured before common-median referencing; it is not sorter-level precision, recall, unit yield, or
+waveform stability. Third, many Tier 2 rows have one training seed, exploratory Welch tests are not
+multiple-comparison corrected, and the weak-unit analysis contains four post hoc selected units.
+Fourth, the legacy spike-weighted sweep changed loss family when weighting was enabled and cannot
+support a weighting conclusion. Finally, long-duration evidence uses a different body from the
+architecture and recipe candidates.
 
-The recommendation is now settled by the full sweep: pick **capacity** — the `base64` / `arch` family
-carries the only clear, replicated detection gain — and add **`omission=0`** when waveform fidelity on
-weak units matters (it lifts amplitude to ~0.94 for a detection cost inside the noise floor); the best
-all-round body is `arch_l2_om0`. L2 is a reasonable default. No recommendation is made for or against
-spike-aware weighting until corrected matched-L2 runs are scored. Every validated architecture result
-is a large gain over the original architecture; whether the remaining sub-raw deficit reflects
-optimization, training duration, or the blind-spot objective remains open.
+## Practical interpretation
 
-For the **training recipe**, batch 256 with lr 2e-3 and 5% warmup is the best observed candidate for
-rapidly reaching d′ = 4.30, while R0, R1, and R5 have statistically unresolved final performance.
-The reported 4.4× ratio uses step-interpolated total runtime from single-seed runs, and R5 changes
-batch size, learning rate, and warmup jointly. It should therefore be treated as a provisional
-deployment recipe, not an isolated or replicated batch-size effect. Future comparisons record exact
-checkpoint elapsed time and optimizer state, repeat seeds, and measure the gradient-noise scale
-before selecting an integration horizon. The tested Lion, one-cycle, and tuned-AdamW configurations
-underperform; the sweep does not rule out those optimizer families under different tuning.
+For this benchmark and short budget, `base64` is the best replicated choice for the all-unit mean;
+omission0 is the clearest tested configuration for preserving weak-unit amplitude and detectability;
+`arch_l2_om0` is a balanced candidate that combines those properties but does not dominate every unit.
+The modern package outperforms `origdi` under the matched-filter proxy on this benchmark. Stronger claims
+require a prespecified held-out recording, corrected weighting controls, exact replicated recipe
+timing, long-budget validation of the selected body, and end-to-end spike-sorter evaluation.

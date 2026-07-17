@@ -43,9 +43,9 @@ set -a; source ~/.codeocean.env; set +a
 curl -s -u "$CODEOCEAN_TOKEN:" -H 'Content-Type: application/json' \
   -d @body.json "$CODEOCEAN_DOMAIN/api/v1/computations"
 ```
-The full job list, champion base config, and per-run overrides are pre-registered in
-[](regeneration-plan.md) §3–§4. Every run trains **and** is scored on the same AP-band recording
-(`train_recording_path` in the plan).
+The original job plan and subsequent adaptive changes are documented in [](regeneration-plan.md);
+the authoritative current ledger and exact overrides are in `results/runs.csv`. Every reported run
+trains and is scored on the same AP-band recording (`train_recording_path` in the plan).
 
 Check status (look at `end_status`, not `state`):
 ```bash
@@ -83,7 +83,9 @@ myst start          # live preview at http://localhost:3000
 myst build --html   # static site in _build/
 ```
 
-## 7. Currently running (in-domain SUPPORT-scale omission A/B)
+## 7. Active and staged experiments
 
-Two matched runs are in flight; ids and parameters in [](../data/provenance.md). When they finish,
-score their 12 checkpoints (steps 3–4 above) to produce the first in-domain trajectory point.
+Current computation IDs and states are tracked in `results/runs.csv`. At manuscript revision time,
+R0/R1/R5 recipe replications and a gradient-statistics run were active; adaptive-accumulation,
+importance-sampling, physical-batch, and fixed-effective-batch controls were staged but gated on the
+gradient measurements. Query Code Ocean rather than relying on this prose for live state.
