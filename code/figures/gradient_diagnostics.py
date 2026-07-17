@@ -54,9 +54,6 @@ def main() -> None:
     if "gradient_signal_norm_sq" not in frame:
         frame["gradient_signal_norm_sq"] = frame["mean_gradient_norm"] ** 2
     frame["gpu_h"] = frame["elapsed_s"] / 3600.0
-    frame["recommended_effective_batch"] = (
-        frame["physical_batch"] * frame["proposed_accumulation"]
-    )
 
     tables = REPO / "results" / "tables"
     figures = REPO / "figures"
@@ -72,10 +69,12 @@ def main() -> None:
     ax = axes[0, 0]
     ax.plot(x, frame["gradient_noise_scale"], "o-", label="instantaneous")
     ax.plot(x, frame["gradient_noise_scale_ema"], "s--", label="log-EMA")
-    ax.plot(x, frame["recommended_effective_batch"], "^:", label="recommended batch")
+    physical_batch = float(frame["physical_batch"].iloc[0])
+    ax.axhline(physical_batch, color="#2ca02c", ls=":",
+               label=f"physical batch ({physical_batch:g})")
     ax.set_xscale("log"); ax.set_yscale("log")
     ax.set_ylabel("examples")
-    ax.set_title("Gradient-noise scale and integration horizon")
+    ax.set_title("Gradient-noise scale relative to physical batch")
     ax.legend(fontsize=8)
 
     ax = axes[0, 1]

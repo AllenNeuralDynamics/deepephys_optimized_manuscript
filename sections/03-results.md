@@ -233,6 +233,12 @@ do not include training-seed variation. Replicated R0/R1/R5 runs with exact tele
 until they land, endpoint ordering and acceleration remain provisional. The R4 result pertains only
 to its tested Lion hyperparameters, not to the optimizer family.
 
+As a single-seed body-transfer check, applying R5 to `arch_l2_om0` reaches **d′ = 4.374** with
+empirical-template amplitude **0.935**. This is close to R5 on `base64_om0` (4.358 / 0.940) and to the
+three-seed short-screen `arch_l2_om0` endpoint (4.360 / 0.937). The observation argues against a
+large body-specific ceiling loss, but it is neither a replicated recipe comparison nor an isolated
+architecture effect.
+
 ```{figure} figures/recipe_convergence.png
 :label: fig-recipe-convergence
 **Single-seed compound-recipe screen.** d′ versus windows seen (left) and estimated GPU-hours (right)
@@ -245,6 +251,29 @@ replication, and batch-only controls are required to attribute the difference.
 **The same recipe screen on log–log deficit axes.** Deficit is raw d′ − denoised d′ (lower is better).
 R0 descends earliest; R1 and R5 finish close together. GPU-hours are step-proportional
 estimates, and the sparse checkpoints do not resolve a common transition near 0.1 GPU-h.
+```
+
+## Gradient measurements motivate late-integration controls
+
+R8 repeats the R1 recipe while measuring four equal microbatch gradients at the same parameter state
+at 12 points during training. Early microbatch gradients are strongly aligned (mean pairwise cosine
+~0.90). Alignment declines with training and is near zero at several late checkpoints, with some
+negative pairs. Estimated gradient-noise scale is below six early, but exceeds the physical batch of
+64 at several late measurements (for example ~567 at 6.0 M windows and >10⁴ at 13.2 M windows).
+
+The estimates are not monotone and are unresolved at three checkpoints because the finite-K noise
+term is as large as the observed mean-gradient norm. With K=4, the sample covariance also has rank at
+most three. These diagnostics therefore support testing late larger-batch integration, but they do
+not identify a precise schedule and do not justify a parameter-space preconditioner. Adaptive,
+fixed-effective-batch, physical-batch, and objective-preserving sampling controls are running.
+
+```{figure} figures/ib_r8_gradstats_gradient_diagnostics.png
+:label: fig-gradient-diagnostics
+**Same-parameter microbatch gradient diagnostics for R8.** The estimated noise scale rises above the
+physical batch at several late checkpoints, while mean pairwise cosine falls from ~0.9 toward zero.
+Missing noise-scale points indicate unresolved signal after finite-K correction. The covariance
+spectrum is limited to at most three nonzero sample-space components because only four microbatches
+were measured; it is not evidence for a low-rank parameter-space optimizer.
 ```
 
 ## Do the two omission trajectories stabilize with longer training?

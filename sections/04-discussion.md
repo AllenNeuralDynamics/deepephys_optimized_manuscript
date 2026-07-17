@@ -40,6 +40,14 @@ d′ = 4.30, but it changes physical batch, learning rate, and warmup together, 
 times are inferred. Replications with exact telemetry and batch-only/fixed-effective-batch controls
 are underway. Until those results land, no recipe is established as faster in expectation.
 
+R8 provides a measurement-level reason to test those controls: microbatch gradients are strongly
+aligned early but weakly aligned or conflicting late, and late noise-scale estimates sometimes exceed
+the physical batch. The estimates are intermittent and unstable with four microbatches, so they
+motivate rather than determine the controller. An adaptive integration run now holds its prior horizon
+when a measurement is unresolved; fixed effective batch, physical batch, and corrected importance
+sampling provide the corresponding controls. The rank-three sample covariance cannot establish that
+Shampoo, K-FAC, or another non-diagonal preconditioner is warranted.
+
 The duration evidence is narrower still: it consists of one om0 and one om1 `support_all` + L2
 trajectory. In those runs amplitude stabilizes early while d′ remains duration-sensitive, and om1 is
 still rising at 3.3 M updates. This motivates long-budget validation, but does not show that `arch`,

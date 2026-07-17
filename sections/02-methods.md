@@ -43,6 +43,14 @@ The study contains three related but non-equivalent experiments:
 The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
 uses a different body. Likewise, the recipe screen does not establish an architecture ordering.
 
+**Gradient diagnostics.** R8 uses the R1 body and recipe and, at 12 scheduled parameter states,
+splits one physical batch of 64 into four equal microbatches. It computes each microbatch-mean
+gradient without updating parameters, then records pairwise cosine, mean-gradient norm, sample
+covariance trace and spectrum, and a finite-K-corrected gradient-noise scale. Because K=4, the
+sample-space covariance has rank at most three and individual noise-scale estimates can be unresolved.
+These measurements diagnose when gradient disagreement grows; they are not per-example gradients and
+do not by themselves define an optimal batch schedule.
+
 ## Architecture and the swept variants
 
 **The `base32` reference, layer by layer.** The input `(B, 63, 384)` (63 frames × 384 channels) is
