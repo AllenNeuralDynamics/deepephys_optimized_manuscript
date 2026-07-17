@@ -328,3 +328,12 @@ recipes on the `base64_om0` body. Dashed grey = anchor (base64\_om0 4.359). R5 (
 purple) reaches d′ = 4.30 in 0.33 GPU-h — 4.4× faster than the AdamW/cosine baseline (black).
 Lion (R4, red) is eliminated: ceiling 4.22, never reaches d′ = 4.30.
 ```
+
+```{figure} figures/recipe_convergence_loglog.png
+:label: fig-recipe-convergence-loglog
+**Training-efficiency — log–log deficit view.** Detection deficit (raw d′ − d′_deep, lower = better)
+vs windows seen (left) and GPU-hours (right), both axes log scale. Dotted lines = target d′ thresholds.
+R0 (black) drops fastest per window seen (small-batch data efficiency), but **R5 (purple, batch 256)
+and R1 (blue, +warmup) converge to the lowest deficit in wall-clock** after the ~0.01–0.1 GPU-h
+crossing point. R4 Lion (red) plateaus visibly above d′ = 4.20, confirming its elimination.
+```

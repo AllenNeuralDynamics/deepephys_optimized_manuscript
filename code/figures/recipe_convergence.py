@@ -90,27 +90,66 @@ def main() -> None:
         print("no trajectory tables found yet under results/tables/ib_r*_trajectory.csv")
         return
 
-    # ---- figure: d' vs samples-seen and vs GPU-hours -------------------------
+    # ---- raw d′ = first non-NaN dprime_raw value across all recipes ----------
+    raw_dp = 4.497  # frozen AP-band reference
+    MIN_DEFICIT = 1e-3  # floor for log(deficit) to handle near-raw values
+
     FIGS.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, 2, figsize=(13, 5.2))
+
+    # ---- Figure 1: linear-y (d' vs samples-seen and vs GPU-hours) ------------
+    fig1, axes1 = plt.subplots(1, 2, figsize=(13, 5.2))
     for _lab, _bat, _rm, name, col, df in data:
-        for ax, xcol in zip(axes, ("samples", "gpu_h")):
+        for ax, xcol in zip(axes1, ("samples", "gpu_h")):
             ax.plot(df[xcol], df[METRIC], "-o", ms=4, lw=1.6, color=col, label=name)
-    for ax, xcol, xlabel in zip(axes, ("samples", "gpu_h"),
-                                ("windows seen (updates x batch)", "GPU-hours")):
+    for ax, xcol, xlabel in zip(axes1, ("samples", "gpu_h"),
+                                ("windows seen (updates × batch)", "GPU-hours")):
         ax.axhline(ANCHOR, ls="--", lw=1, color="grey", alpha=0.7,
                    label=f"base64_om0 anchor {ANCHOR:.3f}")
         ax.set_xscale("log")
         ax.set_xlabel(xlabel)
-        ax.set_ylabel("d' (deep, mean over GT units)")
+        ax.set_ylabel("d′ (deep, mean over GT units)")
         ax.grid(alpha=0.3, which="both")
-    axes[0].set_title("Detection vs data seen")
-    axes[1].set_title("Detection vs wall-clock")
-    axes[0].legend(fontsize=8, loc="lower right")
-    fig.suptitle("Training-efficiency recipe sweep (base64_om0 body)", fontweight="bold")
-    fig.tight_layout()
-    fig.savefig(FIGS / "recipe_convergence.png", dpi=150)
+    axes1[0].set_title("Detection vs data seen")
+    axes1[1].set_title("Detection vs wall-clock")
+    axes1[0].legend(fontsize=8, loc="lower right")
+    fig1.suptitle("Training-efficiency recipe sweep (base64_om0 body)", fontweight="bold")
+    fig1.tight_layout()
+    fig1.savefig(FIGS / "recipe_convergence.png", dpi=150)
     print(f"wrote {FIGS / 'recipe_convergence.png'}")
+
+    # ---- Figure 2: log-log — detection DEFICIT vs GPU-hours ------------------
+    # deficit = raw_dp - d'_deep  (always positive, lower = better)
+    # y-axis: NOT inverted — deficit decreases going DOWN = improving, natural reading
+    fig2, axes2 = plt.subplots(1, 2, figsize=(13, 5.2))
+
+    for _lab, _bat, _rm, name, col, df in data:
+        deficit = (raw_dp - df[METRIC]).clip(lower=MIN_DEFICIT)
+        for ax, xcol in zip(axes2, ("samples", "gpu_h")):
+            ax.plot(df[xcol], deficit, "-o", ms=4, lw=1.6, color=col, label=name)
+
+    for ax, xcol, xlabel in zip(axes2, ("samples", "gpu_h"),
+                                ("windows seen (updates × batch)", "GPU-hours")):
+        for t in args.targets:
+            tdef = raw_dp - t
+            ax.axhline(tdef, ls=":", lw=1.2, color="grey", alpha=0.7)
+            # label at 5 % from left edge using axes-fraction x-coord
+            ax.text(0.02, tdef, f"d′={t:.2f}", transform=ax.get_yaxis_transform(),
+                    fontsize=7, color="dimgrey", va="center", ha="left",
+                    bbox=dict(fc="white", ec="none", pad=1))
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel("detection deficit  (raw d′ − d′_deep)   ↓ = better")
+        ax.grid(alpha=0.3, which="both")
+
+    axes2[0].set_title("Deficit vs data seen  (log–log)")
+    axes2[1].set_title("Deficit vs wall-clock  (log–log)")
+    axes2[0].legend(fontsize=8, loc="upper right")
+    fig2.suptitle("Training-efficiency recipe sweep — log–log deficit (base64_om0 body)",
+                  fontweight="bold")
+    fig2.tight_layout()
+    fig2.savefig(FIGS / "recipe_convergence_loglog.png", dpi=150)
+    print(f"wrote {FIGS / 'recipe_convergence_loglog.png'}")
 
     # ---- summary table: final / peak d' + budget-to-target -------------------
     rows = []
