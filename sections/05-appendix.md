@@ -31,10 +31,6 @@ probe-axis blind-spot branch). Every override is defined in the
 - **om0_scale / om1_scale** — the two long-duration runs (`support_all` wiring, L2, ~3.3 M updates)
   with `omission=0` / `omission=1`. Final-step d′ 4.361 / 4.361; amp 0.931 / 0.870.
 
-**Confounded (legacy Tier 3).** The spike-weight family was scored, but an implementation audit found
-that weighted runs used Charbonnier residuals despite requesting L2. These rows are retained for
-provenance and excluded from matched-L2 inference; corrected reruns are pending.
-
 ## B. Per-unit amplitude across models
 
 `amp_ratio` for each ground-truth unit (rows, sorted by raw matched-filter separability) across a
@@ -108,26 +104,4 @@ protection of marginal units.
 **Per-unit change in detectability Δd′** (units × architectures; red = denoising hurts, blue = helps).
 Almost every cell is red; the strongest unit (2143) is the main exception. `arch` has the
 least-negative displayed column mean, while omission variants give the largest weak-unit gains.
-```
-
-## D. Legacy weighted-loss audit
-
-The Tier 3 sweep attempted to apply spike-aware weights to an L2 `arch_l2_om0` reference. An
-implementation audit found that enabling `spike_weight` always constructed a Charbonnier residual,
-even when `loss=l2` was requested. The weighted rows therefore change both loss family and weighting;
-they cannot estimate an L2 weighting effect. They are retained here for provenance only.
-
-| nominal spike weight | d′ | Δ vs unweighted L2 reference | amp |
-|---|---:|---:|---:|
-| — (L2 reference) | 4.360 | — | 0.937 |
-| soft λ = 3 / 10 / 30 | 4.372 / 4.377 / 4.378 | +0.01 to +0.02 | 0.94 |
-| gate λ = 100 / 300 | 4.319 / 4.369 | −0.04 / +0.01 | 0.94 |
-| focal γ = 2 (λ = 10) | 4.051 | −0.31 | 0.94 |
-| gate λ = 1000 / hard | 4.102 / 4.219 | −0.26 / −0.14 | 0.95 |
-
-```{figure} figures/f9_spike_weight.png
-:label: fig-spike-weight-audit
-**Legacy weighted-loss observations (confounded).** The x-axis gives nominal spike weight, but
-weighted points used Charbonnier residuals and the reference used L2. The curves cannot isolate
-weighting, and no causal or optimization conclusion is drawn from them.
 ```

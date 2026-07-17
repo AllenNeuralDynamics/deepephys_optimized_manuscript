@@ -131,24 +131,12 @@ explicit combination rows test whether selected effects stack. All runs are enum
 | SUPPORT wiring | `support_sd`, `support_all` | `bs_stage=1 bs_dense=1` (+ `bs_multiscale=1`) |
 | temporal omission | `omission0` | route t±1 through the temporal U-Net, drop t±31, and reduce the spatial branch from {t−1,t,t+1} to {t} |
 | loss | `*_l2` pairs | `loss=l2` |
-| spike-aware loss | `weighted`, `l10g1/g2`, gate / hard | `spike_weight`, `spike_weight_gamma`, `spike_weight_thresh`, `spike_weight_car`, `spike_weight_hard` (below) |
 
 The **SUPPORT wiring** options restore three pieces the `fold` reference dropped relative to the
 published SUPPORT denoiser [@eom2023support]: dense re-injection of the centre input (`bs_dense`),
 staging the temporal feature into the blind-spot branch (`bs_stage`), and a parallel multi-scale
-stack (`bs_multiscale`). The **spike-aware loss** multiplies the reconstruction loss at spike-like
-samples by `1 + spike_weight·|nbr|^gamma`, where `|nbr|` is the centre-excluded neighbour amplitude (a
-proxy designed to avoid direct target-channel leakage); a saturating position gate
-(`spike_weight_thresh > 0`, with `spike_weight_car` / `spike_weight_hard`) limits dependence of weight
-on event magnitude. Centre exclusion does not guarantee statistical independence under correlated
-noise. Across the sweep, capacity and the enlarged `arch` body span
+stack (`bs_multiscale`). Across the sweep, capacity and the enlarged `arch` body span
 **0.85 M → 12.6 M parameters**.
-
-An implementation audit after the legacy Tier 3 sweep found that enabling `spike_weight` always
-constructed a Charbonnier elementwise residual, even when the run requested `loss=l2`. Consequently,
-those rows compare a weighted Charbonnier objective with an unweighted L2 reference and cannot isolate
-the effect of weighting. The implementation now applies the configured L1, L2, or Charbonnier
-residual before weighting; corrected matched-objective reruns are required for inference.
 
 ## Quantification (identical for every run)
 

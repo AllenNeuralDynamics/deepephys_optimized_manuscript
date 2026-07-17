@@ -24,7 +24,7 @@ figures/*.png   +   manuscript tables      ──►   the HTML site
 
 ## The run manifest — [`runs.csv`](runs.csv)
 
-One row per run, including later adaptive additions and aborted/confounded experiments. The original
+One row per run, including later adaptive additions and non-primary experiments. The original
 plan is preserved in [the versioned plan](../reproducibility/regeneration-plan.md); `runs.csv` is the
 authoritative current ledger. Columns:
 `label, tier, config, seed, loss, train_chunks, override, co_id, state, ckpt_downloaded, scored, notes`.

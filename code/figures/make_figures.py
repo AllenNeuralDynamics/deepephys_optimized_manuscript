@@ -280,31 +280,4 @@ a1.set_xlabel("training updates"); a1.set_ylabel("d′"); a1.set_title("Detectio
 a2.set_xlabel("training updates"); a2.set_ylabel("amp_ratio"); a2.set_title("Amplitude vs training"); a2.legend(fontsize=8)
 fig.tight_layout(); fig.savefig(FIG / "f8_trajectory.png", dpi=150); plt.close(fig)
 
-# ---- F9: spike-aware loss dose-response (arch_l2_om0 body) ----
-def _meand(label):
-    d = load(label, "dprime")
-    return st.mean(float(d[u]["dprime_deep"]) for u in units if u in d) if d else None
-
-_base = [_meand(l) for l in labels("ib_arch_l2_om0_s*")]
-if _base and all(v is not None for v in _base):
-    b = st.mean(_base); bsd = st.stdev(_base) if len(_base) > 1 else 0.0
-    soft = [(w, _meand(f"ib_arch_l2_om0_w{w}_s0")) for w in (3, 10, 30)]
-    gate = [(w, _meand(f"ib_arch_l2_om0_g{w}_s0")) for w in (100, 300, 1000)]
-    focal = (10, _meand("ib_arch_l2_om0_w10g2_s0"))
-    hard = (1000, _meand("ib_arch_l2_om0_g1000h_s0"))
-    fig, ax = plt.subplots(figsize=(7.2, 4.6))
-    ax.axhspan(b - 2 * bsd, b + 2 * bsd, color="gray", alpha=0.25, label="baseline ±2σ")
-    ax.axhline(b, color="#7f7f7f", lw=1, label=f"arch_l2_om0 baseline ({b:.3f})")
-    ax.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.3f})")
-    xs, ys = zip(*[(w, d) for w, d in soft if d]); ax.plot(xs, ys, "-o", color="#4c72b0", label="soft  1 + λ·|nbr|")
-    xs, ys = zip(*[(w, d) for w, d in gate if d]); ax.plot(xs, ys, "-s", color="#dd8452", label="saturating gate")
-    if focal[1]:
-        ax.plot([focal[0]], [focal[1]], "X", color="#c44e52", ms=12, label="focal γ=2")
-    if hard[1]:
-        ax.plot([hard[0]], [hard[1]], "D", color="#8172b3", ms=8, label="hard gate")
-    ax.set_xscale("log"); ax.set_xlabel("spike weight  λ  (log)"); ax.set_ylabel("d′")
-    ax.set_title("Spike-aware loss: detection vs weight (arch_l2_om0 body)")
-    ax.legend(fontsize=7.5, loc="upper right", framealpha=0.9)
-    fig.tight_layout(); fig.savefig(FIG / "f9_spike_weight.png", dpi=150); plt.close(fig)
-
 print("wrote:", sorted(p.name for p in FIG.glob("f*.png")))

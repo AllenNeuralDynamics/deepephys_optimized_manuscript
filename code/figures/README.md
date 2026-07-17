@@ -11,7 +11,7 @@ regenerate deterministically.
 | `collate_trajectory.py` | merge checkpoint scores with measured elapsed time, LR, samples, optimizer steps, and effective batch |
 | `recipe_convergence.py` | compare recipe trajectories and bootstrap paired GT-unit endpoint differences |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
-| `make_figures.py` | architecture ranking, template-SNR/d′, unit-quality, heatmap, duration, and legacy-audit figures |
+| `make_figures.py` | architecture ranking, template-SNR/d′, unit-quality, heatmap, and duration figures |
 
 ## Figure ↔ quantification map
 

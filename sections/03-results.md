@@ -2,9 +2,9 @@
 
 :::{note} Current state
 The 21-configuration architecture screen, initial six-recipe screen, original-network reference, and
-two long-duration trajectories are scored. Legacy spike-weighted runs are excluded from inference
-because of a configured-loss mismatch (Appendix D). Recipe replications and gradient diagnostics are
-running and are not included below. All results use the same AP-band `recording1_3` hybrid benchmark;
+two long-duration trajectories are scored. Recipe replications, gradient diagnostics, and a
+matched-L2 weighting screen are running and are not included below. All results use the same AP-band
+`recording1_3` hybrid benchmark;
 the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
 :::
 
@@ -243,7 +243,7 @@ replication, and batch-only controls are required to attribute the difference.
 ```{figure} figures/recipe_convergence_loglog.png
 :label: fig-recipe-convergence-loglog
 **The same recipe screen on log–log deficit axes.** Deficit is raw d′ − denoised d′ (lower is better).
-R0 descends earliest; R1 and R5 finish close together. Legacy GPU-hours are step-proportional
+R0 descends earliest; R1 and R5 finish close together. GPU-hours are step-proportional
 estimates, and the sparse checkpoints do not resolve a common transition near 0.1 GPU-h.
 ```
 
