@@ -79,36 +79,16 @@ controls: `1d`, which orders channels by index and ignores the grid, and `2d` / 
 probe-grid 2-D U-Net — the latter being the original DeepInterpolation architecture (the `origdi`
 baseline).
 
-```{mermaid}
-flowchart TD
-    IN["Input context<br/>(B, 63, 384)"] --> SC["grid.scatter<br/>(B, 63, 192, 4)<br/>384 ch → 192×4 grid"]
-    SC --> SPLIT{"split frames"}
-    SPLIT -->|"60 neighbour frames"| FN["fold → (B, 240, 192)<br/>60 frames × 4 cols"]
-    SPLIT -->|"3 centre frames {t-1,t,t+1}"| FC["fold → (B, 12, 192)<br/>3 frames × 4 cols"]
-    subgraph UNET["TEMPORAL U-Net — centre + t±1 EXCLUDED — conv along DEPTH (H=192)"]
-        FN --> ST["stem DoubleConv1d<br/>240→32, k3"]
-        ST --> D1["Down1 pool/2 · 32→64 @H=96"]
-        D1 --> D2["Down2 pool/2 · 64→128 @H=48"]
-        D2 --> D3["Down3 pool/2 — bottleneck<br/>128→256 @H=24"]
-        D3 --> U3["Up3 →128 @H=48 (+skip)"]
-        U3 --> U2["Up2 →64 @H=96 (+skip)"]
-        U2 --> U1["Up1 →32 @H=192 (+skip)"]
-        U1 --> UH["head Conv1d 32→4, k1"]
-    end
-    UH --> UO["u : (B, 4, 192)"]
-    subgraph BS["BLIND-SPOT branch — centre frame — dilated HOLE-convs (centre tap zeroed)"]
-        FC --> H1["ConvHole1D k3 d=1<br/>12→64 · GELU"]
-        H1 --> H2["ConvHole1D k3 d=2<br/>64→64 · GELU"]
-        H2 --> H3["ConvHole1D k3 d=4"]
-        H3 --> H4["ConvHole1D k3 d=8"]
-        H4 --> H5["ConvHole1D k3 d=16"]
-    end
-    H5 --> BO["b : (B, 64, 192)<br/>±31 rows, own row EXCLUDED"]
-    UO --> FUSE["FUSE — pointwise 1×1 only<br/>concat 4+64=68 → 68→64→64→4 (GELU)"]
-    BO --> FUSE
-    FUSE --> Y["y : (B, 4, 192)"]
-    Y --> UF["unfold + grid.gather"]
-    UF --> OUT["Denoised centre<br/>(B, 1, 384)"]
+```{figure} figures/architecture_evolution.png
+:label: fig-architecture-evolution
+:alt: Three-panel schematic of the current two-branch denoiser, its evolution from original DeepInterpolation, and the DoubleConv-to-NAF temporal-stage substitution.
+**Architecture and tested evolution.** **A**, the shared R5/R13 topology uses 60 centre-excluded
+temporal neighbours and a separate centre-frame `ConvHole1D` branch; pointwise fusion preserves the
+self-supervised blind spot. **B**, the principal representation changes from original
+DeepInterpolation through `base32` to the replicated `base64_om0` R5 body. **C**, the capacity-matched
+R13 follow-up replaces only the temporal `DoubleConv1d` stages with 1-D NAF-style gated restoration
+blocks [@chen2022nafnet]. R13 is exploratory and its benchmark result is pending; training-recipe
+changes are intentionally excluded from this architecture figure.
 ```
 
 **The two-branch `base32` (`FoldDeepInterp1D`) denoiser.** The neighbour frames — with the target *and*
@@ -138,6 +118,7 @@ explicit combination rows test whether selected effects stack. All runs are enum
 | blind-spot frames | `ho` | `bs_frames=1` (1-frame blind spot) |
 | SUPPORT wiring | `support_sd`, `support_all` | `bs_stage=1 bs_dense=1` (+ `bs_multiscale=1`) |
 | temporal omission | `omission0` | route t±1 through the temporal U-Net, drop t±31, and reduce the spatial branch from {t−1,t,t+1} to {t} |
+| temporal block (exploratory follow-up) | `ib_r13_naf58` | `temporal_block=naf base_channels=58`; capacity-matched to `base64_om0`, results pending |
 | loss | `*_l2` pairs | `loss=l2` |
 
 The **SUPPORT wiring** options restore three pieces the `fold` reference dropped relative to the
