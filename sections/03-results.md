@@ -5,7 +5,7 @@ The 21-configuration architecture screen, initial six-recipe screen, original-ne
 two long-duration trajectories are scored. The R0/R1/R5 recipe replications and R8 gradient
 diagnostics are also scored and included below. R9 adaptive accumulation and R11 physical-batch
 control are scored and included below. The matched-L2 weighting endpoints, R10 importance sampling,
-and R12 fixed-effective-batch control remain in HPC scoring; R13 NAF training is also pending. All
+R12 fixed-effective-batch, and R13 NAF controls remain in HPC scoring. All
 results use the same AP-band `recording1_3` hybrid benchmark;
 the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
 :::
