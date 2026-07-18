@@ -70,13 +70,24 @@ def arrow(axis, start, end, color=None, linewidth=1.45, label=None,
 
 
 def panel_heading(axis, letter, title, subtitle=None) -> None:
-    axis.text(0.0, 1.035, letter, ha="left", va="bottom", fontsize=15,
+    axis.text(0.0, 1.025, letter, ha="left", va="bottom", fontsize=15,
               fontweight="bold", color=COLORS["ink"], transform=axis.transAxes)
-    axis.text(0.04, 1.035, title, ha="left", va="bottom", fontsize=11.5,
+    axis.text(0.04, 1.025, title, ha="left", va="bottom", fontsize=11.5,
               fontweight="bold", color=COLORS["ink"], transform=axis.transAxes)
     if subtitle:
-        axis.text(0.04, 0.99, subtitle, ha="left", va="top", fontsize=8.3,
+        axis.text(0.04, 0.965, subtitle, ha="left", va="top", fontsize=8.1,
                   color=COLORS["muted"], transform=axis.transAxes)
+
+
+def route_label(axis, x, y, text, color) -> None:
+    axis.text(
+        x, y, text, ha="center", va="center", fontsize=7.2, color=color,
+        bbox={
+            "boxstyle": "round,pad=0.22,rounding_size=0.08",
+            "facecolor": "#FAFAF8", "edgecolor": "none", "alpha": 0.97,
+        },
+        zorder=6,
+    )
 
 
 def topology_panel(axis) -> None:
@@ -113,10 +124,9 @@ def topology_panel(axis) -> None:
         "b\n64 x 192", COLORS["spatial"], COLORS["spatial_edge"], fontsize=7.7)
 
     arrow(axis, (0.29, 0.50), (0.34, 0.725), COLORS["temporal_edge"],
-          label="t-30...t-1, t+1...t+30", label_offset=(0.02, 0.00),
           connection="arc3,rad=-0.12")
     arrow(axis, (0.29, 0.46), (0.34, 0.265), COLORS["spatial_edge"],
-          label="center t", label_offset=(0.005, -0.02), connection="arc3,rad=0.12")
+          connection="arc3,rad=0.12")
     arrow(axis, (0.46, 0.725), (0.50, 0.725), COLORS["temporal_edge"])
     arrow(axis, (0.68, 0.725), (0.72, 0.725), COLORS["temporal_edge"])
     arrow(axis, (0.46, 0.265), (0.50, 0.265), COLORS["spatial_edge"])
@@ -147,25 +157,24 @@ def evolution_panel(axis) -> None:
     panel_heading(axis, "B", "Architectural evolution",
                   "The diagram separates representation changes from the later training-recipe changes.")
 
-    box(axis, 0.02, 0.29, 0.26, 0.42,
-        "Original DeepInterpolation\n(2021 control)\n\n2-D temporal-only U-Net\ncenter frame absent\nno spatial blind-spot branch",
-        COLORS["original"], COLORS["line"], fontsize=8.4, weight="bold")
-    box(axis, 0.37, 0.29, 0.26, 0.42,
-        "base32 reference\n\nfold columns into features\n1-D U-Net along probe depth\nresidual GroupNorm / GELU blocks\n+ center-frame ConvHole branch",
-        COLORS["base"], "#476F97", fontsize=8.2, weight="bold")
-    box(axis, 0.72, 0.29, 0.26, 0.42,
-        "replicated R5 body\n\nbase width 32 -> 64\nomission 1 -> 0\nt+/-1 move into temporal path\n3 center frames -> center t only\n3.15 M parameters",
-        COLORS["temporal"], COLORS["temporal_edge"], fontsize=8.2, weight="bold")
+    box(axis, 0.01, 0.29, 0.27, 0.42,
+        "Original DeepInterpolation\n(2021 control)\n\n2-D temporal U-Net\ncenter frame absent\nno spatial branch",
+        COLORS["original"], COLORS["line"], fontsize=7.6, weight="bold")
+    box(axis, 0.365, 0.29, 0.27, 0.42,
+        "base32 reference\n\nfolded NP1 geometry\n1-D U-Net along depth\nresidual GN + GELU\n+ ConvHole branch",
+        COLORS["base"], "#476F97", fontsize=7.6, weight="bold")
+    box(axis, 0.705, 0.29, 0.275, 0.42,
+        "replicated R5 body\n\nwidth 32 -> 64\nomission 1 -> 0\ncenter inputs 3 -> 1\n3.15 M parameters",
+        COLORS["temporal"], COLORS["temporal_edge"], fontsize=7.6, weight="bold")
 
-    arrow(axis, (0.28, 0.50), (0.37, 0.50))
-    arrow(axis, (0.63, 0.50), (0.72, 0.50))
-    axis.text(0.325, 0.78, "geometry + blind spot", ha="center", va="center",
-              fontsize=7.4, color=COLORS["muted"])
-    axis.text(0.675, 0.78, "capacity + frame routing", ha="center", va="center",
-              fontsize=7.4, color=COLORS["muted"])
+    arrow(axis, (0.28, 0.50), (0.365, 0.50))
+    arrow(axis, (0.635, 0.50), (0.705, 0.50))
+    route_label(axis, 0.322, 0.795, "geometry + blind spot", COLORS["muted"])
+    route_label(axis, 0.670, 0.795, "capacity + frame routing", COLORS["muted"])
     axis.text(0.5, 0.12,
-              "Batch 256, learning rate, warmup, accumulation, and sampling are training controls, not architecture.",
-              ha="center", va="center", fontsize=8.0, color=COLORS["muted"],
+              "Batch 256, learning rate, warmup, accumulation, and sampling\n"
+              "are training controls, not architecture.",
+              ha="center", va="center", fontsize=7.5, color=COLORS["muted"],
               fontstyle="italic")
 
 
@@ -212,18 +221,18 @@ def block_comparison_panel(axis) -> None:
 
 def main() -> None:
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    figure = plt.figure(figsize=(16, 10.2), facecolor="#FAFAF8")
+    figure = plt.figure(figsize=(16, 11.2), facecolor="#FAFAF8")
     grid = figure.add_gridspec(
         2, 2, height_ratios=(1.12, 1.0), width_ratios=(1.0, 1.05),
-        left=0.035, right=0.985, top=0.94, bottom=0.045,
-        hspace=0.24, wspace=0.08,
+        left=0.035, right=0.985, top=0.885, bottom=0.055,
+        hspace=0.31, wspace=0.08,
     )
     topology_panel(figure.add_subplot(grid[0, :]))
     evolution_panel(figure.add_subplot(grid[1, 0]))
     block_comparison_panel(figure.add_subplot(grid[1, 1]))
     figure.suptitle(
         "DeepInterpolation ephys: current topology and architectural evolution",
-        x=0.035, y=0.985, ha="left", fontsize=15, fontweight="bold",
+        x=0.035, y=0.975, ha="left", fontsize=15, fontweight="bold",
         color=COLORS["ink"],
     )
     figure.savefig(OUTPUT, dpi=180, facecolor=figure.get_facecolor())
