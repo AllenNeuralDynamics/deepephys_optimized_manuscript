@@ -15,10 +15,13 @@ abstract: |
   configuration, which routes t±1 through the temporal branch, produced the larger gain among four
   weak units (+0.148 d′) and improved amplitude preservation toward raw. Across architectures,
   change in template SNR did not rank change in d′ (Spearman
-  ρ = 0.02). A single-seed recipe screen identified a promising large-physical-batch configuration,
-  but its timing estimate is provisional and combines batch, learning-rate, and warmup changes. In two
-  longer `support_all` trajectories, amplitude stabilized early while d′ remained duration-sensitive
-  at 3.3 M updates. These results are specific to one hybrid benchmark and a matched-filter proxy;
+  ρ = 0.02). In a three-seed matched replication, warmup alone did not improve the endpoint
+  consistently, whereas a compound batch-256 recipe improved mean d′ by 0.004 in all three paired
+  seeds and reached d′ = 4.30 after a median 2.25 M versus 5.38 M windows for baseline. The effect is
+  small, the sample contains only three seeds, and simultaneous batch, learning-rate, and warmup
+  changes prevent causal attribution. In two longer `support_all` trajectories, amplitude stabilized
+  early while d′ remained duration-sensitive at 3.3 M updates. These results are specific to one
+  hybrid benchmark and a matched-filter proxy;
   held-out recordings and sorter-level validation remain necessary. The versioned train → score →
   figure pipeline is reproducible from this repository.
 ---

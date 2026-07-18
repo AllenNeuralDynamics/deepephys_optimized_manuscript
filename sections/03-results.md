@@ -2,9 +2,10 @@
 
 :::{note} Current state
 The 21-configuration architecture screen, initial six-recipe screen, original-network reference, and
-two long-duration trajectories are scored. Recipe replications, gradient diagnostics, and a
-matched-L2 weighting screen are running and are not included below. All results use the same AP-band
-`recording1_3` hybrid benchmark;
+two long-duration trajectories are scored. The R0/R1/R5 recipe replications and R8 gradient
+diagnostics are also scored and included below. The matched-L2 weighting endpoints and R9–R12 method
+controls remain in HPC scoring and are not included. All results use the same AP-band `recording1_3`
+hybrid benchmark;
 the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
 :::
 
@@ -205,7 +206,7 @@ are unreplicated, so the two `support_*` observations are leads rather than conf
 short screen, but `origdi` is lower overall. These single runs provide no evidence that wider fusion,
 the tested temporal hand-off, or normalization removal improves the endpoint.
 
-## Training-efficiency recipe screen
+## Training-efficiency recipe screen and replication
 
 A separate six-run screen uses `base64_om0` as a fixed candidate body and processes the same ~18.0 M
 training windows under different compound recipes. The initial screen has one seed per recipe and 12
@@ -227,11 +228,41 @@ rate and warmup, and the checkpoint times are inferred. R0 starts at full learni
 warm up. Their apparent convergence near 0.1 GPU-h overlaps the end of warmup, while R0 has no
 checkpoint between ~0.089 and ~0.279 h, so the curves do not localize a shared task transition.
 
-R0, R1, and R5 finish within 0.015 d′. A paired bootstrap over the same ten units gives R1 − R5 =
-0.0076 d′ (95% interval −0.0020 to 0.0235) and R5 − R0 = 0.0075 (−0.0076 to 0.0240). These intervals
-do not include training-seed variation. Replicated R0/R1/R5 runs with exact telemetry are in progress;
-until they land, endpoint ordering and acceleration remain provisional. The R4 result pertains only
-to its tested Lion hyperparameters, not to the optimizer family.
+The completed matched-seed replications separate recipe-level consistency from the original
+one-seed ordering. R0, R1, and R5 each have seeds 0–2 and 25 scored states per new replicate
+(24 scheduled checkpoints plus the validation-selected endpoint). All runs process ~18.0 M windows;
+the new replicates record checkpoint telemetry directly, while the original seed's window count is
+its deterministic update count × physical batch.
+
+| recipe | endpoint d′, mean ± seed SD | paired Δd′ vs R0 | paired seeds improved | median windows to d′ = 4.30 | d′ = 4.35 reached / median windows |
+|---|---|---|---|---|---|
+| R0 baseline | 4.361 ± 0.011 | — | — | 5.38 M | 3/3 / 13.99 M |
+| R1 +3% warmup | 4.358 ± 0.013 | −0.0031 | 1/3 | 5.14 M | 2/3 / 13.68 M* |
+| **R5 batch 256, lr 2e-3, 5% warmup** | **4.365 ± 0.008** | **+0.0043** | **3/3** | **2.25 M** | **3/3 / 14.90 M** |
+
+\*Median among the two R1 seeds that cross 4.35.
+
+Warmup alone is not a reproducible endpoint improvement: R1 gains in one matched seed and loses in
+two. R5 gives a smaller but directionally consistent endpoint change, with paired differences of
++0.0075, +0.0034, and +0.0020 d′. The exact two-sided seed sign-flip p-value is 0.25, the smallest
+possible value with three pairs, so this is not a confirmatory significance result. R5's mean effect
+is positive for 8/10 units after averaging seeds, but only 18/30 seed–unit cells are positive.
+
+R5 reaches d′ = 4.30 with 58% fewer median windows than R0, but one matched R5 seed is slower at that
+threshold and its median crossing at d′ = 4.35 is slightly later. The evidence therefore supports a
+mid-training efficiency lead, not a uniform acceleration at every target. At the endpoint, R5 moves
+the amplitude ratio from 0.938 to 0.940, leaves temporal and spatial cosine effectively unchanged,
+and changes FWHM ratio from 0.990 to 0.976, consistent with mild additional temporal narrowing. R5
+remains a compound recipe, so these replications do not attribute its effect to physical batch alone.
+The R4 result pertains only to its tested Lion hyperparameters, not to the optimizer family.
+
+```{figure} figures/recipe_replication.png
+:label: fig-recipe-replication
+**Matched-seed recipe replication.** Individual seed trajectories and their recipe means are shown
+against training windows (left); matched endpoint seeds are connected on the right. R5 improves the
+endpoint in all three seed pairs, but the effect is small relative to seed spread. R1 warmup does not
+replicate as an endpoint gain.
+```
 
 As a single-seed body-transfer check, applying R5 to `arch_l2_om0` reaches **d′ = 4.374** with
 empirical-template amplitude **0.935**. This is close to R5 on `base64_om0` (4.358 / 0.940) and to the
@@ -242,8 +273,9 @@ architecture effect.
 ```{figure} figures/recipe_convergence.png
 :label: fig-recipe-convergence
 **Single-seed compound-recipe screen.** d′ versus windows seen (left) and estimated GPU-hours (right)
-on the fixed `base64_om0` body. R5 has the lowest interpolated time to 4.30, but exact timing,
-replication, and batch-only controls are required to attribute the difference.
+on the fixed `base64_om0` body. R5 has the lowest interpolated time to 4.30; the matched-seed result
+above supersedes this one-seed endpoint ordering, while batch-only controls remain required for
+causal attribution.
 ```
 
 ```{figure} figures/recipe_convergence_loglog.png
@@ -263,9 +295,11 @@ negative pairs. Estimated gradient-noise scale is below six early, but exceeds t
 
 The estimates are not monotone and are unresolved at three checkpoints because the finite-K noise
 term is as large as the observed mean-gradient norm. With K=4, the sample covariance also has rank at
-most three. These diagnostics therefore support testing late larger-batch integration, but they do
-not identify a precise schedule and do not justify a parameter-space preconditioner. Adaptive,
-fixed-effective-batch, physical-batch, and objective-preserving sampling controls are running.
+most three. R8's scored endpoint is d′ = 4.383, but it uses the same seed as the original R1 run and
+adds diagnostic probes, so it is not an independent recipe replicate. These diagnostics support
+testing late larger-batch integration, but they do not identify a precise schedule and do not justify
+a parameter-space preconditioner. Adaptive, fixed-effective-batch, physical-batch, and
+objective-preserving sampling controls have completed training and remain in benchmark scoring.
 
 ```{figure} figures/ib_r8_gradstats_gradient_diagnostics.png
 :label: fig-gradient-diagnostics

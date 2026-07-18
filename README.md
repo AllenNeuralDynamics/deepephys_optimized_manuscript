@@ -4,9 +4,9 @@ A [MyST Markdown](https://mystmd.org) publication: an optimisation of the DeepIn
 denoiser for Neuropixels spike detection — with a focus on protecting the weaker, low-amplitude
 units — together with a fully reproducible **train → score → figure** pipeline.
 
-> **Status:** the architecture screen, initial recipe screen, original-network reference, and two
-> long-duration trajectories are scored. Recipe replications, gradient diagnostics, and a
-> matched-L2 weighting screen are running.
+> **Status:** the architecture screen, initial recipe screen, R0/R1/R5 recipe replications,
+> gradient diagnostics, original-network reference, and two long-duration trajectories are scored.
+> The matched-L2 weighting endpoints and adaptive-method controls remain in HPC scoring.
 
 ## Why this repo exists
 

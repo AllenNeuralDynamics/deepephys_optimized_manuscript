@@ -33,12 +33,16 @@ and `origdi` combines the highest template SNR with the lowest d′. The appropr
 that greater noise suppression necessarily harms detection, but that this SNR ratio cannot select a
 model for the matched-filter objective.
 
-## Training optimization remains open
+## Training optimization has a provisional compound-recipe lead
 
-The initial recipe experiment is a single-seed compound screen. R5 has the lowest estimated time to
-d′ = 4.30, but it changes physical batch, learning rate, and warmup together, and checkpoint
-times are inferred. Replications with exact telemetry and batch-only/fixed-effective-batch controls
-are underway. Until those results land, no recipe is established as faster in expectation.
+The matched-seed replications narrow the initial recipe result. Warmup alone is not supported as an
+endpoint improvement: R1 averages −0.0031 d′ relative to R0 and improves only one of three paired
+seeds. R5 averages +0.0043 d′, improves all three paired seeds, has the smallest seed SD, and reaches
+d′ = 4.30 after 2.25 M median windows versus 5.38 M for R0. The endpoint effect is nevertheless small
+relative to seed spread, and with three pairs the exact two-sided sign-flip result cannot be smaller
+than p = 0.25. R5 also changes physical batch, learning rate, and warmup together. It is therefore a
+provisional compound-recipe lead, not evidence that batch size alone causes the gain. The batch-only
+and fixed-effective-batch controls now in scoring are required for that attribution.
 
 R8 provides a measurement-level reason to test those controls: microbatch gradients are strongly
 aligned early but weakly aligned or conflicting late, and late noise-scale estimates sometimes exceed
@@ -61,7 +65,8 @@ injected units. Fixed extraction makes comparisons reproducible but does not pro
 overfitting of design decisions to this benchmark. Second, matched-filter d′ is a detection surrogate
 measured before common-median referencing; it is not sorter-level precision, recall, unit yield, or
 waveform stability. Third, many Tier 2 rows have one training seed, exploratory Welch tests are not
-multiple-comparison corrected, and the weak-unit analysis contains four post hoc selected units.
+multiple-comparison corrected, the recipe replication has only three paired seeds, and the weak-unit
+analysis contains four post hoc selected units.
 Finally, long-duration evidence uses a different body from the architecture and recipe candidates.
 
 ## Practical interpretation
@@ -69,6 +74,7 @@ Finally, long-duration evidence uses a different body from the architecture and 
 For this benchmark and short budget, `base64` is the best replicated choice for the all-unit mean;
 omission0 is the clearest tested configuration for preserving weak-unit amplitude and detectability;
 `arch_l2_om0` is a balanced candidate that combines those properties but does not dominate every unit.
-The modern package outperforms `origdi` under the matched-filter proxy on this benchmark. Stronger claims
-require a prespecified held-out recording, exact replicated recipe
-timing, long-budget validation of the selected body, and end-to-end spike-sorter evaluation.
+Among the replicated training recipes, R5 is the provisional compound-recipe choice and warmup alone
+is not supported. The modern package outperforms `origdi` under the matched-filter proxy on this
+benchmark. Stronger claims require a prespecified held-out recording, causal recipe controls,
+long-budget validation of the selected body, and end-to-end spike-sorter evaluation.

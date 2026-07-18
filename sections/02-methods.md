@@ -37,7 +37,7 @@ The study contains three related but non-equivalent experiments:
 | family | model body | training budget | replication | question |
 |---|---|---|---|---|
 | architecture screen | 21 short-budget configurations | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
-| recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; replications running | which tested compound recipe reaches a d′ target fastest? |
+| recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; R0/R1/R5 completed at three matched seeds | which tested compound recipe reaches a d′ target fastest? |
 | duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
 
 The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
@@ -186,6 +186,12 @@ base32 ±2-SD interval (d′ SD 0.015; amplitude SD 0.004) is used as a descript
 not as a confidence interval or an electrophysiological noise floor. Welch tests are exploratory,
 unadjusted comparisons among replicated configurations; single-seed Tier 2 rows carry no inferential
 error bar.
+
+The recipe replication pairs R0, R1, and R5 by seed index and reports seed-level endpoint
+differences, target crossings versus windows seen, and an exact two-sided sign-flip test. With only
+three paired seeds, the smallest attainable two-sided sign-flip p-value is 0.25; these comparisons
+are therefore directional effect estimates, not confirmatory tests. The ten benchmark units provide
+paired within-model resolution but are not independent training replicates.
 
 The short-budget screen saved a validation-loss-selected `best_model` and a terminal model. For all
 33 available Tier 1/2/original runs with both manifests, the selected checkpoint was the terminal
