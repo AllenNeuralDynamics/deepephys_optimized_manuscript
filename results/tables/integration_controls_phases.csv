@@ -1,0 +1,5 @@
+start_samples,end_samples,effective_batch,decision
+0,8999744,64,initial
+8999744,10799744,128,resolved
+10799744,14399616,512,resolved
+14399616,17999616,256,resolved

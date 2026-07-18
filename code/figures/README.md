@@ -12,6 +12,7 @@ regenerate deterministically.
 | `architecture_evolution.py` | render the three-panel current topology, architecture evolution, and NAF-stage comparison |
 | `recipe_convergence.py` | compare recipe trajectories and bootstrap paired GT-unit endpoint differences |
 | `recipe_replication.py` | compare R0/R1/R5 across three matched training seeds, sample budgets, and waveform metrics |
+| `integration_controls.py` | compare R9 adaptive accumulation and R11 physical batch with matched R1 endpoints, trajectories, units, and compute |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |
 | `make_figures.py` | architecture ranking, template-SNR/d′, unit-quality, heatmap, and duration figures |

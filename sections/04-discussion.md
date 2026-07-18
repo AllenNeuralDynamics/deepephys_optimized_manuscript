@@ -42,15 +42,22 @@ d′ = 4.30 after 2.25 M median windows versus 5.38 M for R0. The endpoint effec
 relative to seed spread, and with three pairs the exact two-sided sign-flip result cannot be smaller
 than p = 0.25. R5 also changes physical batch, learning rate, and warmup together. It is therefore a
 provisional compound-recipe lead, not evidence that batch size alone causes the gain. The batch-only
-and fixed-effective-batch controls now in scoring are required for that attribution.
+control now narrows that interpretation: R11 is 12% faster than matched R1 but lowers seed-0 d′ by
+0.0205. Because its endpoint remains inside the observed R1 seed range and only one R11 seed exists,
+this is a speed/quality signal rather than a replicated physical-batch effect. The fixed accumulated
+effective-batch control still in scoring is required to distinguish physical batching from
+accumulation.
 
 R8 provides a measurement-level reason to test those controls: microbatch gradients are strongly
 aligned early but weakly aligned or conflicting late, and late noise-scale estimates sometimes exceed
 the physical batch. The estimates are intermittent and unstable with four microbatches, so they
-motivate rather than determine the controller. An adaptive integration run now holds its prior horizon
-when a measurement is unresolved; fixed effective batch, physical batch, and corrected importance
-sampling provide the corresponding controls. The rank-three sample covariance cannot establish that
-Shampoo, K-FAC, or another non-diagonal preconditioner is warranted.
+motivate rather than determine the controller. R9 responds to the late noise-scale rise by stepping
+from effective batch 64 through 128 and 512 before settling at 256. It preserves matched seed-0 d′
+with 37.5% fewer optimizer updates, but does not improve the endpoint or durable convergence, and its
+mean hides large opposing unit changes. This supports adaptive accumulation as an update-compression
+mechanism, not as a demonstrated detection gain. Fixed effective batch and corrected importance
+sampling remain the corresponding pending controls. The rank-three sample covariance cannot establish
+that Shampoo, K-FAC, or another non-diagonal preconditioner is warranted.
 
 The duration evidence is narrower still: it consists of one om0 and one om1 `support_all` + L2
 trajectory. In those runs amplitude stabilizes early while d′ remains duration-sensitive, and om1 is

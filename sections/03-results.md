@@ -3,9 +3,10 @@
 :::{note} Current state
 The 21-configuration architecture screen, initial six-recipe screen, original-network reference, and
 two long-duration trajectories are scored. The R0/R1/R5 recipe replications and R8 gradient
-diagnostics are also scored and included below. The matched-L2 weighting endpoints and R9–R12 method
-controls remain in HPC scoring and are not included. All results use the same AP-band `recording1_3`
-hybrid benchmark;
+diagnostics are also scored and included below. R9 adaptive accumulation and R11 physical-batch
+control are scored and included below. The matched-L2 weighting endpoints, R10 importance sampling,
+and R12 fixed-effective-batch control remain in HPC scoring; R13 NAF training is also pending. All
+results use the same AP-band `recording1_3` hybrid benchmark;
 the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
 :::
 
@@ -308,6 +309,46 @@ physical batch at several late checkpoints, while mean pairwise cosine falls fro
 Missing noise-scale points indicate unresolved signal after finite-K correction. The covariance
 spectrum is limited to at most three nonzero sample-space components because only four microbatches
 were measured; it is not evidence for a low-rank parameter-space optimizer.
+```
+
+## Adaptive accumulation compresses updates without an endpoint gain
+
+R9 and R11 use the same seed-0 body, objective, learning rate, warmup, and ~18 M-window budget as R1.
+R9 changes the effective-batch schedule through adaptive accumulation and runs its controller
+diagnostics; R11 changes the physical batch from 64 to 256. Their endpoints and costs are:
+
+| method | endpoint d′ | Δd′ vs matched R1 | optimizer updates | update reduction | Code Ocean runtime |
+|---|---:|---:|---:|---:|---:|
+| R1 warmup, batch 64 | 4.3651 | — | 281,244 | — | 2.80 h |
+| R9 adaptive accumulation | 4.3656 | +0.0005 | 175,778 | 37.5% | 2.70 h |
+| R11 physical batch 256 | 4.3446 | −0.0205 | 70,308 | 75.0% | 2.46 h |
+
+R9 holds effective batch 64 through 9.0 M windows, then uses 128 to 10.8 M, 512 to 14.4 M, and 256
+for the remainder. It preserves the matched R1 endpoint while removing 37.5% of optimizer updates,
+but serial accumulation still processes every physical microbatch and reduces total Code Ocean time
+by only 3.4%. Detection and waveform aggregates are essentially unchanged: Δd′_fixed = +0.0016,
+Δamp = −0.0005, Δtemporal cosine = +0.00004, and Δspatial cosine = +0.00002.
+
+The apparent early R9 crossing is not durable. It first interpolates through d′ = 4.30 at 2.94 M
+windows, then drops to 4.278 at 6.05 M; the first scored state after which it stays above 4.30 is
+10.43 M, versus 5.75 M for R1. R11 first reaches 4.30 at 6.31 M and does not reach 4.35. These
+crossings are descriptive because R1 has 12 scheduled states while R9/R11 have 24.
+
+The endpoint means also hide opposing unit effects. R9 improves only 2/10 units relative to matched
+R1 (median Δd′ = −0.0055): unit 2143 gains +0.150 while unit 793 loses −0.098. R11 improves 3/10
+units (median −0.0050), with its mean loss dominated by unit 793 (−0.147). R9 exceeds R11 by +0.021
+in the all-unit mean but by only +0.0007 at the median unit. Finally, both single-run endpoints lie
+inside the observed three-seed R1 range (4.3426–4.3662), so neither establishes a method effect in
+expectation.
+
+```{figure} figures/integration_controls.png
+:label: fig-integration-controls
+**Adaptive accumulation and physical-batch controls.** **A**, d′ trajectories against equal windows
+seen; faint grey lines show the three R1 seeds. **B**, both single-run control endpoints lie within
+the observed R1 seed range. **C**, paired unit effects show that aggregate differences are driven by
+opposing changes in a few strong units. **D**, R9 changes effective batch late, whereas R11 remains at
+physical batch 256. R12 fixed accumulated batch 256 remains pending and is needed for causal
+separation of physical-batch and accumulation effects.
 ```
 
 ## Do the two omission trajectories stabilize with longer training?

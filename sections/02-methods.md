@@ -30,14 +30,15 @@ This is legitimate because DeepInterpolation is self-supervised (blind-spot): gr
 labels are used only for *scoring*, never for training. Per-recording train = evaluate is the intended
 deployment, not label leakage.
 
-## Three experiment families
+## Experiment families
 
-The study contains three related but non-equivalent experiments:
+The study contains four related but non-equivalent experiments:
 
 | family | model body | training budget | replication | question |
 |---|---|---|---|---|
 | architecture screen | 21 short-budget configurations | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
 | recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; R0/R1/R5 completed at three matched seeds | which tested compound recipe reaches a d′ target fastest? |
+| integration controls | `base64_om0` with the R1 recipe | the same ~18 M windows | one seed per control; R9/R11 scored, R12 pending | do adaptive accumulation or physical batch 256 improve detection or only compress optimizer updates? |
 | duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
 
 The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
@@ -50,6 +51,15 @@ covariance trace and spectrum, and a finite-K-corrected gradient-noise scale. Be
 sample-space covariance has rank at most three and individual noise-scale estimates can be unresolved.
 These measurements diagnose when gradient disagreement grows; they are not per-example gradients and
 do not by themselves define an optimal batch schedule.
+
+**Integration controls.** R9 keeps the R1 physical batch of 64 and maps a log-EMA of the measured
+gradient-noise scale to a power-of-two accumulation target; unresolved measurements retain the prior
+target. R11 instead uses physical batch 256 with no accumulation. Both retain the R1 seed, model,
+Charbonnier objective, learning rate, 3% warmup, sample-progress schedule, and ~18 M-window budget.
+They are compared at equal windows seen and on endpoint d′ and waveform fidelity. Checkpoints within
+a trajectory are repeated states of one training run, not independent replicates; the three R1 seeds
+provide descriptive seed-scale context only. R12, the fixed accumulated effective-batch-256 control,
+is required to separate physical-batch effects from accumulation and remains in scoring.
 
 ## Architecture and the swept variants
 
