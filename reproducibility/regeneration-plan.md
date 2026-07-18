@@ -8,7 +8,7 @@ decisions and later report-driven reprioritization. The authoritative execution 
 
 **Status:** architecture and initial recipe screens executed; later replication and optimization
 experiments tracked in `results/runs.csv`.
-Last updated: 2026-07-17
+Last updated: 2026-07-18
 
 ---
 
@@ -120,6 +120,15 @@ All keep the **charbonnier (eps=0.4)** base loss; the spike-weight only re-weigh
 **Original planned counts:** 37 short + 2 long-duration runs = **39 total**. Later adaptive additions
 are recorded in `results/runs.csv`.
 **Loss coverage:** 6 charbonnier↔L2 matched pairs (base, omission, capacity, best-arch, fuse, SNR-trap); pure L2 = 10 short + 2 scale; charbonnier = 27 short (6 of them spike-weighted).
+
+### Exploratory architecture follow-up added 2026-07-18
+
+`ib_r13_naf58` replaces only the center-excluded temporal U-Net's residual double-convolution stages
+with 1-D NAF-style gated restoration blocks [@chen2022nafnet]. The center-frame `ConvHole1D` branch, pointwise fusion,
+Charbonnier objective, R5 training recipe, sample budget, and checkpoint schedule remain fixed.
+`base_channels=58` gives 3,162,950 parameters, +0.42% versus the 3,149,704-parameter R5/R0 body;
+this is therefore the capacity-matched architecture control. It is exploratory and must pass the
+same blind-spot derivative check and frozen d′/waveform trajectory scoring as the existing recipes.
 
 ### Deliberately excluded (were within-noise "does X stack on Y" combos in the old report)
 `fuse128/1024`, `archL3`, `fuse256_tmult8`, `fuse256_wL3/fuse512_wL3`, `uL30/300`, `support_sd_l2`. Pull any back if a section needs it.

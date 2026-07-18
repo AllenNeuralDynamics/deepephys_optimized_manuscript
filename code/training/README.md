@@ -26,7 +26,9 @@ override, seeds, and training loss for each, is the pre-registered table in
 - SUPPORT wiring — `bs_stage`, `bs_dense`, `bs_multiscale`.
 - spike-weighting — `spike_weight`, `spike_weight_gamma`, `spike_weight_thresh`,
   `spike_weight_car`, `spike_weight_hard`.
-- `norm` — `group` (default) or `none`; `temporal_mult`.
+- temporal U-Net — `norm` (`group` or `none`), `temporal_mult`, and `temporal_block`
+    (`doubleconv` by default or the 1-D NAF-style `naf` control). The NAF switch does not alter the
+    center-frame blind-spot branch, pointwise fuse head, target, or self-supervised loss.
 
 ## Launch body
 
