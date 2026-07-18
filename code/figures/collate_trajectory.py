@@ -26,6 +26,8 @@ REPO = Path(__file__).resolve().parents[2]
 def checkpoint_metadata(label: str) -> tuple[dict[int, dict], dict[str, dict]]:
     path = REPO / "models" / label / "manifest.json"
     if not path.exists():
+        path = REPO / "models" / label / "checkpoint_manifest.json"
+    if not path.exists():
         return {}, {}
     items = json.loads(path.read_text()).get("checkpoints", [])
     by_step = {int(item["step"]): item for item in items if item.get("step") is not None}
@@ -83,7 +85,7 @@ def main() -> None:
         md = df.to_markdown(index=False, floatfmt=".4f")
     except Exception:  # tabulate not installed
         md = df.to_csv(index=False)
-    (out / f"{args.label}_trajectory.md").write_text(md + "\n")
+    (out / f"{args.label}_trajectory.md").write_text(md.rstrip() + "\n")
 
     print(df.to_string(index=False))
     print(f"\nwrote {len(df)} rows -> {out / (args.label + '_trajectory.csv')}")
