@@ -1,11 +1,12 @@
 # Results
 
 :::{note} Current state
-All planned Code Ocean training and all 610 HPC scoring jobs are complete. The analyses below include
-the 21-configuration architecture screen, six-recipe screen, original-network reference, R0/R1/R5
-recipe replications, R8 gradient diagnostics, four integration and sampling controls, the
-capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two long-duration
-trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
+All Code Ocean training and all 610 HPC scoring jobs underlying the analyses below are complete. Two
+post-report width-96 controls (`omission=0/1`) are training and are not included here. The completed
+analyses include the 21-configuration architecture screen, six-recipe screen, original-network
+reference, R0/R1/R5 recipe replications, R8 gradient diagnostics, four integration and sampling
+controls, the capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two
+long-duration trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
 the raw reference is **d′ = 4.497**. `results/tables/master_table.csv` contains all 78 completed
 endpoint runs with experiment-family and budget labels; `table_coverage.csv` records the sole
 exclusion, the intentionally aborted R7 run. The global table is an inventory rather than one causal
