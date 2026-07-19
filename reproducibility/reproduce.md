@@ -78,18 +78,6 @@ nested `best` scores from trajectory/control runs, and writes a ledger coverage 
 their exact inputs/outputs are documented in
 [`code/figures/`](../code/figures/README.md).
 
-The validation-loss headroom decomposition requires the inference environment and a GPU because it
-reruns the exact fixed validation subset:
-
-```bash
-sbatch code/scoring/validation_loss_headroom.sbatch \
-  code/scoring/validation_loss_headroom.py <r5_best_model.pt> \
-  results/tables/validation_loss_headroom_raw.csv
-python code/figures/validation_loss_headroom.py
-```
-
-The scoring script rejects the result unless recomputed validation loss matches the checkpoint.
-
 ## 6. Build the manuscript (local HTML site)
 
 ```bash

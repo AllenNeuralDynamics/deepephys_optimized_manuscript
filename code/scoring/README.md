@@ -8,12 +8,14 @@ here verbatim.
 |---|---|---|
 | `run_ckpt.sbatch` | `sbatch run_ckpt.sbatch <ckpt_abs> <out_dprime.csv>` | d′ CSV: `unit_id, …, dprime_deep, dprime_deep_fixed, …` |
 | `template_diag.sbatch` | `sbatch template_diag.sbatch <ckpt_abs> <prefix>` | `<prefix>_diag.csv`: `…, amp_ratio, fwhm_ratio, temporal_cos, spatial_cos, …` |
-| `validation_loss_headroom.sbatch` | `sbatch validation_loss_headroom.sbatch <analysis.py> <ckpt_abs> <out.csv>` | exact-validation spike-support loss decomposition and per-unit support audit |
+| `validation_loss_headroom.sbatch` | `sbatch validation_loss_headroom.sbatch <analysis.py> <ckpt_abs> <out.csv>` | exploratory GT-support/off-GT residual contrast; not a manuscript analysis |
 
 Both hardcode the S3 benchmark path (`aind-benchmark-data/…ProbeC-AP_recording1_3`) and use the
 inference model definition from `aind-ephys-deepinterpolation-inference` (keep it in sync with the
 training `model.py`). `validation_loss_headroom.py` additionally reconstructs the checkpoint's fixed
 validation sampler and rejects a result if its aggregate loss does not match the stored checkpoint.
+Its off-GT reference conflates independent noise, correlated background, and unlabeled native spikes;
+the retained outputs are an audit artifact, not a four-component loss decomposition.
 
 ## Vendor from HPC
 

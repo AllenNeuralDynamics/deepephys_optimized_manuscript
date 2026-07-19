@@ -1,7 +1,7 @@
 # Figures
 
 Manuscript figure assets, generated **in-domain** from the scored CSVs by the scripts in
-[`../code/figures/`](../code/figures/README.md). The report currently contains 15 figure directives;
+[`../code/figures/`](../code/figures/README.md). The report currently contains 14 figure directives;
 the authoritative collection is the set of directives in `sections/`. The original 10-figure and
 five-table quantification plan is retained in [](../reproducibility/regeneration-plan.md) §6.
 

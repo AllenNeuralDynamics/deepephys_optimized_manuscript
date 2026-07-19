@@ -21,9 +21,7 @@ abstract: |
   adaptive accumulation and objective-preserving importance sampling matched the warmup endpoint,
   but importance sampling required 2.2× the runtime; physical and accumulated effective batch 256
   both finished lower. A capacity-matched NAF temporal block was 0.022 d′ lower and 41% slower than
-  matched seed-0 DoubleConv despite nearly identical validation loss. On the exact R5 validation set,
-  eliminating all spike-support loss above the same-channel off-spike floor would lower mean loss by
-  only $1.58\times10^{-5}$; the NAF loss difference is 18% of that ceiling. Corrected soft magnitude
+  matched seed-0 DoubleConv despite nearly identical validation loss. Corrected soft magnitude
   weighting at λ = 3 gave a +0.0055 d′ lead within unweighted seed spread, while stronger weighting
   reduced d′ by as much as 0.262 and could distort template shape. Absolute self-template d′ is
   in-sample optimistic because template estimation and hit scoring reuse events. The conclusions are
