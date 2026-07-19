@@ -19,6 +19,12 @@ The `validation_loss_*` files are retained as exploratory audit artifacts and ar
 inputs. Their off-GT reference combines independent noise, correlated background, and unlabeled
 native spikes, so they must not be interpreted as a spike-reconstruction floor.
 
+`channel_schedule_gpu_benchmark.csv`, its metadata JSON, and
+`channel_schedule_gpu_summary.{csv,md}` are exploratory synthetic-batch compute measurements for
+alternative temporal U-Net channel pyramids. They quantify parameters, training-step throughput,
+and peak GPU allocation only; they provide no evidence that a schedule preserves validation loss,
+waveform fidelity, or d′.
+
 The global master table is an evidence inventory, not an omnibus causal ranking. Filter on
 `experiment_family` and `budget_group`, then use the dedicated matched-control summaries for recipe,
 integration, NAF, and corrected-weighting conclusions.

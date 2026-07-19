@@ -15,6 +15,7 @@ regenerate deterministically.
 | `integration_controls.py` | compare R9–R12 adaptive, sampling, physical-batch, and accumulated-batch controls with matched R1 endpoints, trajectories, units, and compute |
 | `naf_control.py` | compare the capacity-matched R13 NAF temporal block with the three R5 DoubleConv seeds, loss curves, units, and runtime |
 | `weighting_controls.py` | compare corrected matched-L2 weighting endpoints, waveform fidelity, seed context, and paired unit effects |
+| `channel_schedule_benchmark.py` | summarize exploratory synthetic-GPU throughput/memory for width-96 channel pyramids; does not measure d′ |
 | `validation_loss_headroom.py` | exploratory GT-support/off-GT contrast; retained for audit but excluded from the manuscript because off-GT data mix multiple signal/noise sources |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |

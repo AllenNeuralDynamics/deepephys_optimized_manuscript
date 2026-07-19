@@ -1,0 +1,19 @@
+{
+  "slurm_job_id": 23242348,
+  "state": "COMPLETED",
+  "exit_code": "0:0",
+  "elapsed_seconds": 66,
+  "host": "n202",
+  "started_at": "2026-07-19T09:54:47-07:00",
+  "device": "NVIDIA GeForce GTX 1080 Ti",
+  "device_memory_mib": 11264,
+  "torch_version": "2.5.1+cu121",
+  "warmup_steps": 5,
+  "timed_steps": 20,
+  "batch_sizes": [64, 128, 256],
+  "benchmark_scope": "Synthetic random input/target AdamW training steps; measures compute and memory only, not model quality.",
+  "benchmark_script_sha256": "d05778f3f68d2b811f6f93048a49381e29c4007422106715b7696c6a7012c0ff",
+  "model_source_sha256": "c096309519c7c6e333396994253cef2fb621a673485606f6dd9146bb40b0ef0e",
+  "checkpoint_sha256": "94826fb45507b49ed10ef031c5268325b8e1b1771852d5a3ba80344213be92a8",
+  "result_sha256": "7daf4cac54b56c76c66815cbbb9d6cf3531db72df281e1e6f61b705601eef777"
+}
