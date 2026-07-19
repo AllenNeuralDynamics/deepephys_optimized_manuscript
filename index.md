@@ -14,16 +14,20 @@ abstract: |
   the largest replicated gain in the all-unit mean (+0.105 d′), whereas the compound `omission0`
   configuration, which routes t±1 through the temporal branch, produced the larger gain among four
   weak units (+0.148 d′) and improved amplitude preservation toward raw. Across architectures,
-  change in template SNR did not rank change in d′ (Spearman
-  ρ = 0.02). In a three-seed matched replication, warmup alone did not improve the endpoint
-  consistently, whereas a compound batch-256 recipe improved mean d′ by 0.004 in all three paired
-  seeds and reached d′ = 4.30 after a median 2.25 M versus 5.38 M windows for baseline. The effect is
-  small, the sample contains only three seeds, and simultaneous batch, learning-rate, and warmup
-  changes prevent causal attribution. In two longer `support_all` trajectories, amplitude stabilized
-  early while d′ remained duration-sensitive at 3.3 M updates. These results are specific to one
-  hybrid benchmark and a matched-filter proxy;
-  held-out recordings and sorter-level validation remain necessary. The versioned train → score →
-  figure pipeline is reproducible from this repository.
+  change in template SNR did not rank change in d′ (Spearman ρ = 0.02). In a three-seed matched
+  replication, warmup alone did not improve the endpoint consistently, whereas a compound batch-256
+  recipe improved mean d′ by 0.004 in all three pairs and reached d′ = 4.30 after a median 2.25 M
+  versus 5.38 M windows for baseline. Four single-seed controls did not isolate a better method:
+  adaptive accumulation and objective-preserving importance sampling matched the warmup endpoint,
+  but importance sampling required 2.2× the runtime; physical and accumulated effective batch 256
+  both finished lower. A capacity-matched NAF temporal block was 0.022 d′ lower and 41% slower than
+  matched seed-0 DoubleConv despite nearly identical validation loss. Corrected soft magnitude
+  weighting at λ = 3 gave a +0.0055 d′ lead within unweighted seed spread, while stronger weighting
+  reduced d′ by as much as 0.262 and could distort template shape. Absolute self-template d′ is
+  in-sample optimistic because template estimation and hit scoring reuse events. The conclusions are
+  therefore specific to one hybrid benchmark and a matched-filter proxy; cross-fitted, held-out, and
+  sorter-level validation remain necessary. The versioned train → score → figure pipeline is
+  reproducible from this repository.
 ---
 
 ```{include} sections/01-introduction.md

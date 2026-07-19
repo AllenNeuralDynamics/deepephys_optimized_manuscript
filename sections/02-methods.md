@@ -32,13 +32,14 @@ deployment, not label leakage.
 
 ## Experiment families
 
-The study contains four related but non-equivalent experiments:
+The study contains five related but non-equivalent experiments:
 
 | family | model body | training budget | replication | question |
 |---|---|---|---|---|
 | architecture screen | 21 short-budget configurations | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
 | recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; R0/R1/R5 completed at three matched seeds | which tested compound recipe reaches a d′ target fastest? |
-| integration controls | `base64_om0` with the R1 recipe | the same ~18 M windows | one seed per control; R9/R11 scored, R12 pending | do adaptive accumulation or physical batch 256 improve detection or only compress optimizer updates? |
+| integration controls | `base64_om0` with the R1 recipe | the same ~18 M gradient windows; R10 additionally screens 4× candidates | one seed per control | do adaptive accumulation, importance sampling, or effective batch 256 improve detection or only alter compute? |
+| corrected weighting screen | `arch_l2_om0`, L2 objective | ~18 M windows | one seed per arm; three unweighted seeds provide context | can center-excluded spike weighting improve amplitude or d′ without waveform distortion? |
 | duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
 
 The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
@@ -52,14 +53,25 @@ sample-space covariance has rank at most three and individual noise-scale estima
 These measurements diagnose when gradient disagreement grows; they are not per-example gradients and
 do not by themselves define an optimal batch schedule.
 
-**Integration controls.** R9 keeps the R1 physical batch of 64 and maps a log-EMA of the measured
-gradient-noise scale to a power-of-two accumulation target; unresolved measurements retain the prior
-target. R11 instead uses physical batch 256 with no accumulation. Both retain the R1 seed, model,
-Charbonnier objective, learning rate, 3% warmup, sample-progress schedule, and ~18 M-window budget.
-They are compared at equal windows seen and on endpoint d′ and waveform fidelity. Checkpoints within
-a trajectory are repeated states of one training run, not independent replicates; the three R1 seeds
-provide descriptive seed-scale context only. R12, the fixed accumulated effective-batch-256 control,
-is required to separate physical-batch effects from accumulation and remains in scoring.
+**Integration and sampling controls.** R9 keeps the R1 physical batch of 64 and maps a log-EMA of the
+measured gradient-noise scale to a power-of-two accumulation target; unresolved measurements retain
+the prior target. R10 screens four uniformly sampled candidate batches under `no_grad`, samples one
+batch from a uniform/loss-proportional proposal mixture, and applies inverse-probability correction so
+the expected gradient remains the original uniform objective. R11 uses physical batch 256 with no
+accumulation; R12 uses physical batch 64 with fixed accumulation 4, giving the same effective batch
+of 256. All retain the R1 seed, model, Charbonnier objective, learning rate, 3% warmup,
+sample-progress schedule, and ~18 M gradient-window budget. They are compared at equal gradient
+windows seen, endpoint d′, waveform fidelity, and runtime; R10's 72 M screened candidates are also
+reported as compute. Checkpoints within a trajectory are repeated states of one training run, not
+independent replicates; the three R1 seeds provide descriptive seed-scale context only.
+
+**Corrected weighting screen.** Seven arms use the same `arch_l2_om0` body, seed 0, L2 objective,
+sample budget, and training recipe as the unweighted anchor. Soft magnitude weights use
+`1 + λ|neighbour|`; soft and hard position gates use center-excluded spatial neighbours after CAR,
+with thresholds of 5× and 8× the robust background scale, respectively. We test magnitude λ = 3,
+10, 30; soft-gate λ = 100, 300, 1000; and hard-gate λ = 1000. The weights never use the target
+channel's own center sample, preserving the blind-spot objective. These are single-seed endpoint
+screens; the three unweighted seeds provide descriptive variation, not an inferential error bar.
 
 ## Architecture and the swept variants
 
@@ -97,7 +109,7 @@ temporal neighbours and a separate centre-frame `ConvHole1D` branch; pointwise f
 self-supervised blind spot. **B**, the principal representation changes from original
 DeepInterpolation through `base32` to the replicated `base64_om0` R5 body. **C**, the capacity-matched
 R13 follow-up replaces only the temporal `DoubleConv1d` stages with 1-D NAF-style gated restoration
-blocks [@chen2022nafnet]. R13 is exploratory and its benchmark result is pending; training-recipe
+blocks [@chen2022nafnet]. R13 is exploratory; training-recipe
 changes are intentionally excluded from this architecture figure.
 ```
 
@@ -128,7 +140,7 @@ explicit combination rows test whether selected effects stack. All runs are enum
 | blind-spot frames | `ho` | `bs_frames=1` (1-frame blind spot) |
 | SUPPORT wiring | `support_sd`, `support_all` | `bs_stage=1 bs_dense=1` (+ `bs_multiscale=1`) |
 | temporal omission | `omission0` | route t±1 through the temporal U-Net, drop t±31, and reduce the spatial branch from {t−1,t,t+1} to {t} |
-| temporal block (exploratory follow-up) | `ib_r13_naf58` | `temporal_block=naf base_channels=58`; capacity-matched to `base64_om0`, results pending |
+| temporal block (exploratory follow-up) | `ib_r13_naf58` | `temporal_block=naf base_channels=58`; capacity-matched to `base64_om0` |
 | loss | `*_l2` pairs | `loss=l2` |
 
 The **SUPPORT wiring** options restore three pieces the `fold` reference dropped relative to the

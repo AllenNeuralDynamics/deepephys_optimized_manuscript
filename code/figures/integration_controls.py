@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare adaptive accumulation and physical-batch controls with R1."""
+"""Compare integration and objective-preserving sampling controls with R1."""
 from __future__ import annotations
 
 import json
@@ -18,7 +18,9 @@ FIGURES = REPO / "figures"
 CONTROLS = [
     ("R1", "ib_r1_warmup", "R1 warmup, batch 64", 64, "#303437"),
     ("R9", "ib_r9_adaptive", "R9 adaptive accumulation", 64, "#168578"),
+    ("R10", "ib_r10_importance", "R10 importance sampling", 64, "#7B5EA7"),
     ("R11", "ib_r11_batchonly", "R11 physical batch 256", 256, "#C75A31"),
+    ("R12", "ib_r12_fixed256", "R12 accumulated batch 256", 64, "#C7932F"),
 ]
 R1_REPLICATES = ["ib_r1_warmup", "ib_r1_s1", "ib_r1_s2"]
 TARGETS = (4.20, 4.30, 4.35)
@@ -27,7 +29,9 @@ BUDGETS = ((1_000_000, "1m"), (5_000_000, "5m"),
 CO_RUNTIME_S = {
     "ib_r1_warmup": 10_061,
     "ib_r9_adaptive": 9_716,
+    "ib_r10_importance": 22_059,
     "ib_r11_batchonly": 8_845,
+    "ib_r12_fixed256": 9_565,
 }
 BASELINE_UPDATES = 281_244
 
@@ -156,7 +160,7 @@ def build_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFra
 
     r1 = summary.loc[summary["method"] == "R1"].iloc[0]
     deltas = []
-    for method in ("R9", "R11"):
+    for method in ("R9", "R10", "R11", "R12"):
         candidate = summary.loc[summary["method"] == method].iloc[0]
         row = {"comparison": f"{method}-R1"}
         for metric in ("dprime_deep", "dprime_deep_fixed", "snr_deep", "amp_ratio",
@@ -168,8 +172,11 @@ def build_tables() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFra
     unit_rows = []
     pairs = (
         ("R9-R1", "ib_r9_adaptive", "ib_r1_warmup"),
+        ("R10-R1", "ib_r10_importance", "ib_r1_warmup"),
         ("R11-R1", "ib_r11_batchonly", "ib_r1_warmup"),
+        ("R12-R1", "ib_r12_fixed256", "ib_r1_warmup"),
         ("R9-R11", "ib_r9_adaptive", "ib_r11_batchonly"),
+        ("R12-R11", "ib_r12_fixed256", "ib_r11_batchonly"),
     )
     for name, candidate, baseline in pairs:
         paired = pd.concat([
@@ -216,7 +223,8 @@ def plot(summary: pd.DataFrame, unit_effects: pd.DataFrame,
     for label in R1_REPLICATES:
         _frame, values = endpoint(label)
         r1_values.append(values["dprime_deep"])
-    for x, method in enumerate(("R1", "R9", "R11")):
+    methods = ("R1", "R9", "R10", "R11", "R12")
+    for x, method in enumerate(methods):
         if method == "R1":
             values = np.asarray(r1_values)
             axis.scatter(np.full(len(values), x), values, color=colors[method], s=45)
@@ -227,20 +235,25 @@ def plot(summary: pd.DataFrame, unit_effects: pd.DataFrame,
             axis.scatter([x], [value], color=colors[method], s=70, marker="D")
     axis.axhspan(min(r1_values), max(r1_values), color="#8D9498", alpha=0.12,
                  label="R1 observed seed range")
-    axis.set_xticks(range(3), ["R1\n3 seeds", "R9\n1 seed", "R11\n1 seed"])
+    axis.set_xticks(range(len(methods)),
+                    ["R1\n3 seeds", "R9", "R10", "R11", "R12"])
     axis.set_ylabel("best-checkpoint mean d-prime")
-    axis.set_title("B  Both controls lie within R1 seed spread")
+    axis.set_title("B  All controls lie within R1 seed spread")
     axis.legend(frameon=False, fontsize=8, loc="lower left")
 
     axis = axes[1, 0]
-    selected = unit_effects[unit_effects["comparison"].isin(("R9-R1", "R11-R1"))]
+    comparisons = ("R9-R1", "R10-R1", "R11-R1", "R12-R1")
+    selected = unit_effects[unit_effects["comparison"].isin(comparisons)]
     order = (selected[selected["comparison"] == "R9-R1"]
              .sort_values("baseline_dprime")["unit_id"].tolist())
     positions = np.arange(len(order))
-    for offset, comparison, color in ((-0.18, "R9-R1", colors["R9"]),
-                                      (0.18, "R11-R1", colors["R11"])):
+    for offset, comparison, color in (
+            (-0.30, "R9-R1", colors["R9"]),
+            (-0.10, "R10-R1", colors["R10"]),
+            (0.10, "R11-R1", colors["R11"]),
+            (0.30, "R12-R1", colors["R12"])):
         frame = selected[selected["comparison"] == comparison].set_index("unit_id").loc[order]
-        axis.bar(positions + offset, frame["dprime_delta"], width=0.34,
+        axis.bar(positions + offset, frame["dprime_delta"], width=0.19,
                  color=color, label=comparison)
     axis.axhline(0, color="#555555", lw=1)
     axis.set_xticks(positions, [str(unit_id) for unit_id in order], rotation=45)
@@ -250,38 +263,28 @@ def plot(summary: pd.DataFrame, unit_effects: pd.DataFrame,
     axis.legend(frameon=False, fontsize=8)
 
     axis = axes[1, 1]
-    for row in phases.itertuples():
-        axis.hlines(row.effective_batch, row.start_samples / 1e6,
-                    row.end_samples / 1e6, color=colors["R9"], lw=4)
-        if row.end_samples < phases["end_samples"].max():
-            next_batch = int(phases.loc[
-                phases["start_samples"] == row.end_samples, "effective_batch"
-            ].iloc[0])
-            axis.vlines(row.end_samples / 1e6,
-                        min(row.effective_batch, next_batch),
-                        max(row.effective_batch, next_batch),
-                        color=colors["R9"], lw=2)
-    axis.hlines(256, 0, 17.998848, color=colors["R11"], lw=2.5, ls="--")
-    axis.text(0.4, 278, "R11 physical batch 256", color=colors["R11"], fontsize=8)
-    axis.set_yscale("log", base=2)
-    axis.set_yticks([64, 128, 256, 512], ["64", "128", "256", "512"])
-    axis.set_xlim(0, 18.2)
-    axis.set_ylim(52, 650)
-    axis.set_xlabel("training windows seen (millions)")
-    axis.set_ylabel("effective batch")
-    axis.set_title("D  R9 changes batch late; R11 is fixed")
-    r9 = summary.loc[summary["method"] == "R9"].iloc[0]
-    r11 = summary.loc[summary["method"] == "R11"].iloc[0]
-    axis.text(0.02, 0.96,
-              f"R9: {int(r9.optimizer_updates):,} updates, {r9.code_ocean_runtime_s/3600:.2f} h\n"
-              f"R11: {int(r11.optimizer_updates):,} updates, {r11.code_ocean_runtime_s/3600:.2f} h",
-              transform=axis.transAxes, fontsize=8, va="top",
-              bbox={"boxstyle": "round,pad=0.3", "facecolor": "white",
-                    "edgecolor": "none", "alpha": 0.9})
+    for row in summary.itertuples():
+        runtime_h = row.code_ocean_runtime_s / 3600
+        axis.scatter(runtime_h, row.dprime_deep, s=75, color=colors[row.method],
+                     marker="D" if row.method != "R1" else "o", zorder=3)
+        offset = (-28, 4) if row.method == "R10" else (5, 4)
+        axis.annotate(row.method, (runtime_h, row.dprime_deep), xytext=offset,
+                      textcoords="offset points", fontsize=8, color=colors[row.method])
+    r1_seed_values = []
+    for label in R1_REPLICATES:
+        _frame, values = endpoint(label)
+        r1_seed_values.append(values["dprime_deep"])
+    axis.axhspan(min(r1_seed_values), max(r1_seed_values),
+                 color="#8D9498", alpha=0.12)
+    axis.set_xlabel("Code Ocean runtime (hours)")
+    axis.set_ylabel("best-checkpoint mean d-prime")
+    axis.set_title("D  Runtime versus endpoint detection")
+    axis.set_xlim(2.2, 6.5)
 
     for axis in axes.flat:
         axis.grid(alpha=0.22, which="both")
-    figure.suptitle("Adaptive accumulation and physical-batch controls", fontweight="bold")
+    figure.suptitle("Integration and objective-preserving sampling controls",
+                     fontweight="bold")
     figure.tight_layout()
     figure.savefig(FIGURES / "integration_controls.png", dpi=180)
     plt.close(figure)

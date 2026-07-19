@@ -1,13 +1,14 @@
 # Results
 
 :::{note} Current state
-The 21-configuration architecture screen, initial six-recipe screen, original-network reference, and
-two long-duration trajectories are scored. The R0/R1/R5 recipe replications and R8 gradient
-diagnostics are also scored and included below. R9 adaptive accumulation and R11 physical-batch
-control are scored and included below. The matched-L2 weighting endpoints, R10 importance sampling,
-R12 fixed-effective-batch, and R13 NAF controls remain in HPC scoring. All
-results use the same AP-band `recording1_3` hybrid benchmark;
-the raw reference is **d′ = 4.497**. Full ledger: `results/tables/master_table.csv`.
+All planned Code Ocean training and all 610 HPC scoring jobs are complete. The analyses below include
+the 21-configuration architecture screen, six-recipe screen, original-network reference, R0/R1/R5
+recipe replications, R8 gradient diagnostics, four integration and sampling controls, the
+capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two long-duration
+trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
+the raw reference is **d′ = 4.497**. The full run ledger is `results/runs.csv`; architecture,
+integration, NAF, and weighting summaries are in `results/tables/master_table.csv`,
+`integration_controls_summary.csv`, `naf_control_summary.csv`, and `weighting_controls_summary.csv`.
 :::
 
 ## Fixed-budget architecture screen
@@ -300,7 +301,7 @@ most three. R8's scored endpoint is d′ = 4.383, but it uses the same seed as t
 adds diagnostic probes, so it is not an independent recipe replicate. These diagnostics support
 testing late larger-batch integration, but they do not identify a precise schedule and do not justify
 a parameter-space preconditioner. Adaptive, fixed-effective-batch, physical-batch, and
-objective-preserving sampling controls have completed training and remain in benchmark scoring.
+objective-preserving sampling controls are reported below.
 
 ```{figure} figures/ib_r8_gradstats_gradient_diagnostics.png
 :label: fig-gradient-diagnostics
@@ -311,44 +312,102 @@ spectrum is limited to at most three nonzero sample-space components because onl
 were measured; it is not evidence for a low-rank parameter-space optimizer.
 ```
 
-## Adaptive accumulation compresses updates without an endpoint gain
+## Integration controls alter compute and update count, not endpoint detection
 
-R9 and R11 use the same seed-0 body, objective, learning rate, warmup, and ~18 M-window budget as R1.
-R9 changes the effective-batch schedule through adaptive accumulation and runs its controller
-diagnostics; R11 changes the physical batch from 64 to 256. Their endpoints and costs are:
+R9–R12 use the same seed-0 body, objective, learning rate, warmup, and ~18 M gradient-window budget
+as R1. R9 changes the effective-batch schedule through adaptive accumulation; R10 screens four
+candidate batches per update with objective-preserving importance sampling; R11 changes the physical
+batch from 64 to 256; and R12 retains physical batch 64 but accumulates four batches per update.
 
 | method | endpoint d′ | Δd′ vs matched R1 | optimizer updates | update reduction | Code Ocean runtime |
 |---|---:|---:|---:|---:|---:|
 | R1 warmup, batch 64 | 4.3651 | — | 281,244 | — | 2.80 h |
 | R9 adaptive accumulation | 4.3656 | +0.0005 | 175,778 | 37.5% | 2.70 h |
+| R10 importance sampling | 4.3651 | −0.0000 | 281,244 | 0% | 6.13 h |
 | R11 physical batch 256 | 4.3446 | −0.0205 | 70,308 | 75.0% | 2.46 h |
+| R12 accumulated batch 256 | 4.3472 | −0.0179 | 70,311 | 75.0% | 2.66 h |
 
 R9 holds effective batch 64 through 9.0 M windows, then uses 128 to 10.8 M, 512 to 14.4 M, and 256
 for the remainder. It preserves the matched R1 endpoint while removing 37.5% of optimizer updates,
 but serial accumulation still processes every physical microbatch and reduces total Code Ocean time
-by only 3.4%. Detection and waveform aggregates are essentially unchanged: Δd′_fixed = +0.0016,
-Δamp = −0.0005, Δtemporal cosine = +0.00004, and Δspatial cosine = +0.00002.
+by only 3.4%. Its apparent early crossing is not durable: it first interpolates through d′ = 4.30 at
+2.94 M windows, drops to 4.278 at 6.05 M, and first remains above 4.30 at a scored state after 10.43 M
+windows, versus 5.75 M for R1.
 
-The apparent early R9 crossing is not durable. It first interpolates through d′ = 4.30 at 2.94 M
-windows, then drops to 4.278 at 6.05 M; the first scored state after which it stays above 4.30 is
-10.43 M, versus 5.75 M for R1. R11 first reaches 4.30 at 6.31 M and does not reach 4.35. These
-crossings are descriptive because R1 has 12 scheduled states while R9/R11 have 24.
+R10 is endpoint-neutral relative to matched R1 (Δd′ = −0.00003; 5/10 units improve), but screening
+four candidates raises runtime from 2.80 to 6.13 h. Thus the corrected inverse-probability estimator
+does not turn candidate prioritization into a benchmark gain at this budget. R11 and R12 are also
+close despite their four-fold difference in physical batch: R12 exceeds R11 by only +0.0026 mean
+d′, has a median paired unit change of −0.0026, and improves 4/10 units. Their common effective batch
+and near-identical update count, rather than physical batch itself, therefore best explain their
+similar lower endpoints in this single-seed comparison.
 
-The endpoint means also hide opposing unit effects. R9 improves only 2/10 units relative to matched
-R1 (median Δd′ = −0.0055): unit 2143 gains +0.150 while unit 793 loses −0.098. R11 improves 3/10
-units (median −0.0050), with its mean loss dominated by unit 793 (−0.147). R9 exceeds R11 by +0.021
-in the all-unit mean but by only +0.0007 at the median unit. Finally, both single-run endpoints lie
-inside the observed three-seed R1 range (4.3426–4.3662), so neither establishes a method effect in
+Endpoint means hide opposing unit effects. R9 improves only 2/10 units relative to matched R1
+(median Δd′ = −0.0055): unit 2143 gains +0.150 while unit 793 loses −0.098. R11 improves 3/10 units
+(median −0.0050), with its mean loss dominated by unit 793 (−0.147). All four control endpoints lie
+inside the observed three-seed R1 range (4.3426–4.3662), so none establishes a method effect in
 expectation.
 
 ```{figure} figures/integration_controls.png
 :label: fig-integration-controls
-**Adaptive accumulation and physical-batch controls.** **A**, d′ trajectories against equal windows
-seen; faint grey lines show the three R1 seeds. **B**, both single-run control endpoints lie within
-the observed R1 seed range. **C**, paired unit effects show that aggregate differences are driven by
-opposing changes in a few strong units. **D**, R9 changes effective batch late, whereas R11 remains at
-physical batch 256. R12 fixed accumulated batch 256 remains pending and is needed for causal
-separation of physical-batch and accumulation effects.
+**Integration and objective-preserving sampling controls.** **A**, d′ trajectories against equal
+gradient windows seen; faint grey lines show the three R1 seeds. **B**, every single-run control
+endpoint lies within the observed R1 seed range. **C**, paired unit effects show opposing changes
+hidden by the means. **D**, runtime versus endpoint d′ exposes the extra cost of R10 candidate
+screening and the close R11/R12 outcomes at effective batch 256.
+```
+
+## Capacity-matched NAF blocks do not improve this benchmark
+
+R13 replaces only the R5 temporal DoubleConv stages with 1-D NAF-style blocks and narrows the base
+width to 58, yielding 3,162,950 trainable parameters versus 3,149,704 for R5 (+0.42%). The R5
+training recipe, blind-spot branch, fusion head, objective, seed, and sample budget are unchanged.
+R13 reaches d′ = 4.3352, which is −0.0223 relative to matched R5 seed 0 and below the complete R5
+three-seed range of 4.3575–4.3730. It improves only 2/10 paired units.
+
+The negative detection result is not predicted by the training objective. Final normalized
+validation loss differs from R5 seed 0 by only +0.00000285, while the NAF run takes 3.43 h versus
+2.44 h (+41%). This single-seed control therefore provides no evidence that importing a contemporary
+image-restoration block improves this blind-spot temporal denoiser; it also demonstrates that tied
+reconstruction loss does not guarantee tied spike detectability.
+
+```{figure} figures/naf_control.png
+:label: fig-naf-control
+**Capacity-matched NAF temporal-block control.** **A**, checkpoint d′ versus equal training windows
+for matched seed-0 R5 and R13, with the other R5 seeds in grey. **B**, the R13 endpoint lies below the
+observed three-seed R5 range. **C**, only two paired units improve. **D**, validation losses converge
+to nearly the same value, but R13 trains 41% longer.
+```
+
+## Strong spike weighting harms detection despite amplitude gains
+
+The corrected matched-L2 screen compares seven center-excluded weighting rules with unweighted
+`arch_l2_om0` seed 0. Small magnitude weights raise empirical-template amplitude, but only λ = 3
+raises endpoint d′; all stronger rules reduce it.
+
+| weighting arm | endpoint d′ | Δd′ vs unweighted seed 0 | amplitude ratio |
+|---|---:|---:|---:|
+| unweighted | 4.3670 | — | 0.9350 |
+| soft magnitude λ = 3 | 4.3725 | +0.0055 | 0.9397 |
+| soft magnitude λ = 10 | 4.3521 | −0.0150 | 0.9413 |
+| soft magnitude λ = 30 | 4.3503 | −0.0167 | 0.9402 |
+| soft gate λ = 100 | 4.3437 | −0.0233 | 0.9411 |
+| soft gate λ = 300 | 4.1046 | −0.2624 | 0.9437 |
+| soft gate λ = 1000 | 4.2294 | −0.1376 | 0.9414 |
+| hard gate λ = 1000 | 4.2033 | −0.1638 | 0.9248 |
+
+Soft λ = 3 improves 6/10 units and amplitude by +0.0047, but its +0.0055 d′ change remains inside
+the unweighted three-seed range (4.3387–4.3737; SD 0.0186). It is therefore an unreplicated lead,
+not a selected recipe. Strong gates decouple amplitude from fidelity and detection: λ = 300 raises
+amplitude by +0.0087 while temporal and spatial template cosine fall to 0.883 and 0.948, and unit 337
+loses 2.66 d′. The hard λ = 1000 arm improves only 1/10 units and also lowers amplitude.
+
+```{figure} figures/weighting_controls.png
+:label: fig-weighting-controls
+**Corrected matched-L2 spike-weighting endpoint screen.** **A**, endpoint d′ with the observed
+unweighted three-seed range shaded. **B**, modest amplitude increases do not predict detection.
+**C**, strong soft gates distort temporal and spatial templates. **D**, unit-level d′ changes show
+that the λ = 3 lead is distributed but small, whereas high weights produce large losses.
 ```
 
 ## Do the two omission trajectories stabilize with longer training?

@@ -181,7 +181,7 @@ def evolution_panel(axis) -> None:
 def block_comparison_panel(axis) -> None:
     setup(axis)
     panel_heading(axis, "C", "Local temporal-stage substitution",
-                  "R13 is capacity matched (+0.42% parameters); results are pending.")
+                  "R13 is capacity matched (+0.42% parameters); scoring found no d-prime gain.")
 
     axis.text(0.23, 0.83, "R5: DoubleConv1d", ha="center", va="center",
               fontsize=9.2, fontweight="bold", color=COLORS["temporal_edge"])
