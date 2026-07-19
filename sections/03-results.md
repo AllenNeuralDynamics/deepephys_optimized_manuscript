@@ -4,8 +4,9 @@
 All planned Code Ocean training and all 610 HPC scoring jobs are complete. The analyses below include
 the 21-configuration architecture screen, six-recipe screen, original-network reference, R0/R1/R5
 recipe replications, R8 gradient diagnostics, four integration and sampling controls, the
-capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two long-duration
-trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
+validation-loss headroom calibration, capacity-matched NAF control, seven corrected matched-L2
+weighting arms, and two long-duration trajectories. All results use the same AP-band `recording1_3`
+hybrid benchmark;
 the raw reference is **d′ = 4.497**. `results/tables/master_table.csv` contains all 78 completed
 endpoint runs with experiment-family and budget labels; `table_coverage.csv` records the sole
 exclusion, the intentionally aborted R7 run. The global table is an inventory rather than one causal
@@ -209,6 +210,47 @@ are unreplicated, so the two `support_*` observations are leads rather than conf
 `fuse512` is the lowest modern architecture in the
 short screen, but `origdi` is lower overall. These single runs provide no evidence that wider fusion,
 the tested temporal hand-off, or normalization removal improves the endpoint.
+
+## Meaningful spike reconstruction barely moves mean validation loss
+
+The R5 seed-0 headroom analysis exactly reconstructs the fixed validation calculation: its mean over
+20,000 windows × 384 channels is 0.646742974 versus 0.646742997 stored in the checkpoint (absolute
+error $2.25\times10^{-8}$). The scorer-aligned mask covers 57,868 of 7,680,000 channel-time elements
+(0.7535%) around 8,927 GT spikes. Mean elementwise loss is 0.594959 on spike support and 0.592863 on
+the same channels off-spike, leaving only 0.002097 excess loss per support element.
+
+Reducing *all* spike-support loss to that same-channel background floor would lower the aggregate
+validation loss by only **$1.58\times10^{-5}$**, or 0.00244% of the total loss (0.00640% of the
+loss above the Charbonnier minimum of 0.4). Partial recovery moves still less:
+
+| recoverable spike excess removed | validation-loss drop | projected R5 loss |
+|---:|---:|---:|
+| 10% | $1.58\times10^{-6}$ | 0.64674139 |
+| 25% | $3.95\times10^{-6}$ | 0.64673902 |
+| 50% | $7.90\times10^{-6}$ | 0.64673508 |
+| 100% | $1.58\times10^{-5}$ | 0.64672718 |
+
+The full meaningful ceiling is 3.71× the R5 three-seed loss SD ($4.25\times10^{-6}$), but a 25%
+recovery is approximately one seed SD. The R13–R5 seed-0 loss difference ($2.85\times10^{-6}$) is
+only 18% of the ceiling, so that loss tie cannot rule out a spike-relevant difference. Conversely,
+the R9–R12 range ($2.64\times10^{-4}$) is 16.7× the ceiling and cannot be caused solely by improved
+reconstruction inside this GT support mask. It still does not establish better spike reconstruction;
+such a large change can be dominated by background elements.
+
+Setting every spike-support residual to exactly zero gives a much larger $1.47\times10^{-3}$ upper
+bound, but that removes unpredictable noisy-target error as well as spike error and is not a
+meaningful denoising target. The practical calibration is therefore $\Delta L_{\mathrm{meaningful}}$,
+not the zero-residual bound. These numbers apply to R5's Charbonnier objective and this benchmark;
+L2 loss requires its own numerical calibration.
+
+```{figure} figures/validation_loss_headroom.png
+:label: fig-validation-loss-headroom
+**Validation-loss leverage of GT spike reconstruction.** **A**, spike-support elements have only
+0.00210 excess elementwise loss above their same-channel off-spike reference; multiplying by their
+0.7535% prevalence yields $\Delta L=1.58\times10^{-5}$. **B**, the R13–R5 difference and R5 seed SD
+are below that ceiling, whereas the R9–R12 range is 16.7× larger. The zero-residual bound is shown
+only to expose how much noisy-target error the meaningful counterfactual deliberately retains.
+```
 
 ## Training-efficiency recipe screen and replication
 

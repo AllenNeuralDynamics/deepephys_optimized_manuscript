@@ -6,7 +6,8 @@ units — together with a fully reproducible **train → score → figure** pipe
 
 > **Status:** all planned Code Ocean training and all 610 HPC scoring jobs are complete. The report
 > includes the architecture and recipe screens, matched replications, gradient and integration
-> controls, capacity-matched NAF control, corrected weighting screen, and duration trajectories.
+> controls, validation-loss headroom calibration, capacity-matched NAF control, corrected weighting
+> screen, and duration trajectories.
 
 ## Why this repo exists
 

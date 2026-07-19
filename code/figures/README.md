@@ -15,6 +15,7 @@ regenerate deterministically.
 | `integration_controls.py` | compare R9–R12 adaptive, sampling, physical-batch, and accumulated-batch controls with matched R1 endpoints, trajectories, units, and compute |
 | `naf_control.py` | compare the capacity-matched R13 NAF temporal block with the three R5 DoubleConv seeds, loss curves, units, and runtime |
 | `weighting_controls.py` | compare corrected matched-L2 weighting endpoints, waveform fidelity, seed context, and paired unit effects |
+| `validation_loss_headroom.py` | calibrate measured spike-support loss headroom against seed, NAF, and method-control validation-loss changes |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |
 | `make_figures.py` | architecture ranking, template-SNR/d′, unit-quality, heatmap, and duration figures |

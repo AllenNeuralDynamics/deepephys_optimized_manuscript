@@ -176,6 +176,29 @@ spike-excluded background windows on that single channel. It combines amplitude 
 background variance and is not a direct measure of "noise removed." In contrast, d′ separates
 multichannel temporal matched-filter scores at spike and background events.
 
+**Validation-loss headroom.** To calibrate how much a spike-relevant improvement can move the
+sample-averaged objective, we rerun R5 seed 0 on its exact fixed 20,000-window validation subset and
+retain the elementwise Charbonnier loss. A channel-time element belongs to GT spike support when its
+target frame lies in the scorer-aligned [−1.5, +2.5) ms window around an injected spike and its
+channel has at least 50% of that unit's empirical peak-to-peak maximum (at most 24 channels). Let
+$S$ denote those elements, $p_S=|S|/N$, $\bar{\ell}_S$ their mean loss, and
+$\bar{\ell}_{B,c}$ the off-spike mean on the same channel. The loss movement from eliminating the
+*excess* spike residual is
+
+$$
+\Delta L_{\mathrm{meaningful}}
+=\frac{1}{N}\sum_c\left[
+\sum_{i\in S_c}\ell_i-|S_c|\bar{\ell}_{B,c}
+\right].
+$$
+
+This background-floor counterfactual treats ordinary blind-spot prediction error as irreducible and
+is the primary estimate. A deliberately optimistic upper bound instead sets every spike-support
+residual to zero; for Charbonnier loss $\sqrt{r^2+\epsilon^2}$, its minimum elementwise value is
+$\epsilon=0.4$, not zero. Both bounds use the noisy self-supervised target and therefore measure
+objective leverage, not recovery of a known noise-free voltage trace. The recomputed aggregate must
+match the checkpoint's stored validation loss before either bound is accepted.
+
 **Per-unit × per-model resolution.** Both amplitude and detection are reported as matrices — rows =
 the 10 units sorted by baseline separability, columns = every model — so an intervention's effect is
 read across the whole unit population, not just at the 10-unit mean (appendix

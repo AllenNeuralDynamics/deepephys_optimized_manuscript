@@ -33,6 +33,26 @@ and `origdi` combines the highest template SNR with the lowest d′. The appropr
 that greater noise suppression necessarily harms detection, but that this SNR ratio cannot select a
 model for the matched-filter objective.
 
+## Validation loss changes have a spike-scale ceiling
+
+The in-band headroom measurement provides a scale for caring about Charbonnier validation-loss
+changes. Even eliminating all residual *above the same-channel off-spike floor* on a deliberately
+broad GT support mask lowers R5 loss by only $1.58\times10^{-5}$. Changes below that ceiling are
+compatible with meaningful spike differences but are not evidence for them, because background
+variation can produce the same movement. This is why R13's $2.85\times10^{-6}$ loss difference
+cannot rescue or condemn its d′ result: the reconstruction objectives are effectively tied on the
+spike-relevant scale.
+
+The converse also matters. A change much larger than $1.58\times10^{-5}$ cannot be explained solely
+by removing current excess loss within this support mask. The R9–R12 range is 16.7× larger, implying
+that background or other non-GT elements dominate those objective differences. Lower loss can still
+be a real reconstruction improvement, but it is not thereby a spike improvement. The zero-residual
+bound ($1.47\times10^{-3}$) is not an appropriate decision threshold because it assumes prediction
+of independent target noise. In this in-band calculation, the complete meaningful ceiling is 3.7×
+R5 seed SD; realistic partial recovery remains near or below seed variation. This calibration is
+specific to R5, Charbonnier $\epsilon=0.4$, the support definition, and this recording; L2 and
+held-out recordings need separate calibration.
+
 ## Training optimization has only a provisional compound-recipe lead
 
 The matched-seed replications narrow the initial recipe result. Warmup alone is not supported as an
