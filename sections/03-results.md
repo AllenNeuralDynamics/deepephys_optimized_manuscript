@@ -6,9 +6,11 @@ the 21-configuration architecture screen, six-recipe screen, original-network re
 recipe replications, R8 gradient diagnostics, four integration and sampling controls, the
 capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two long-duration
 trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
-the raw reference is **d′ = 4.497**. The full run ledger is `results/runs.csv`; architecture,
-integration, NAF, and weighting summaries are in `results/tables/master_table.csv`,
-`integration_controls_summary.csv`, `naf_control_summary.csv`, and `weighting_controls_summary.csv`.
+the raw reference is **d′ = 4.497**. `results/tables/master_table.csv` contains all 78 completed
+endpoint runs with experiment-family and budget labels; `table_coverage.csv` records the sole
+exclusion, the intentionally aborted R7 run. The global table is an inventory rather than one causal
+ranking. Matched architecture, recipe, integration, NAF, and weighting conclusions use their
+family-specific tables and seed context.
 :::
 
 ## Fixed-budget architecture screen

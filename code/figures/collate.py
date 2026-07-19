@@ -8,6 +8,7 @@ results/scores/<label>_dprime.csv     per-unit d' (unit_id, dprime_deep, dprime_
                                        dprime_raw, snr_deep, ...)
 results/scores/<label>_diag.csv       per-unit waveform (unit_id, amp_ratio, fwhm_ratio,
                                        temporal_cos, spatial_cos, ...)
+results/scores/<label>/<label>_best_* equivalent endpoint layout for trajectory/control runs
 
 Writes (results/tables/, both .csv and .md)
 -------------------------------------------
@@ -16,6 +17,8 @@ perunit_amp             amp_ratio,      units (rows, by baseline d') x models (c
 perunit_dprime          dprime_deep,    units x models
 perunit_dprime_delta    dprime_deep - dprime_raw, units x models
 noise_floor             sigma of d'/amp over seed replicates, per config
+model_family_summary    run/config counts and d' range by experiment family and budget
+table_coverage          one row per ledger entry: endpoint layout, inclusion, and exclusion reason
 
 Runs without score files yet are reported as pending and skipped, so this is safe to run at any
 time. No results are invented.
@@ -35,10 +38,6 @@ SCORES = REPO / "results" / "scores"
 TABLES = REPO / "results" / "tables"
 
 
-def _read(path: Path) -> pd.DataFrame | None:
-    return pd.read_csv(path) if path.exists() else None
-
-
 def _write(df: pd.DataFrame, stem: str, index: bool = False) -> None:
     TABLES.mkdir(parents=True, exist_ok=True)
     df.to_csv(TABLES / f"{stem}.csv", index=index)
@@ -46,22 +45,71 @@ def _write(df: pd.DataFrame, stem: str, index: bool = False) -> None:
         md = df.to_markdown(index=index, floatfmt=".3f")
     except Exception:  # tabulate not installed
         md = df.to_csv(index=index)
-    (TABLES / f"{stem}.md").write_text(md + "\n")
+    (TABLES / f"{stem}.md").write_text(md.rstrip() + "\n")
 
 
-def load_run(label: str) -> pd.DataFrame | None:
+def endpoint_paths(label: str) -> tuple[str, Path, Path] | None:
+    """Resolve one complete endpoint pair without treating checkpoints as independent runs."""
+    candidates = (
+        ("root", SCORES / f"{label}_dprime.csv", SCORES / f"{label}_diag.csv"),
+        ("nested_best", SCORES / label / f"{label}_best_dprime.csv",
+         SCORES / label / f"{label}_best_diag.csv"),
+    )
+    for layout, dprime_path, diag_path in candidates:
+        if dprime_path.exists() and diag_path.exists():
+            return layout, dprime_path, diag_path
+
+    partial = [str(path.relative_to(REPO)) for _, dp, dg in candidates
+               for path in (dp, dg) if path.exists()]
+    if partial:
+        raise FileNotFoundError(
+            f"incomplete endpoint pair for {label}: found {', '.join(partial)}"
+        )
+    return None
+
+
+def experiment_family(run: pd.Series) -> str:
+    tier = str(run["tier"])
+    config = str(run["config"])
+    if tier == "scale":
+        return "duration_diagnostic"
+    if tier == "recipe":
+        return "recipe_screen"
+    if tier == "opt2_rep":
+        return "recipe_replication"
+    if tier == "opt2_diag":
+        return "gradient_diagnostic"
+    if tier == "opt2_method":
+        return "integration_control"
+    if tier == "opt3_arch":
+        return "naf_control"
+    if tier == "weight2":
+        return "corrected_weighting"
+    if any(token in config for token in ("_w3", "_w10", "_w30", "_g100", "_g300",
+                                          "_g1000")):
+        return "legacy_weighting_screen"
+    return "architecture_screen"
+
+
+def budget_group(run: pd.Series) -> str:
+    if str(run["tier"]) == "scale":
+        return "long_3.30M_updates"
+    if str(run["train_chunks"]) == "4":
+        return "short_~18M_windows"
+    return f"train_chunks_{run['train_chunks']}"
+
+
+def load_run(label: str) -> tuple[pd.DataFrame, str, Path, Path] | None:
     """Merge a run's per-unit d' and diagnostic CSVs on unit_id; return per-unit rows."""
-    dp = _read(SCORES / f"{label}_dprime.csv")
-    dg = _read(SCORES / f"{label}_diag.csv")
-    if dp is None and dg is None:
+    resolved = endpoint_paths(label)
+    if resolved is None:
         return None
-    if dp is None:
-        dp = pd.DataFrame({"unit_id": dg["unit_id"]})
-    if dg is None:
-        dg = pd.DataFrame({"unit_id": dp["unit_id"]})
+    layout, dprime_path, diag_path = resolved
+    dp = pd.read_csv(dprime_path)
+    dg = pd.read_csv(diag_path)
     per_unit = dp.merge(dg, on="unit_id", how="outer")
     per_unit.insert(0, "model", label)
-    return per_unit
+    return per_unit, layout, dprime_path, diag_path
 
 
 def main() -> None:
@@ -69,20 +117,38 @@ def main() -> None:
     ap.add_argument("--manifest", default=str(REPO / "results" / "runs.csv"))
     args = ap.parse_args()
 
-    manifest = pd.read_csv(args.manifest)
+    manifest = pd.read_csv(args.manifest, keep_default_na=False)
     all_metrics = [m for m in DPRIME_METRICS + DIAG_METRICS]
 
-    master_rows, per_unit_frames, scored, pending = [], [], [], []
+    master_rows, per_unit_frames, scored, pending, coverage_rows = [], [], [], [], []
     for _, run in manifest.iterrows():
         label = run["label"]
-        per_unit = load_run(label)
-        if per_unit is None:
+        loaded = load_run(label)
+        if loaded is None:
             pending.append(label)
+            coverage_rows.append({
+                "label": label, "experiment_family": experiment_family(run),
+                "budget_group": budget_group(run), "included": False,
+                "endpoint_layout": "", "dprime_path": "", "diag_path": "",
+                "reason": "no_endpoint_scores",
+            })
+            if str(run["scored"]).lower() == "yes":
+                raise FileNotFoundError(f"ledger marks {label} scored, but endpoint files are missing")
             continue
+        per_unit, layout, dprime_path, diag_path = loaded
         scored.append(label)
         per_unit_frames.append(per_unit)
-        row = {"label": label, "config": run["config"], "seed": run["seed"],
-               "loss": run["loss"], "tier": run["tier"]}
+        coverage_rows.append({
+            "label": label, "experiment_family": experiment_family(run),
+            "budget_group": budget_group(run), "included": True,
+            "endpoint_layout": layout,
+            "dprime_path": str(dprime_path.relative_to(REPO)),
+            "diag_path": str(diag_path.relative_to(REPO)), "reason": "",
+        })
+        row = {"label": label, "experiment_family": experiment_family(run),
+               "budget_group": budget_group(run), "config": run["config"],
+               "seed": run["seed"], "loss": run["loss"], "tier": run["tier"],
+               "train_chunks": run["train_chunks"]}
         for m in all_metrics:
             row[m] = per_unit[m].mean() if m in per_unit else pd.NA
         master_rows.append(row)
@@ -92,8 +158,17 @@ def main() -> None:
         print("No scored runs yet — nothing written. (Drop CSVs in results/scores/ and re-run.)")
         return
 
-    master = pd.DataFrame(master_rows).sort_values("dprime_deep", ascending=False, ignore_index=True)
+    master = pd.DataFrame(master_rows).sort_values("dprime_deep", ascending=False,
+                                                   ignore_index=True)
     _write(master, "master_table")
+    family_summary = (master.groupby(["experiment_family", "budget_group"], as_index=False)
+                      .agg(runs=("label", "size"),
+                           configurations=("config", "nunique"),
+                           dprime_min=("dprime_deep", "min"),
+                           dprime_max=("dprime_deep", "max"))
+                      .sort_values(["budget_group", "experiment_family"], ignore_index=True))
+    _write(family_summary, "model_family_summary")
+    _write(pd.DataFrame(coverage_rows), "table_coverage")
 
     # Descriptive training-seed variability for each replicated config.
     nf = (master.groupby("config")

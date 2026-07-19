@@ -1,0 +1,10 @@
+experiment_family,budget_group,runs,configurations,dprime_min,dprime_max
+duration_diagnostic,long_3.30M_updates,2,2,4.274495227736301,4.362950698333062
+architecture_screen,short_~18M_windows,39,21,4.12453198446805,4.409408695162808
+corrected_weighting,short_~18M_windows,7,7,4.104648847788395,4.372544240106761
+gradient_diagnostic,short_~18M_windows,1,1,4.3829175397207205,4.3829175397207205
+integration_control,short_~18M_windows,4,4,4.344648259398726,4.365614795394948
+legacy_weighting_screen,short_~18M_windows,10,10,4.051060355375182,4.378344912784478
+naf_control,short_~18M_windows,1,1,4.335240086620962,4.335240086620962
+recipe_replication,short_~18M_windows,6,3,4.342603883413127,4.372989576147659
+recipe_screen,short_~18M_windows,8,8,4.218658034958482,4.374094707145511

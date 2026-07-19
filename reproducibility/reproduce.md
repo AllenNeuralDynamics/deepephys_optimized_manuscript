@@ -72,8 +72,10 @@ Both are pinned to the benchmark recording, 10 GT units, `seed=0` (see
 
 ## 5. Collate + figures
 
-Collate mean-over-10-units into the master table and per-unit matrices, then render the figure
-collection (§6 of the plan). Scripts and their exact inputs/outputs are documented in
+Collate mean-over-10-units into the complete endpoint master table and per-unit matrices, then render
+the figure collection (§6 of the plan). The collator resolves both root-level screen scores and
+nested `best` scores from trajectory/control runs, and writes a ledger coverage audit. Scripts and
+their exact inputs/outputs are documented in
 [`code/figures/`](../code/figures/README.md).
 
 ## 6. Build the manuscript (local HTML site)
@@ -85,7 +87,6 @@ myst build --html   # static site in _build/
 
 ## 7. Active and staged experiments
 
-Current computation IDs and states are tracked in `results/runs.csv`. At manuscript revision time,
-R0/R1/R5 recipe replications and a gradient-statistics run were active; adaptive-accumulation,
-importance-sampling, physical-batch, and fixed-effective-batch controls were staged but gated on the
-gradient measurements. Query Code Ocean rather than relying on this prose for live state.
+Current computation IDs and states are tracked in `results/runs.csv`. All planned Code Ocean training
+and all 610 HPC scoring jobs are complete. The regenerated coverage table includes 78 endpoint runs;
+the only excluded ledger entry is the intentionally aborted R7 PCGrad experiment.

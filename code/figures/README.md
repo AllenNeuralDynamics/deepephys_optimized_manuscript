@@ -7,7 +7,7 @@ regenerate deterministically.
 | script | purpose |
 |---|---|
 | `co_dl.py` | download checkpoints plus exact optimization telemetry from a Code Ocean computation |
-| `collate.py` | collate per-unit CSVs → master table + per-unit amp / Δd′ matrices (mean over 10 units) |
+| `collate.py` | resolve root and nested best endpoints → complete master/family/coverage tables + per-unit amp / Δd′ matrices (mean over 10 units) |
 | `collate_trajectory.py` | merge checkpoint scores with measured elapsed time, LR, samples, optimizer steps, and effective batch |
 | `architecture_evolution.py` | render the three-panel current topology, architecture evolution, and NAF-stage comparison |
 | `recipe_convergence.py` | compare recipe trajectories and bootstrap paired GT-unit endpoint differences |

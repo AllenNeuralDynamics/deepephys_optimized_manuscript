@@ -13,10 +13,11 @@ Code Ocean training run  ──►  checkpoints (best_model.pt, ckpt_step_*.pt)
 HPC scoring (run_ckpt.sbatch, template_diag.sbatch)
         │  writes per-unit CSVs
         ▼
-results/scores/<label>_dprime.csv   +   <label>_diag.csv      ◄── one pair per run
+results/scores/<label>_{dprime,diag}.csv
+or results/scores/<label>/<label>_best_{dprime,diag}.csv      ◄── one endpoint pair per run
         │  code/figures/collate.py
         ▼
-results/tables/{master_table,perunit_amp,perunit_dprime,perunit_dprime_delta,noise_floor}.{csv,md}
+results/tables/{master_table,model_family_summary,table_coverage,perunit_*,noise_floor}.{csv,md}
         │  figure scripts (code/figures/make_*.py)  +  {include} of the .md tables
         ▼
 figures/*.png   +   manuscript tables      ──►   the HTML site
@@ -38,7 +39,8 @@ column in the per-unit matrices.
 ```bash
 python code/figures/collate.py     # reads runs.csv + results/scores/*, writes results/tables/*
 ```
-Safe to run at any time — runs without score files yet are simply reported as *pending* and skipped.
+Safe to run at any time: runs without score files are reported as pending and skipped, while a ledger
+row explicitly marked `scored=yes` fails loudly if its endpoint pair is missing.
 
 ## Subfolders
 

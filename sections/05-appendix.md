@@ -31,12 +31,35 @@ probe-axis blind-spot branch). Every override is defined in the
 - **om0_scale / om1_scale** — the two long-duration runs (`support_all` wiring, L2, ~3.3 M updates)
   with `omission=0` / `omission=1`. Final-step d′ 4.361 / 4.361; amp 0.931 / 0.870.
 
+**Complete endpoint coverage.** `results/tables/master_table.csv` and its Markdown twin contain all
+78 completed run endpoints with all detection and waveform metrics. The associated
+`model_family_summary` and `table_coverage` tables make comparison boundaries and exclusions
+explicit:
+
+| experiment family | budget | endpoint runs |
+|---|---|---:|
+| architecture screen | ~18 M windows | 39 |
+| legacy weighting screen | ~18 M windows | 10 |
+| recipe screen | ~18 M windows | 8 |
+| recipe replication | ~18 M windows | 6 |
+| gradient diagnostic | ~18 M windows | 1 |
+| integration controls | ~18 M windows | 4 |
+| NAF control | ~18 M windows | 1 |
+| corrected weighting | ~18 M windows | 7 |
+| duration diagnostic | 3.30 M updates | 2 |
+| **total completed endpoints** |  | **78** |
+
+The global d′ sort is an inventory, not an omnibus method ranking. Comparisons should stay within
+the relevant family, body, budget, and seed context; the dedicated recipe, integration, NAF, and
+weighting tables implement those matched comparisons. The intentionally aborted R7 PCGrad entry is
+the only ledger row without an endpoint and is recorded as such in `table_coverage`.
+
 ## B. Per-unit amplitude across models
 
 `amp_ratio` for each ground-truth unit (rows, sorted by raw matched-filter separability) across a
 representative set of the **short-budget** models; seeds averaged. The two long `support_all` runs are
 excluded here (different training budget — see the duration section);
-the full matrix across every run is in `results/tables/perunit_amp.csv`.
+the full 10-unit × 78-endpoint matrix is in `results/tables/perunit_amp.csv`.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -71,7 +94,7 @@ omission variants, show that architecture also matters.
 ## C. Per-unit detection (Δd′) across models
 
 Change in detectability from denoising, Δd′ = d′_deep − d′_raw, per unit × representative model (seeds
-averaged; full matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made that
+averaged; full 10-unit × 78-endpoint matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made that
 unit *harder* to detect.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |

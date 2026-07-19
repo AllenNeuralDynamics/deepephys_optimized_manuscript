@@ -219,7 +219,8 @@ Both sbatch scripts are pinned to the 5.1 substrate (hardcoded S3 path, 10 units
 The headline "who gets smoothed / who gets harder to detect" view (old report Appendices B & C). Rows = the 10 GT units **sorted by baseline d′ (unit quality)**; columns = every scored model; a **mean** row at the bottom.
 - **Amplitude matrix** (App B eq.) — `amp_ratio` per unit × model + heatmap (green ≈1.0 preserved / red smoothed). Shows the vertical quality gradient (strong units ~0.97, weak units 0.66–0.83).
 - **Detection matrix** (App C eq.) — `dprime_deep` per unit × model (absolute) **and** a **Δd′ = dprime_deep − dprime_raw** heatmap (red = DI hurts, blue = DI helps). Exposes per-unit collapses (old: `arch` erased unit 337, 3.15→0.16).
-- **No extra runs:** every diagnostic run already stores per-unit values (§5.4); these matrices are pure collation across all 39 models.
+- **No extra runs:** every diagnostic run already stores per-unit values (§5.4); these matrices are
+	pure collation across all completed endpoints (78 in the current revision).
 - Because every model is a column, an intervention's effect is read **across the whole unit population at once**, not just at the 10-unit mean.
 
 ### 5.4 Per-run outputs (uniform)
