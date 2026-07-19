@@ -5,10 +5,11 @@ denoiser for Neuropixels spike detection — with a focus on protecting the weak
 units — together with a fully reproducible **train → score → figure** pipeline.
 
 > **Status:** all Code Ocean training and all 610 HPC scoring jobs underlying the current report are
-> complete. Two post-report width-96 omission controls are training and are not included in the
-> conclusions below. The report includes the architecture and recipe screens, matched replications,
-> gradient and integration controls, capacity-matched NAF control, corrected weighting screen, and
-> duration trajectories.
+> complete. Five post-report width-96 controls are training: the full pyramid under both omission
+> routings plus three efficient channel-schedule ablations. They are not included in the conclusions
+> below. The report includes the architecture and recipe screens, matched replications, gradient and
+> integration controls, capacity-matched NAF control, corrected weighting screen, and duration
+> trajectories.
 
 ## Why this repo exists
 
