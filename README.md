@@ -28,7 +28,7 @@ validation.
 | `reproducibility/reproduce.md` | step-by-step: environment → launch → score → figures → PDF |
 | `reproducibility/regeneration-plan.md` | versioned experimental and analysis plan (including adaptive reprioritization) |
 | `data/provenance.md` | Code Ocean capsule/asset IDs, recording paths, HPC locations |
-| `code/` | scoring (HPC sbatch), figure-generation, and training-launch scripts + docs |
+| `code/` | complete scoring metrics and HPC drivers, figure generation, tests, and training-launch docs |
 | `figures/` | manuscript figure assets |
 | `references.bib` | bibliography |
 

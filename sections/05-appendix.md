@@ -184,15 +184,16 @@ tables retain **all 87 scored endpoints**, including audit-only confounded runs.
 | manuscript surface | models included | models intentionally outside that surface |
 |---|---|---|
 | master, family, coverage, and full per-unit tables | all 87 scored endpoints | R7 PCGrad was aborted |
-| Figure 1, architecture definition/evolution | original DI, base32, R5 base64, one depth-2 and four depth-3 base96 designs, R13 NAF | wiring/loss variants that do not introduce a new depicted topology |
-| Figures 2, 3, and 5; Appendix heatmaps | 21 original architecture configurations + matched R5 base64 + nine scored width/schedule/depth follow-ups = 31 | recipe replicates, integration/sampling controls, weighting interventions, and long-duration repeats |
-| Figure 4 and matched-R5 tables | matched R5 base64 + nine scored width/schedule/depth follow-ups = 10 | models with a different body, recipe, or sample budget |
-| recipe figures | R0–R6 screen; R0/R1/R5 matched replications where applicable | architecture and method controls |
-| gradient figure | R8 trajectory only | endpoints without same-parameter microbatch diagnostics |
-| integration figure | R1 seed context + R9–R12 | unrelated architecture, weighting, and duration families |
-| NAF figure | R5 DoubleConv seeds + matched R13 NAF58 | non-capacity-matched architectures |
-| corrected weighting figure | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
-| duration figure | two 3.30-M-update `support_all` trajectories | short-budget endpoints |
+| Figures 1–3, qualitative benchmark and metric diagnostics | selected full96 omission0 endpoint; four displayed GT units; complete score distributions for one strong and one weak unit | all other models; post-screen illustration is not held-out model evidence |
+| Figure 4, architecture definition/evolution | original DI, base32, R5 base64, one depth-2 and four depth-3 base96 designs, R13 NAF | wiring/loss variants that do not introduce a new depicted topology |
+| Figures 5, 6, and 8; Figures 17–18 heatmaps | 21 original architecture configurations + matched R5 base64 + nine scored width/schedule/depth follow-ups = 31 | recipe replicates, integration/sampling controls, weighting interventions, and long-duration repeats |
+| Figure 7 and matched-R5 tables | matched R5 base64 + nine scored width/schedule/depth follow-ups = 10 | models with a different body, recipe, or sample budget |
+| Figures 9–11, recipe comparisons | R0–R6 screen; R0/R1/R5 matched replications where applicable | architecture and method controls |
+| Figure 12, gradient diagnostics | R8 trajectory only | endpoints without same-parameter microbatch diagnostics |
+| Figure 13, integration controls | R1 seed context + R9–R12 | unrelated architecture, weighting, and duration families |
+| Figure 14, NAF control | R5 DoubleConv seeds + matched R13 NAF58 | non-capacity-matched architectures |
+| Figure 15, corrected weighting | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
+| Figure 16, duration diagnostic | two 3.30-M-update `support_all` trajectories | short-budget endpoints |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while
 also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets

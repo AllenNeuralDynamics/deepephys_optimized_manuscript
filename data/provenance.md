@@ -70,6 +70,31 @@ audit identified that only their synthetic GPU benchmark existed. The matched de
 a shallow 96→192→384 pyramid against the nearly parameter-matched depth-3 √2 schedule; its final
 d′/diagnostic jobs were `23243308`–`23243311`.
 
+## Qualitative benchmark export
+
+The opening raw/denoised, unit-attenuation, and d′-distribution figures use one
+compact export from the highest-d′ omission0 endpoint. This is a post-screen
+diagnostic selection, not held-out evidence.
+
+| item | value |
+|---|---|
+| model | `ib_w96_om0_s0` (`96→192→384→768`, omission0) |
+| checkpoint SHA-256 | `1087a75b878fa82745f33581095f5d54a7f69bbb68ce83fd99893b62d778c4d1` |
+| inference checkout | `aind-ephys-deepinterpolation-inference` commit `808d7fa` |
+| export job | AIND HPC `23244894`, completed in 00:12:36 on a GTX 1080 Ti |
+| scoring extraction | seed 0; at most 100 GT events/unit; 200 spike-excluded backgrounds |
+| detail units | 2143, 1143, 720, 1129 |
+| exemplar | unit 1143, frame 107200608, nearest other injected event 14.667 ms away |
+| compact NPZ | `results/qualitative/full96_om0_examples.npz`, 1,657,671 bytes, SHA-256 `5be9ca2cbb07a62b626b87ac56495fde490ae2d64a02c1bf92af8d305163e93e` |
+| reproduced CSV | `results/qualitative/full96_om0_examples.csv`, SHA-256 `fb75d4663cbd66fb68bfda27d0ac84010f76bdfa75d51e3be6cc9f8d2992102f` |
+| metadata JSON | `results/qualitative/full96_om0_examples_metadata.json`, SHA-256 `f89fc514fdafbc8e3af03a6855596bf9619fb325213a1c13597e31ee97eda1e2` |
+
+Before writing these files, the exporter recomputed all ten committed per-unit
+SNR and d′ rows and required maximum absolute error below `1e-6`; the observed
+error was exactly 0. The 30-ms all-probe and 4-ms local displays remove only each
+channel's median for visualization. Scoring uses the native calibrated windows
+without that display centering.
+
 ## Checkpoint schedule (`n_ckpt=12`)
 
 Log-spaced steps: 1, 4, 15, 60, 235, 919, 3597, 14078, 55103, 215688, 844255, 3304616 —

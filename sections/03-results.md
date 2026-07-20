@@ -66,7 +66,9 @@ spread (SD = 0.041), so its mean is particularly uncertain.
 below the raw d′ of 4.497, from **−0.088** (`arch`) to **−0.362** (`origdi`). All nine completed width/schedule/depth
 follow-ups also remain below raw; the closest is full base96 omission1 at **−0.083**. Thus every
 tested short-budget denoised output reduces the all-unit matched-filter mean on this benchmark. This
-does not establish the same effect on other recordings or under a complete spike sorter.
+direction is not unique to the pooled-variance d′ formula: for full96 omission0, the threshold-free
+mean AUC also falls from 0.9612 to 0.9536, with 8/10 units lower. Neither metric establishes the same
+effect on other recordings or under a complete spike sorter.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking

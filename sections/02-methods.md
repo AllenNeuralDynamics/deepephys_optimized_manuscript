@@ -16,6 +16,71 @@ external validation: architectures and recipes were selected iteratively using t
 and unit set. Conclusions are therefore conditional on this benchmark until repeated on held-out
 sessions.
 
+## Basic validation before model comparison
+
+Before computing any model ranking, the scoring code verifies that recording and sorting have the
+same sampling frequency, one shared segment, and integer GT spike frames inside the recording. The
+checkpoint must strict-load against the pinned inference model, and every raw/denoised comparison
+uses identical frame centers, channel identities, and native voltage calibration. The AP-band input
+is evaluated before common-median referencing or any additional scoring-time filter. A mismatch in
+any of these checks stops scoring rather than producing a partial endpoint.
+
+The qualitative export applies the same frozen extraction to the selected full96 omission0 model
+and must reproduce its committed per-unit SNR and d′ columns to within `1e-6` before writing figure
+data. The overview and close-up figures therefore show the actual benchmark and checkpoint used by
+the quantitative pipeline, not a separate demonstration recording. The illustrated model and events
+were selected for explanation after the model screen; the images are diagnostic views, not
+independent validation evidence.
+
+The complete implementation is vendored in
+[`code/scoring/detection_metrics.py`](code/scoring/detection_metrics.py), with executable S3 and
+waveform drivers in [`code/scoring/run_hybrid_s3.py`](code/scoring/run_hybrid_s3.py) and
+[`code/scoring/template_diag.py`](code/scoring/template_diag.py). Focused equation and alignment
+tests are in [`code/tests/test_detection_metrics.py`](code/tests/test_detection_metrics.py); exact
+commands and every output column are documented in the
+[`code/scoring` README](code/scoring/README.md).
+
+## What matched-filter d′ measures
+
+For each unit, the raw empirical template determines the peak channel and up to 24 channels whose
+peak-to-peak amplitude is at least 50% of that peak. Each 4-ms multichannel event window is flattened
+and projected onto an L2-normalized empirical template. The 100 **hit scores** come from the frozen
+GT event times. The 200 **background scores** come from randomly sampled centers, with seed 0, after
+excluding centers within one analysis window of any injected GT spike. For hit scores $h$ and
+background scores $b$,
+
+$$
+d' = \frac{\mu_h-\mu_b}{\sqrt{\left(\sigma_h^2+\sigma_b^2\right)/2}}.
+$$
+
+Every hit and background score contributes through its mean and population variance. The endpoint
+does **not** count extrema, select maxima, slide a detector over the trace, choose a threshold, or
+count threshold crossings. AUC is retained as a threshold-free companion: the probability that a
+random hit score exceeds a random background score.
+
+`d′_self` uses the raw empirical template for raw windows and a separately learned denoised
+empirical template for denoised windows, analogous to a sorter learning templates in its input
+domain. `d′_fixed` projects denoised windows onto the raw empirical template. Both use exactly the
+same event and background centers. Because template estimation and hit scoring reuse the same 100
+events, absolute d′ is optimistically in-sample; comparisons are frozen identically, but a
+cross-fitted endpoint remains necessary.
+
+Lower voltage variance alone does not guarantee higher d′. Denoising can attenuate or reshape the
+spike, reducing $\mu_h-\mu_b$, and structured residual background can still project onto the learned
+template. d′ rises only if separation between the complete hit and background score distributions
+increases relative to their pooled spread. The score-distribution figure displays those terms for a
+strong and a weak GT unit before and after denoising.
+
+```{figure} figures/dprime_score_distributions.png
+:label: fig-dprime-distributions
+**d′ uses complete GT-event and background score distributions, not extrema.** Rows show a strong
+and a weak injected unit; columns show raw and full96 omission0-denoised domains. Vertical lines are
+the two distribution means. Scores are displayed in pooled-SD units, so the horizontal distance
+between means is d′. All 100 GT-event scores and 200 spike-excluded background scores are shown;
+the same centers enter raw and denoised calculations. The empirical template and hit scores reuse
+events, so absolute separation is in-sample optimistic even though model comparisons are frozen.
+```
+
 ## The in-domain rule
 
 DeepInterpolation is a self-supervised denoiser, so it must be evaluated in the band it is deployed
@@ -188,18 +253,13 @@ All models are scored by one uniform protocol (full catalog and formulas in
 [the versioned analysis plan](reproducibility/regeneration-plan.md), §5). Per-unit metrics are computed on each of the 10
 GT units, then averaged.
 
-**Detection (primary).** For each unit, up to 100 GT-centered event windows and 200 sampled
-spike-excluded background windows are projected onto normalized empirical templates; d′ is the
-standardized separation between event and background projection scores. This is a GT-time
-event-versus-background surrogate, not a continuously sliding detector. `d′_self` uses a denoised-domain
-template, analogous to an adaptive sorter, while `d′_fixed` scores denoised windows with the empirical
-raw-domain template. The event windows used to estimate each template are also used as hit windows,
-so absolute d′ is optimistically in-sample; the identical procedure is used for all model comparisons.
-`d′_fixed` measures compatibility with the raw waveform, not agreement with a noise-free injected
-template. Agreement between rankings indicates that template adaptation is not driving the
-architecture ordering; disagreement can reflect either representation adaptation or distortion. The
-raw-data reference is **d′ = 4.497**, and **Δd′ = d′_deep − d′_raw** measures the change from
-denoising under this surrogate.
+**Detection (primary).** The event/background matched-filter calculation is defined above and
+implemented in the vendored scoring module. `d′_fixed` measures compatibility with the raw empirical
+waveform, not agreement with a noise-free injected template. Agreement between self- and
+fixed-template rankings indicates that template adaptation is not driving the architecture ordering;
+disagreement can reflect either representation adaptation or distortion. The raw-data reference is
+**d′ = 4.497**, and **Δd′ = d′_deep − d′_raw** measures the change from denoising under this
+surrogate.
 
 **Waveform and SNR metrics.** `amp_ratio` is denoised-template ÷ raw-template peak-to-peak amplitude
 on the empirical raw peak channel; `fwhm_ratio` is the corresponding trough-width ratio;

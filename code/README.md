@@ -1,17 +1,18 @@
 # Code
 
-Scripts for the reproducible pipeline, grouped by stage. Some live on the AIND HPC or were run
-ad-hoc during the study; this directory is the canonical home and each subfolder's README documents
-what to vendor and how.
+Scripts for the reproducible pipeline, grouped by stage. This directory is the canonical source;
+the AIND HPC receives staged copies for GPU/S3 execution. Each subfolder README documents inputs,
+outputs, environment assumptions, and exact commands.
 
 | subfolder | stage | status |
 |---|---|---|
 | [`training/`](training/README.md) | launch Code Ocean training runs | documented (capsule-side) |
-| [`scoring/`](scoring/README.md) | HPC sbatch d′ / diagnostic scoring | **to vendor from HPC** |
-| [`figures/`](figures/README.md) | download, collate, plot, render site figures | **to vendor / re-commit** |
+| [`scoring/`](scoring/README.md) | event/background d′, waveform diagnostics, S3/HPC drivers, qualitative export | vendored and tested |
+| [`figures/`](figures/README.md) | collate tables and render every committed manuscript figure | vendored and regenerated |
 
 :::{note}
-The scoring sbatch scripts currently live on the HPC under `$BASE`; the download/collate/plot
-helpers were run locally. Pull commands are in each subfolder README. Once committed here, they are
-the single source of truth and the manuscript figures regenerate from them.
+Checkpoint weights and the full S3 recording are intentionally not committed. Endpoint CSVs and a
+compact qualitative NPZ are committed with provenance. The qualitative exporter first reproduces
+the frozen endpoint numerically; all subsequent figure rendering is local and requires neither a
+GPU nor S3 access.
 :::

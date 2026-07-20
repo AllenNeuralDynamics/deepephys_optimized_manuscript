@@ -113,7 +113,7 @@ SCREEN_METADATA = {
 }
 missing_metadata = set(NAMES) - set(SCREEN_METADATA)
 if missing_metadata:
-    raise ValueError(f"missing Figure 3 metadata: {sorted(missing_metadata)}")
+    raise ValueError(f"missing SNR/d-prime plot metadata: {sorted(missing_metadata)}")
 
 FOLLOWUP = (
     {"key": "base64", "name": "base64 R5", "bar": "base64 R5\nom0",
@@ -327,7 +327,7 @@ plot_points.extend(
 if len(plot_points) != len(COMPARISON_NAMES) or any(
         point["omission"] not in {0, 1} for point in plot_points):
     raise ValueError(
-        f"Figure 3 requires {len(COMPARISON_NAMES)} entries with omission route 0 or 1"
+        f"SNR/d-prime plot requires {len(COMPARISON_NAMES)} entries with omission route 0 or 1"
     )
 
 parameter_norm = LogNorm(

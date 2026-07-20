@@ -63,12 +63,28 @@ rsync -t --no-perms --chmod=u+rwx -e "ssh -o BatchMode=yes" \
 
 ## 4. Score on HPC (AP-band, frozen substrate)
 
+Stage the repository-owned scoring implementation from the local manuscript checkout:
+
 ```bash
-sbatch code/scoring/run_ckpt.sbatch      <ckpt_abs> <out_dprime.csv>     # d′ metrics
-sbatch code/scoring/template_diag.sbatch <ckpt_abs> <prefix>            # amp/fwhm/cos diagnostics
+rsync -rt --no-perms --chmod=u+rwx -e "ssh -o BatchMode=yes" \
+  code/scoring/ \
+  jeromel@hpc-login:/allen/aind/scratch/jeromel/ephys_denoising/manuscript_scoring/
+```
+
+On HPC:
+
+```bash
+SCORING=$BASE/manuscript_scoring
+INFERENCE=$BASE/aind-ephys-deepinterpolation-inference-808d7fa/code
+sbatch "$SCORING/run_ckpt.sbatch" \
+  <ckpt_abs> <out_dprime.csv> "$INFERENCE" "$SCORING"
+sbatch "$SCORING/template_diag.sbatch" \
+  <ckpt_abs> <prefix> "$INFERENCE" "$SCORING"
 ```
 Both are pinned to the benchmark recording, 10 GT units, `seed=0` (see
-[](../data/provenance.md)). See [`code/scoring/`](../code/scoring/README.md).
+[](../data/provenance.md)). The wrappers abort if the vendored metric or driver
+files are missing. See [`code/scoring/`](../code/scoring/README.md) for the exact
+d′ equation, output schema, qualitative export command, and focused tests.
 
 ## 5. Collate + figures
 
@@ -82,7 +98,13 @@ their exact inputs/outputs are documented in
 python code/figures/collate.py
 python code/figures/width_schedule_followup.py
 python code/figures/make_figures.py
+python code/figures/qualitative_examples.py
 ```
+
+The first three manuscript figures read the committed compact artifact in
+`results/qualitative/`. Recreating that artifact from S3 and the checkpoint is a
+GPU step documented in [`code/scoring/`](../code/scoring/README.md); ordinary
+local regeneration needs neither S3 nor a GPU.
 
 ## 6. Build the manuscript (local HTML site)
 
