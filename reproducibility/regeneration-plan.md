@@ -281,8 +281,8 @@ contains 18 figure directives; family-specific plots preserve matched bodies, ob
 ### 6.2 Figure collection (one+ per quantification family)
 | manuscript figure | plot | comparison scope |
 |---|---|---|
-| 1 | raw/denoised all-probe view, GT-event close-up, and peak-channel trace | selected full96 omission0 endpoint |
-| 2 | empirical templates and traces across four GT-unit strengths | same selected endpoint; post-screen diagnostic |
+| 1 | raw/denoised all-probe view, GT-event close-up, and peak-channel trace | matched Full96 omission routes + seed-0 original DI on identical inputs |
+| 2 | empirical templates and traces across four GT-unit strengths | same three endpoints; post-screen diagnostic |
 | 3 | complete hit/background score distributions and d′ equation | strong and weak GT-unit examples |
 | 4 | topology and architectural evolution through base96 schedules, plus R13 block substitution | architecture definitions |
 | 5 | combined d′ ranking | 21 original configurations + ten matched-R5 endpoints |

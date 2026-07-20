@@ -117,8 +117,8 @@ the appendix matrices.
 
 ## Rebuild the qualitative figures
 
-The GPU/S3 export validates that its d′ values reproduce the committed full96
-omission0 endpoint within `1e-6` before writing anything:
+Each GPU/S3 export validates that its d′ values reproduce the corresponding
+committed endpoint within `1e-6` before writing anything. For omission0:
 
 ```bash
 BASE=/allen/aind/scratch/jeromel/ephys_denoising
@@ -132,11 +132,21 @@ sbatch "$SCORING/export_qualitative_examples.sbatch" \
    "$BASE/traj_scores/ib_w96_om0_s0_dprime.csv" \
    "$BASE/qualitative/full96_om0_examples.npz" \
    "$BASE/qualitative/full96_om0_examples_metadata.json" \
-   "$INFERENCE"
+   "$INFERENCE" \
+   ib_w96_om0_s0
 ```
 
-Once the compact artifact exists, figure regeneration is local and does not
-require S3, SpikeInterface, a checkpoint, or a GPU:
+Repeat the same command with these checkpoint, reference, output, and label
+substitutions for the contextual models:
+
+| model | checkpoint | reference | output stem | label |
+|---|---|---|---|---|
+| Full96 omission1 | `$BASE/checkpoints_sweep/ib/ib_w96_om1_s0/best_model.pt` | `$BASE/traj_scores/ib_w96_om1_s0_dprime.csv` | `$BASE/qualitative/full96_om1_examples` | `ib_w96_om1_s0` |
+| original DI seed 0 | `$BASE/models/ib_origdi_s0/best_model.pt` | `$BASE/traj_scores/ib_origdi_s0_dprime.csv` | `$BASE/qualitative/origdi_s0_examples` | `ib_origdi_s0` |
+
+Once all three compact artifacts exist, figure regeneration is local and does
+not require S3, SpikeInterface, a checkpoint, or a GPU. The renderer verifies
+that their raw/event/template domains match before writing Figures 1–2:
 
 ```bash
 python code/figures/qualitative_examples.py

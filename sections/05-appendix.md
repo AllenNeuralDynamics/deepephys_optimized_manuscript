@@ -184,7 +184,8 @@ tables retain **all 87 scored endpoints**, including audit-only confounded runs.
 | manuscript surface | models included | models intentionally outside that surface |
 |---|---|---|
 | master, family, coverage, and full per-unit tables | all 87 scored endpoints | R7 PCGrad was aborted |
-| Figures 1–3, qualitative benchmark and metric diagnostics | selected full96 omission0 endpoint; four displayed GT units; complete score distributions for one strong and one weak unit | all other models; post-screen illustration is not held-out model evidence |
+| Figures 1–2, qualitative benchmark and template diagnostics | raw + matched Full96 omission routes + seed-0 original DI; four displayed GT units | all other models; post-screen illustration is not held-out model evidence |
+| Figure 3, d′ score distributions | Full96 omission0; complete scores for one strong and one weak unit | other endpoints; this panel explains the metric rather than comparing models |
 | Figure 4, architecture definition/evolution | original DI, base32, R5 base64, one depth-2 and four depth-3 base96 designs, R13 NAF | wiring/loss variants that do not introduce a new depicted topology |
 | Figures 5, 6, and 8; Figures 17–18 heatmaps | 21 original architecture configurations + matched R5 base64 + nine scored width/schedule/depth follow-ups = 31 | recipe replicates, integration/sampling controls, weighting interventions, and long-duration repeats |
 | Figure 7 and matched-R5 tables | matched R5 base64 + nine scored width/schedule/depth follow-ups = 10 | models with a different body, recipe, or sample budget |

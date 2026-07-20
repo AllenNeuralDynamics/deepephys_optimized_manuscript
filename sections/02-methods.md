@@ -25,12 +25,15 @@ uses identical frame centers, channel identities, and native voltage calibration
 is evaluated before common-median referencing or any additional scoring-time filter. A mismatch in
 any of these checks stops scoring rather than producing a partial endpoint.
 
-The qualitative export applies the same frozen extraction to the selected full96 omission0 model
-and must reproduce its committed per-unit SNR and d′ columns to within `1e-6` before writing figure
-data. The overview and close-up figures therefore show the actual benchmark and checkpoint used by
-the quantitative pipeline, not a separate demonstration recording. The illustrated model and events
-were selected for explanation after the model screen; the images are diagnostic views, not
-independent validation evidence.
+The qualitative export applies the same frozen extraction independently to Full96 omission0,
+Full96 omission1, and seed-0 original DI. Each export must reproduce its own committed per-unit SNR
+and d′ columns to within `1e-6` before writing figure data. The renderer then requires exact agreement
+in event frame, time axes, raw probe and local voltages, contact coordinates, selected template
+channels, and raw empirical templates across all three artifacts. The overview and template figures
+therefore compare actual scored checkpoints on identical inputs, not separate demonstration
+recordings. The illustrated models, units, and event were selected for explanation after the model
+screen; the images are diagnostic views, not independent validation evidence. The subsequent d′
+score-distribution figure remains a focused explanation of the Full96 omission0 endpoint.
 
 The complete implementation is vendored in
 [`code/scoring/detection_metrics.py`](code/scoring/detection_metrics.py), with executable S3 and

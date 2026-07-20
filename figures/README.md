@@ -6,9 +6,9 @@ the authoritative collection is the set of directives in `sections/`. The origin
 five-table quantification plan is retained in [](../reproducibility/regeneration-plan.md) §6.
 
 The first three assets are qualitative validation views generated from the compact, endpoint-checked
-artifact in [`../results/qualitative/`](../results/qualitative/README.md): the full probe before and
-after denoising, local empirical templates across unit strength, and the hit/background score
-distributions entering d′.
+artifacts in [`../results/qualitative/`](../results/qualitative/README.md): Figures 1–2 compare raw,
+matched Full96 omission routes, and seed-0 original DI on identical events, while Figure 3 shows the
+Full96 omission0 hit/background score distributions entering d′.
 
 The reference (`base32`) two-branch fold architecture is embedded as a diagram in
 [Methods](../sections/02-methods.md); a full layer-by-layer reference (shapes, receptive fields, and

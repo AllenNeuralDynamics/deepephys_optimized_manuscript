@@ -11,8 +11,8 @@ outputs, environment assumptions, and exact commands.
 | [`figures/`](figures/README.md) | collate tables and render every committed manuscript figure | vendored and regenerated |
 
 :::{note}
-Checkpoint weights and the full S3 recording are intentionally not committed. Endpoint CSVs and a
-compact qualitative NPZ are committed with provenance. The qualitative exporter first reproduces
-the frozen endpoint numerically; all subsequent figure rendering is local and requires neither a
-GPU nor S3 access.
+Checkpoint weights and the full S3 recording are intentionally not committed. Endpoint CSVs and
+three compact qualitative NPZ artifacts are committed with provenance. Each qualitative exporter
+first reproduces its frozen endpoint numerically; all subsequent figure rendering is local and
+requires neither a GPU nor S3 access.
 :::

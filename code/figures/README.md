@@ -17,7 +17,7 @@ regenerate deterministically.
 | `weighting_controls.py` | compare corrected matched-L2 weighting endpoints, waveform fidelity, seed context, and paired unit effects |
 | `channel_schedule_benchmark.py` | summarize exploratory synthetic-GPU throughput/memory for width-96 channel pyramids; does not measure d′ |
 | `width_schedule_followup.py` | validate and summarize the matched R5 base64/base96 width/depth/schedule study, paired unit effects, runtime, weak-unit behavior, and omission routing |
-| `qualitative_examples.py` | render the all-probe raw/denoised view, GT-event close-up, multi-unit attenuation examples, and d′ score distributions from the compact validated artifact |
+| `qualitative_examples.py` | render the all-probe raw/three-model view, GT-event close-up, multi-unit attenuation comparison, and omission0 d′ score distributions from three compact validated artifacts |
 | `validation_loss_headroom.py` | exploratory GT-support/off-GT contrast; retained for audit but excluded from the manuscript because off-GT data mix multiple signal/noise sources |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |

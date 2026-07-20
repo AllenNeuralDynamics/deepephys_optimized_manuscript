@@ -72,28 +72,31 @@ d′/diagnostic jobs were `23243308`–`23243311`.
 
 ## Qualitative benchmark export
 
-The opening raw/denoised, unit-attenuation, and d′-distribution figures use one
-compact export from the highest-d′ omission0 endpoint. This is a post-screen
-diagnostic selection, not held-out evidence.
+The opening raw/denoised and unit-attenuation figures compare three compact
+exports: the matched Full96 omission routes and seed-0 original DI. The d′
+distribution figure remains focused on Full96 omission0. These are post-screen
+diagnostic selections, not held-out evidence.
 
 | item | value |
 |---|---|
-| model | `ib_w96_om0_s0` (`96→192→384→768`, omission0) |
-| checkpoint SHA-256 | `1087a75b878fa82745f33581095f5d54a7f69bbb68ce83fd99893b62d778c4d1` |
 | inference checkout | `aind-ephys-deepinterpolation-inference` commit `808d7fa` |
-| export job | AIND HPC `23244894`, completed in 00:12:36 on a GTX 1080 Ti |
 | scoring extraction | seed 0; at most 100 GT events/unit; 200 spike-excluded backgrounds |
 | detail units | 2143, 1143, 720, 1129 |
 | exemplar | unit 1143, frame 107200608, nearest other injected event 14.667 ms away |
-| compact NPZ | `results/qualitative/full96_om0_examples.npz`, 1,657,671 bytes, SHA-256 `5be9ca2cbb07a62b626b87ac56495fde490ae2d64a02c1bf92af8d305163e93e` |
-| reproduced CSV | `results/qualitative/full96_om0_examples.csv`, SHA-256 `fb75d4663cbd66fb68bfda27d0ac84010f76bdfa75d51e3be6cc9f8d2992102f` |
-| metadata JSON | `results/qualitative/full96_om0_examples_metadata.json`, SHA-256 `f89fc514fdafbc8e3af03a6855596bf9619fb325213a1c13597e31ee97eda1e2` |
 
-Before writing these files, the exporter recomputed all ten committed per-unit
+| model | checkpoint SHA-256 | export job | NPZ SHA-256 |
+|---|---|---|---|
+| `ib_w96_om0_s0` | `1087a75b878fa82745f33581095f5d54a7f69bbb68ce83fd99893b62d778c4d1` | `23244894` (00:12:36, GTX 1080 Ti) | `5be9ca2cbb07a62b626b87ac56495fde490ae2d64a02c1bf92af8d305163e93e` |
+| `ib_w96_om1_s0` | `6683c5880ac0c6c6a95e72b09fdb29398bd91218d66e2379f9db6b2b5924f146` | `23246072` (00:10:51, TITAN Xp) | `433582303a763e273b0f972f67502149f78e3336f8150b580081323ad63b2122` |
+| `ib_origdi_s0` | `d047ea9fda59c5ba74fa28a88b7b4347b84b087111a4db8fe5632851a63610c0` | `23246073` (00:10:54, TITAN Xp) | `39af42d4029c44b07a3ed44780d2d6ff021a54604c986face0bb14915ac14393` |
+
+Before writing each artifact, the exporter recomputed all ten committed per-unit
 SNR and d′ rows and required maximum absolute error below `1e-6`; the observed
-error was exactly 0. The 30-ms all-probe and 4-ms local displays remove only each
-channel's median for visualization. Scoring uses the native calibrated windows
-without that display centering.
+error was exactly 0 for all three. The renderer additionally verified exact
+agreement in shared raw/event/template inputs. The 30-ms all-probe and 4-ms local
+displays remove only each channel's median for visualization. Scoring uses the
+native calibrated windows without that display centering. CSV and metadata hashes
+are recorded in `results/qualitative/README.md`.
 
 ## Checkpoint schedule (`n_ckpt=12`)
 

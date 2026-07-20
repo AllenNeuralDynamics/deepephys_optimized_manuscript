@@ -101,9 +101,9 @@ python code/figures/make_figures.py
 python code/figures/qualitative_examples.py
 ```
 
-The first three manuscript figures read the committed compact artifact in
-`results/qualitative/`. Recreating that artifact from S3 and the checkpoint is a
-GPU step documented in [`code/scoring/`](../code/scoring/README.md); ordinary
+The first three manuscript figures read the three committed compact artifacts in
+`results/qualitative/`. Recreating those artifacts from S3 and their checkpoints
+is a GPU step documented in [`code/scoring/`](../code/scoring/README.md); ordinary
 local regeneration needs neither S3 nor a GPU.
 
 ## 6. Build the manuscript (local HTML site)

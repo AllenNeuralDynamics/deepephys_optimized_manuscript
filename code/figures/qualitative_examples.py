@@ -12,12 +12,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 REPO = Path(__file__).resolve().parents[2]
-DATA = REPO / "results" / "qualitative" / "full96_om0_examples.npz"
-METADATA = DATA.with_name("full96_om0_examples_metadata.json")
+QUALITATIVE = REPO / "results" / "qualitative"
+ARTIFACTS = {
+    "om0": QUALITATIVE / "full96_om0_examples.npz",
+    "om1": QUALITATIVE / "full96_om1_examples.npz",
+    "origdi": QUALITATIVE / "origdi_s0_examples.npz",
+}
+METADATA = {
+    key: path.with_name(f"{path.stem}_metadata.json")
+    for key, path in ARTIFACTS.items()
+}
 FIGURES = REPO / "figures"
 UNITS = (2143, 1143, 720, 1129)
 RAW_COLOR = "#4F5965"
-DENOISED_COLOR = "#D26A3A"
+MODEL_COLORS = {
+    "om0": "#D26A3A",
+    "om1": "#2A7F9E",
+    "origdi": "#6F5A8A",
+}
+MODEL_LABELS = {
+    "om0": "Full96 omission0",
+    "om1": "Full96 omission1",
+    "origdi": "Original DI",
+}
 HIT_COLOR = "#C84A44"
 BACKGROUND_COLOR = "#8D969F"
 
@@ -54,39 +71,80 @@ def _local_template_contacts(raw, denoised, depths, peak_index, radius_um=120.0)
     return raw[:, indices], denoised[:, indices], depths[indices], local_peak_index
 
 
-def plot_probe_overview(data) -> None:
-    raw_probe = _center_channels(data["raw_probe_uV"])
-    denoised_probe = _center_channels(data["denoised_probe_uV"])
-    raw_local = _center_channels(data["raw_local_uV"])
-    denoised_local = _center_channels(data["denoised_local_uV"])
-    overview_time = data["overview_time_ms"]
-    local_time = data["local_time_ms"]
-    probe_depth = data["probe_depth_um"]
-    local_depth = data["local_depth_um"]
-    peak_index = int(_scalar(data, "local_peak_index"))
-    exemplar_unit = int(_scalar(data, "exemplar_unit"))
+def _assert_shared_domain(data_by_model) -> None:
+    reference = data_by_model["om0"]
+    exact_keys = (
+        "exemplar_unit",
+        "event_frame",
+        "event_isolation_frames",
+        "local_channels",
+        "local_peak_index",
+    )
+    numeric_keys = (
+        "sampling_frequency",
+        "overview_time_ms",
+        "probe_depth_um",
+        "local_time_ms",
+        "local_depth_um",
+        "raw_probe_uV",
+        "raw_local_uV",
+    )
+    for model_key, data in data_by_model.items():
+        if model_key == "om0":
+            continue
+        for key in exact_keys:
+            if not np.array_equal(reference[key], data[key]):
+                raise ValueError(f"{model_key} differs from omission0 for {key}")
+        for key in numeric_keys:
+            if not np.allclose(reference[key], data[key], rtol=0, atol=1e-6):
+                raise ValueError(f"{model_key} differs from omission0 for {key}")
+        for unit_id in UNITS:
+            for suffix in ("channels", "depth_um", "peak_index", "raw_template_uV"):
+                key = f"unit_{unit_id}_{suffix}"
+                if not np.allclose(reference[key], data[key], rtol=0, atol=1e-6):
+                    raise ValueError(f"{model_key} differs from omission0 for {key}")
 
-    figure = plt.figure(figsize=(14.2, 8.6))
-    grid = figure.add_gridspec(2, 1, height_ratios=(1.05, 0.9), hspace=0.34)
-    overview_grid = grid[0].subgridspec(1, 3, width_ratios=(1, 1, 0.035), wspace=0.2)
-    detail_grid = grid[1].subgridspec(1, 4, width_ratios=(1, 1, 0.045, 1.08), wspace=0.45)
-    axes = {
-        "raw_probe": figure.add_subplot(overview_grid[0, 0]),
-        "denoised_probe": figure.add_subplot(overview_grid[0, 1]),
-        "overview_colorbar": figure.add_subplot(overview_grid[0, 2]),
-        "raw_local": figure.add_subplot(detail_grid[0, 0]),
-        "denoised_local": figure.add_subplot(detail_grid[0, 1]),
-        "local_colorbar": figure.add_subplot(detail_grid[0, 2]),
-        "trace": figure.add_subplot(detail_grid[0, 3]),
-    }
-    overview_limit = np.quantile(np.abs(np.concatenate([raw_probe.ravel(), denoised_probe.ravel()])), 0.995)
-    local_limit = np.quantile(np.abs(np.concatenate([raw_local.ravel(), denoised_local.ravel()])), 0.995)
-    for name, values, title in (
-        ("raw_probe", raw_probe, "A  Raw AP-band recording"),
-        ("denoised_probe", denoised_probe, "B  Full96 omission0 output"),
-    ):
-        image = axes[name].imshow(
-            values,
+
+def plot_probe_overview(data_by_model) -> None:
+    reference = data_by_model["om0"]
+    raw_probe = _center_channels(reference["raw_probe_uV"])
+    raw_local = _center_channels(reference["raw_local_uV"])
+    probes = {"raw": raw_probe}
+    locals_ = {"raw": raw_local}
+    for model_key, data in data_by_model.items():
+        probes[model_key] = _center_channels(data["denoised_probe_uV"])
+        locals_[model_key] = _center_channels(data["denoised_local_uV"])
+    overview_time = reference["overview_time_ms"]
+    local_time = reference["local_time_ms"]
+    probe_depth = reference["probe_depth_um"]
+    local_depth = reference["local_depth_um"]
+    peak_index = int(_scalar(reference, "local_peak_index"))
+    exemplar_unit = int(_scalar(reference, "exemplar_unit"))
+
+    figure = plt.figure(figsize=(16.8, 11.2))
+    grid = figure.add_gridspec(3, 1, height_ratios=(1.0, 0.88, 0.58), hspace=0.38)
+    overview_grid = grid[0].subgridspec(1, 5, width_ratios=(1, 1, 1, 1, 0.035), wspace=0.22)
+    detail_grid = grid[1].subgridspec(1, 5, width_ratios=(1, 1, 1, 1, 0.035), wspace=0.22)
+    overview_axes = [figure.add_subplot(overview_grid[0, index]) for index in range(4)]
+    detail_axes = [figure.add_subplot(detail_grid[0, index]) for index in range(4)]
+    overview_colorbar = figure.add_subplot(overview_grid[0, 4])
+    local_colorbar = figure.add_subplot(detail_grid[0, 4])
+    trace_axis = figure.add_subplot(grid[2, 0])
+    overview_limit = np.quantile(
+        np.abs(np.concatenate([values.ravel() for values in probes.values()])), 0.995
+    )
+    local_limit = np.quantile(
+        np.abs(np.concatenate([values.ravel() for values in locals_.values()])), 0.995
+    )
+    display_columns = (
+        ("raw", "A", "Raw AP-band"),
+        ("om0", "B", MODEL_LABELS["om0"]),
+        ("om1", "C", MODEL_LABELS["om1"]),
+        ("origdi", "D", MODEL_LABELS["origdi"]),
+    )
+    for axis, (model_key, panel, title) in zip(overview_axes, display_columns):
+        image = axis.imshow(
+            probes[model_key],
             aspect="auto",
             cmap="RdBu_r",
             vmin=-overview_limit,
@@ -94,19 +152,24 @@ def plot_probe_overview(data) -> None:
             extent=(overview_time[0], overview_time[-1], len(probe_depth) - 0.5, -0.5),
             interpolation="nearest",
         )
-        axes[name].axvline(0, color="#111111", lw=0.9, ls=":")
-        axes[name].set_title(title, loc="left", fontweight="bold")
-        axes[name].set_xlabel("Time from exemplar GT event (ms)")
-        _depth_ticks(axes[name], probe_depth)
-    colorbar = figure.colorbar(image, cax=axes["overview_colorbar"])
+        axis.axvline(0, color="#111111", lw=0.9, ls=":")
+        axis.set_title(f"{panel}  {title}", loc="left", fontweight="bold")
+        axis.set_xlabel("Time from GT event (ms)")
+        _depth_ticks(axis, probe_depth, "Probe depth (µm)" if model_key == "raw" else "")
+    colorbar = figure.colorbar(image, cax=overview_colorbar)
     colorbar.set_label("Voltage (µV; channel median removed)")
 
-    for name, values, title in (
-        ("raw_local", raw_local, f"C  Raw close-up, GT unit {exemplar_unit}"),
-        ("denoised_local", denoised_local, "D  Denoised close-up, same event"),
+    for axis, (model_key, panel, title) in zip(
+        detail_axes,
+        (
+            ("raw", "E", f"Raw close-up, unit {exemplar_unit}"),
+            ("om0", "F", "Full96 omission0"),
+            ("om1", "G", "Full96 omission1"),
+            ("origdi", "H", "Original DI"),
+        ),
     ):
-        local_image = axes[name].imshow(
-            values,
+        local_image = axis.imshow(
+            locals_[model_key],
             aspect="auto",
             cmap="RdBu_r",
             vmin=-local_limit,
@@ -114,49 +177,95 @@ def plot_probe_overview(data) -> None:
             extent=(local_time[0], local_time[-1], len(local_depth) - 0.5, -0.5),
             interpolation="nearest",
         )
-        axes[name].axvline(0, color="#111111", lw=0.9, ls=":")
-        axes[name].set_title(title, loc="left", fontweight="bold")
-        axes[name].set_xlabel("Time from GT event (ms)")
-        _depth_ticks(axes[name], local_depth)
-    local_colorbar = figure.colorbar(local_image, cax=axes["local_colorbar"])
-    local_colorbar.ax.set_title("µV", pad=6)
+        axis.axvline(0, color="#111111", lw=0.9, ls=":")
+        axis.set_title(f"{panel}  {title}", loc="left", fontweight="bold")
+        axis.set_xlabel("Time from GT event (ms)")
+        _depth_ticks(axis, local_depth, "Contact depth (µm)" if model_key == "raw" else "")
+    local_scale = figure.colorbar(local_image, cax=local_colorbar)
+    local_scale.ax.set_title("µV", pad=6)
 
     raw_trace = raw_local[peak_index] - np.median(raw_local[peak_index, :10])
-    denoised_trace = denoised_local[peak_index] - np.median(denoised_local[peak_index, :10])
-    axes["trace"].plot(local_time, raw_trace, color=RAW_COLOR, lw=1.4, label="raw")
-    axes["trace"].plot(local_time, denoised_trace, color=DENOISED_COLOR, lw=1.7, label="denoised")
-    axes["trace"].axvline(0, color="#111111", lw=0.9, ls=":")
-    axes["trace"].axhline(0, color="#B7BDC2", lw=0.7)
-    axes["trace"].set_title("E  Peak-channel voltage", loc="left", fontweight="bold")
-    axes["trace"].set_xlabel("Time from GT event (ms)")
-    axes["trace"].set_ylabel("Voltage (µV)")
-    axes["trace"].legend(frameon=False)
-    axes["trace"].grid(alpha=0.2)
+    trace_axis.plot(local_time, raw_trace, color=RAW_COLOR, lw=1.4, label="Raw")
+    for model_key, data in data_by_model.items():
+        trace = locals_[model_key][peak_index]
+        trace = trace - np.median(trace[:10])
+        trace_axis.plot(
+            local_time, trace, color=MODEL_COLORS[model_key], lw=1.6,
+            label=MODEL_LABELS[model_key],
+        )
+    trace_axis.axvline(0, color="#111111", lw=0.9, ls=":")
+    trace_axis.axhline(0, color="#B7BDC2", lw=0.7)
+    trace_axis.set_title("I  Peak-channel voltage for the same event", loc="left", fontweight="bold")
+    trace_axis.set_xlabel("Time from GT event (ms)")
+    trace_axis.set_ylabel("Voltage (µV)")
+    trace_axis.legend(frameon=False, ncol=4, loc="upper right")
+    trace_axis.grid(alpha=0.2)
     figure.suptitle(
         "The frozen hybrid benchmark before and after DeepInterpolation",
         fontweight="bold",
         y=0.99,
     )
-    figure.subplots_adjust(top=0.92, right=0.96, left=0.07, bottom=0.08)
-    figure.savefig(FIGURES / "benchmark_raw_denoised_example.png", dpi=140)
+    figure.subplots_adjust(top=0.94, right=0.96, left=0.065, bottom=0.07)
+    figure.savefig(FIGURES / "benchmark_raw_denoised_example.png", dpi=110)
     plt.close(figure)
 
 
-def plot_unit_attenuation(data) -> None:
+def plot_unit_attenuation(data_by_model) -> None:
     time = (np.arange(120) - 45) / 30.0
-    figure, axes = plt.subplots(len(UNITS), 3, figsize=(12.8, 10.6), squeeze=False)
+    figure = plt.figure(figsize=(18.6, 11.8))
+    grid = figure.add_gridspec(
+        len(UNITS), 7,
+        width_ratios=(1, 1, 1, 1, 0.035, 0.08, 1.25),
+        hspace=0.65,
+        wspace=0.42,
+    )
+    axes = np.empty((len(UNITS), 5), dtype=object)
+    colorbar_axes = []
+    for row_index in range(len(UNITS)):
+        for column in range(4):
+            axes[row_index, column] = figure.add_subplot(grid[row_index, column])
+        colorbar_axes.append(figure.add_subplot(grid[row_index, 4]))
+        axes[row_index, 4] = figure.add_subplot(grid[row_index, 6])
+    reference = data_by_model["om0"]
     for row_index, unit_id in enumerate(UNITS):
-        raw = _center_template(data[f"unit_{unit_id}_raw_template_uV"])
-        denoised = _center_template(data[f"unit_{unit_id}_denoised_template_uV"])
-        depths = data[f"unit_{unit_id}_depth_um"]
-        peak_index = int(_scalar(data, f"unit_{unit_id}_peak_index"))
-        raw, denoised, depths, peak_index = _local_template_contacts(
-            raw, denoised, depths, peak_index
+        raw = _center_template(reference[f"unit_{unit_id}_raw_template_uV"])
+        templates = {
+            model_key: _center_template(data[f"unit_{unit_id}_denoised_template_uV"])
+            for model_key, data in data_by_model.items()
+        }
+        depths = reference[f"unit_{unit_id}_depth_um"]
+        peak_index = int(_scalar(reference, f"unit_{unit_id}_peak_index"))
+        raw, om0, depths, peak_index = _local_template_contacts(
+            raw, templates["om0"], depths, peak_index
         )
+        keep_depths = depths.copy()
+        templates["om0"] = om0
+        for model_key in ("om1", "origdi"):
+            _, local_template, model_depths, model_peak = _local_template_contacts(
+                _center_template(reference[f"unit_{unit_id}_raw_template_uV"]),
+                templates[model_key],
+                reference[f"unit_{unit_id}_depth_um"],
+                int(_scalar(reference, f"unit_{unit_id}_peak_index")),
+            )
+            if not np.array_equal(model_depths, keep_depths) or model_peak != peak_index:
+                raise ValueError(f"local contact mismatch for unit {unit_id}, {model_key}")
+            templates[model_key] = local_template
+        raw_trace = raw[:, peak_index]
+        raw_dprime = float(_scalar(reference, f"unit_{unit_id}_dprime_raw"))
+        metric_labels = {0: f"raw d′ {raw_dprime:.2f}"}
+        for column, model_key in enumerate(("om0", "om1", "origdi"), start=1):
+            trace = templates[model_key][:, peak_index]
+            deep_dprime = float(
+                _scalar(data_by_model[model_key], f"unit_{unit_id}_dprime_deep")
+            )
+            amplitude_ratio = np.ptp(trace) / max(np.ptp(raw_trace), 1e-9)
+            metric_labels[column] = f"d′ {deep_dprime:.2f} | amp {amplitude_ratio:.2f}"
         limit = np.max(np.abs(raw))
         for column, values, title in (
-            (0, raw, "Raw empirical template"),
-            (1, denoised, "Denoised empirical template"),
+            (0, raw, "Raw"),
+            (1, templates["om0"], "Full96 omission0"),
+            (2, templates["om1"], "Full96 omission1"),
+            (3, templates["origdi"], "Original DI"),
         ):
             image = axes[row_index, column].imshow(
                 values.T,
@@ -170,45 +279,42 @@ def plot_unit_attenuation(data) -> None:
             axes[row_index, column].axvline(0, color="#111111", lw=0.7, ls=":")
             if row_index == 0:
                 axes[row_index, column].set_title(title, fontweight="bold")
-            axes[row_index, column].set_xlabel("Time (ms)")
-            _depth_ticks(axes[row_index, column], depths, "Contact depth (µm)")
-        figure.colorbar(image, ax=axes[row_index, :2], pad=0.008, fraction=0.018).set_label("µV")
+            axes[row_index, column].set_xlabel(
+                f"Time (ms)\n{metric_labels[column]}", fontsize=8.5
+            )
+            _depth_ticks(
+                axes[row_index, column], depths,
+                "Contact depth (µm)" if column == 0 else "",
+            )
+        scale = figure.colorbar(image, cax=colorbar_axes[row_index])
+        scale.ax.set_title("µV", pad=5, fontsize=8)
 
-        raw_trace = raw[:, peak_index]
-        denoised_trace = denoised[:, peak_index]
-        axes[row_index, 2].plot(time, raw_trace, color=RAW_COLOR, lw=1.35, label="raw")
-        axes[row_index, 2].plot(time, denoised_trace, color=DENOISED_COLOR, lw=1.65, label="denoised")
-        axes[row_index, 2].axvline(0, color="#111111", lw=0.7, ls=":")
-        axes[row_index, 2].axhline(0, color="#B7BDC2", lw=0.7)
-        raw_dprime = float(_scalar(data, f"unit_{unit_id}_dprime_raw"))
-        deep_dprime = float(_scalar(data, f"unit_{unit_id}_dprime_deep"))
-        amplitude_ratio = np.ptp(denoised_trace) / max(np.ptp(raw_trace), 1e-9)
-        axes[row_index, 2].text(
-            0.98,
-            0.05,
-            f"raw d′ {raw_dprime:.2f} → {deep_dprime:.2f}\namp ratio {amplitude_ratio:.2f}",
-            transform=axes[row_index, 2].transAxes,
-            ha="right",
-            va="bottom",
-            fontsize=8.5,
-            bbox={"facecolor": "white", "edgecolor": "0.85", "alpha": 0.9},
-        )
-        axes[row_index, 2].set_title(
-            f"Unit {unit_id}  |  peak-channel template",
+        trace_axis = axes[row_index, 4]
+        trace_axis.plot(time, raw_trace, color=RAW_COLOR, lw=1.25, label="Raw")
+        for model_key, data in data_by_model.items():
+            trace = templates[model_key][:, peak_index]
+            trace_axis.plot(
+                time, trace, color=MODEL_COLORS[model_key], lw=1.5,
+                label=MODEL_LABELS[model_key],
+            )
+        trace_axis.axvline(0, color="#111111", lw=0.7, ls=":")
+        trace_axis.axhline(0, color="#B7BDC2", lw=0.7)
+        trace_axis.set_title(
+            f"Unit {unit_id}  |  peak-channel templates",
             loc="left",
             fontweight="bold",
         )
-        axes[row_index, 2].set_xlabel("Time (ms)")
-        axes[row_index, 2].set_ylabel("Voltage (µV)")
-        axes[row_index, 2].grid(alpha=0.2)
-    axes[0, 2].legend(frameon=False, loc="upper right")
+        trace_axis.set_xlabel("Time (ms)")
+        trace_axis.set_ylabel("Voltage (µV)")
+        trace_axis.grid(alpha=0.2)
+    axes[0, 4].legend(frameon=False, loc="upper right", fontsize=8)
     figure.suptitle(
         "Weak GT units are attenuated more than strong units",
         fontweight="bold",
         y=0.995,
     )
-    figure.subplots_adjust(top=0.95, hspace=0.5, wspace=0.48, right=0.95)
-    figure.savefig(FIGURES / "unit_attenuation_examples.png", dpi=190)
+    figure.subplots_adjust(top=0.94, right=0.97, left=0.06, bottom=0.06)
+    figure.savefig(FIGURES / "unit_attenuation_examples.png", dpi=170)
     plt.close(figure)
 
 
@@ -279,19 +385,24 @@ def plot_dprime_explainer(data) -> None:
 
 def main() -> None:
     FIGURES.mkdir(exist_ok=True)
-    if not DATA.exists() or not METADATA.exists():
+    missing = [path for path in (*ARTIFACTS.values(), *METADATA.values()) if not path.exists()]
+    if missing:
         raise FileNotFoundError(
-            "qualitative source data are missing; run code/scoring/export_qualitative_examples.py"
+            "qualitative source data are missing: " + ", ".join(str(path) for path in missing)
         )
-    with np.load(DATA) as data:
-        plot_probe_overview(data)
-        plot_unit_attenuation(data)
-        plot_dprime_explainer(data)
-    metadata = json.loads(METADATA.read_text())
+    loaded = {key: np.load(path) for key, path in ARTIFACTS.items()}
+    try:
+        _assert_shared_domain(loaded)
+        plot_probe_overview(loaded)
+        plot_unit_attenuation(loaded)
+        plot_dprime_explainer(loaded["om0"])
+    finally:
+        for data in loaded.values():
+            data.close()
+    metadata = {key: json.loads(path.read_text()) for key, path in METADATA.items()}
     print(
         "wrote qualitative figures from",
-        metadata["model_label"],
-        metadata["checkpoint_sha256"][:12],
+        ", ".join(metadata[key]["model_label"] for key in ARTIFACTS),
     )
 
 

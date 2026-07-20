@@ -1,6 +1,6 @@
 #!/bin/bash
 # Export compact raw/denoised traces, templates, and score distributions for figures.
-# Usage: sbatch export_qualitative_examples.sbatch <export.py> <metrics.py> <checkpoint> <reference.csv> <out.npz> <metadata.json> <inference_code>
+# Usage: sbatch export_qualitative_examples.sbatch <export.py> <metrics.py> <checkpoint> <reference.csv> <out.npz> <metadata.json> <inference_code> [model_label]
 #SBATCH --partition=aind
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=8
@@ -18,6 +18,7 @@ REFERENCE="${4:?pass reference dprime csv}"
 OUTPUT="${5:?pass output npz}"
 METADATA="${6:?pass metadata json}"
 INFERENCE_CODE="${7:?pass pinned inference code directory}"
+MODEL_LABEL="${8:-ib_w96_om0_s0}"
 mkdir -p "$BASE/logs" "$(dirname "$OUTPUT")"
 source "$FORGE/etc/profile.d/conda.sh"
 conda activate "$BASE/env"
@@ -37,7 +38,7 @@ srun env PYTHONPATH="$INFERENCE_CODE${PYTHONPATH:+:$PYTHONPATH}" \
     --reference-scores "$REFERENCE" \
     --out "$OUTPUT" \
     --metadata "$METADATA" \
-    --model-label ib_w96_om0_s0 \
+    --model-label "$MODEL_LABEL" \
     --units 2143,1143,720,1129 \
     --exemplar-unit 1143 \
     --device cuda --batch-size 512
