@@ -10,12 +10,20 @@ abstract: |
   matched-filter d′ and empirical-template waveform metrics. Across 21 short-budget architectures,
   every denoised output had lower mean d′ than raw data. The complete modernization from the original
   ephys network to the two-branch `base32` model improved d′ by 0.14; the best observed modern body
-  improved it by 0.27, although several high-capacity results are single-seed screens. Width produced
+  improved it by 0.28, although several high-capacity results are single-seed screens. Width produced
   the largest replicated gain in the all-unit mean (+0.105 d′), whereas the compound `omission0`
   configuration, which routes t±1 through the temporal branch, produced the larger gain among four
   weak units (+0.148 d′) and improved amplitude preservation toward raw. Across architectures,
-  change in template SNR did not rank change in d′ (Spearman ρ = 0.02). In a three-seed matched
-  replication, warmup alone did not improve the endpoint consistently, whereas a compound batch-256
+  change in template SNR did not rank change in d′ (Spearman ρ = 0.02). In a single-seed matched-R5
+  follow-up, omission0 d′ increased from 4.358 for base64 to 4.360 for base96 with 1.5× channel
+  growth, 4.377 with a 384-channel cap, and 4.394 with full 2× growth. Only full base96 had a
+  descriptive paired-unit bootstrap interval above zero versus base64; its four-weak-unit mean was
+  effectively unchanged, and its Code Ocean runtime was 4.63 h versus 2.65 h for base64. At nearly
+  matched parameter count, a depth-2 `96→192→384` model reached d′ 4.354, +0.014 above the depth-3
+  √2 schedule with a descriptive paired-unit interval above zero, while remaining tied with base64.
+  Thus channel allocation, not extra depth alone, explains the small-model difference. In a
+  three-seed matched replication, warmup alone did not improve the endpoint consistently, whereas a
+  compound batch-256
   recipe improved mean d′ by 0.004 in all three pairs and reached d′ = 4.30 after a median 2.25 M
   versus 5.38 M windows for baseline. Four single-seed controls did not isolate a better method:
   adaptive accumulation and objective-preserving importance sampling matched the warmup endpoint,

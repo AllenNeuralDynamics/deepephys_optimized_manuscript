@@ -4,12 +4,12 @@ A [MyST Markdown](https://mystmd.org) publication: an optimisation of the DeepIn
 denoiser for Neuropixels spike detection — with a focus on protecting the weaker, low-amplitude
 units — together with a fully reproducible **train → score → figure** pipeline.
 
-> **Status:** all Code Ocean training and all 610 HPC scoring jobs underlying the current report are
-> complete. Five post-report width-96 controls are training: the full pyramid under both omission
-> routings plus three efficient channel-schedule ablations. They are not included in the conclusions
-> below. The report includes the architecture and recipe screens, matched replications, gradient and
-> integration controls, capacity-matched NAF control, corrected weighting screen, and duration
-> trajectories.
+> **Status:** the report contains 87 scored endpoints. The coverage audit identified that the √2
+> channel schedule had only a synthetic GPU benchmark; matched omission0/omission1 √2 runs
+> (`96→136→192→272`) were subsequently trained, checkpoint-validated, and scored on the frozen
+> ten-unit benchmark. Matched depth-2 base96 controls (`96→192→384`, omission0/omission1) were
+> subsequently trained and scored under the same protocol. The intentionally aborted R7 PCGrad row
+> is the sole ledger entry without an endpoint.
 
 ## Why this repo exists
 

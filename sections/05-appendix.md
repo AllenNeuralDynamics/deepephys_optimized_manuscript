@@ -7,7 +7,9 @@ scattered on the NP1 grid, width columns folded into features, a 1-D U-Net along
 probe-axis blind-spot branch). Every override is defined in the
 [versioned analysis plan](reproducibility/regeneration-plan.md) §4.
 
-**Scored (Tier 1 + Tier 2 + SUPPORT scale).**
+**Scored model and control families.**
+- **origdi** — the published temporal-only 2-D DeepInterpolation ephys network, trained and scored
+  under the common in-band protocol. d′ 4.135 ± 0.010, amp 0.811 (3 seeds).
 - **base32** — the reference: `base_channels=32, depth=3`, 3-frame temporal blind spot
   (`omission=1`), `bs_channels=64 / bs_depth=5`, `fuse_channels=64`, Charbonnier loss. In-band
   d′ 4.277 ± 0.015, amp 0.859 (5 seeds).
@@ -18,6 +20,14 @@ probe-axis blind-spot branch). Every override is defined in the
 - **omission0_l2** — omission0 in L2, completing the loss × omission 2×2. d′ 4.305, amp 0.931 (3 seeds).
 - **base64** — base32 with the U-Net base width doubled (32 → 64, 3.15 M params). d′ 4.382,
   amp 0.880 (3 seeds).
+- **Matched R5 width/schedule/depth follow-up** — one seed each, with the R5 recipe and omission0 unless
+  noted. `width96_g15` uses 96→144→216→324 (2.23 M params; d′ 4.360), `width96_cap384` uses
+  96→192→384→384 (4.60 M; d′ 4.377), and full `width96` uses 96→192→384→768 (6.96 M;
+  d′ 4.394). The growth1.5 and full omission1 twins reach 4.389 / 4.414 but lower the four-weak-unit
+  mean and waveform amplitude relative to omission0. The √2 schedule (96→136→192→272; 1.83 M)
+  reaches d′ 4.340 / 4.359 under omission0 / omission1; its omission1 twin likewise lowers the
+  four-weak-unit mean and waveform amplitude. The nearly parameter-matched depth-2 schedule
+  (96→192→384; 1.80 M) reaches 4.354 / 4.365; omission0 is +0.014 above √2 while tied with base64.
 - **arch** — the enlarged body: base 64, depth 4, `bs_channels=128`, `bs_depth=7`. Its single run has
   the highest observed short-screen mean (d′ 4.409, amp 0.871); L2 twin `arch_l2` is 4.407.
 - **base64_om0 / arch_om0** — the two capacity bodies with the omission gap removed (`omission=0`,
@@ -30,15 +40,26 @@ probe-axis blind-spot branch). Every override is defined in the
   observations exceed the upper edge of the base32 ±2-seed-SD reference; amp is ~0.86 throughout.
 - **om0_scale / om1_scale** — the two long-duration runs (`support_all` wiring, L2, ~3.3 M updates)
   with `omission=0` / `omission=1`. Final-step d′ 4.361 / 4.361; amp 0.931 / 0.870.
+- **R0–R6 recipe family** — eight single-seed recipe-screen endpoints on `base64_om0`; R0, R1,
+  and R5 each have two additional matched seeds. These change optimization, not architecture.
+- **R8–R12 diagnostics and integration controls** — R8 records same-parameter gradient diagnostics;
+  R9–R12 test adaptive accumulation, objective-preserving importance sampling, physical batch 256,
+  and accumulated effective batch 256 against R1.
+- **R13 NAF58** — a capacity-matched NAF temporal-block substitution against the R5 DoubleConv body;
+  d′ 4.335 and 41% longer runtime than matched R5 seed 0.
+- **Corrected weighting family** — seven matched-L2 weighted arms plus three unweighted
+  `arch_l2_om0` seeds for context. The ten separately classified legacy weighted endpoints are
+  scored but audit-only because their executed objective was Charbonnier rather than requested L2.
 
 **Complete endpoint coverage.** `results/tables/master_table.csv` and its Markdown twin contain all
-78 completed run endpoints with all detection and waveform metrics. The associated
+87 completed run endpoints with all detection and waveform metrics. The associated
 `model_family_summary` and `table_coverage` tables make comparison boundaries and exclusions
 explicit:
 
 | experiment family | budget | endpoint runs |
 |---|---|---:|
 | architecture screen | ~18 M windows | 39 |
+| width/schedule/depth follow-up | ~18 M windows | 9 |
 | legacy weighting screen | ~18 M windows | 10 |
 | recipe screen | ~18 M windows | 8 |
 | recipe replication | ~18 M windows | 6 |
@@ -47,19 +68,20 @@ explicit:
 | NAF control | ~18 M windows | 1 |
 | corrected weighting | ~18 M windows | 7 |
 | duration diagnostic | 3.30 M updates | 2 |
-| **total completed endpoints** |  | **78** |
+| **total completed endpoints** |  | **87** |
 
 The global d′ sort is an inventory, not an omnibus method ranking. Comparisons should stay within
 the relevant family, body, budget, and seed context; the dedicated recipe, integration, NAF, and
 weighting tables implement those matched comparisons. The intentionally aborted R7 PCGrad entry is
-the only ledger row without an endpoint and is recorded as such in `table_coverage`.
+the sole row without an endpoint in `table_coverage`.
 
 ## B. Per-unit amplitude across models
 
 `amp_ratio` for each ground-truth unit (rows, sorted by raw matched-filter separability) across a
-representative set of the **short-budget** models; seeds averaged. The two long `support_all` runs are
-excluded here (different training budget — see the duration section);
-the full 10-unit × 78-endpoint matrix is in `results/tables/perunit_amp.csv`.
+representative set of the **original short-budget screen**; seeds averaged. The matched-R5 follow-up
+is reported immediately below. The two long `support_all` runs are excluded here (different training
+budget — see the duration section);
+the full 10-unit × 87-endpoint matrix is in `results/tables/perunit_amp.csv`.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -78,24 +100,35 @@ the full 10-unit × 78-endpoint matrix is in `results/tables/perunit_amp.csv`.
 The dominant repeated structure is vertical: strong units return near 1.0 across models, whereas weak
 units are attenuated more. Architecture still matters, as shown by the spread within each row and the
 systematic shift of omission variants. In base32, Spearman correlation with raw d′ is 0.94; across all
-21 short-budget architectures the median correlation is 0.88 (range 0.66–0.94). The omission gap
-shifts weak units most (1129 0.67 → 0.83, 94 0.81 → 0.97); `base64` and `arch` lift them only mildly;
-`base32_l2` tracks base32 almost exactly;
+31 architecture-comparison entries the median correlation is 0.85 (range 0.62–0.94; original
+21-model median 0.88). The omission gap shifts weak units most (1129 0.67 → 0.83, 94 0.81 → 0.97);
+`base64` and `arch` lift them only mildly; `base32_l2` tracks base32 almost exactly;
 and the combos `base64_om0` / `arch_om0` reproduce the full omission lift at high capacity (94 → 0.96–0.97,
 1129 → 0.82–0.83).
 
+**Matched-R5 width/schedule/depth follow-up, all ten endpoints.** This companion table prevents the
+single-seed follow-up from disappearing behind the representative original-screen table:
+
+```{include} ../results/tables/width_schedule_perunit_amp.md
+```
+
+Omission0 models are nearly tied in mean amplitude (0.938–0.941), whereas all four omission1
+endpoints lower it (0.877–0.894), especially for the four weak units.
+
 ```{figure} figures/f6_perunit_amp_heatmap.png
 :label: fig-perunit-amp
-**Per-unit amplitude across the 21 short-budget architectures** (green ≈ preserved, red = attenuated).
+**Per-unit amplitude across all 31 architecture-comparison entries** (green ≈ preserved, red =
+attenuated). The final ten columns are the matched-R5 reference and nine width/schedule/depth follow-ups.
 The repeated vertical gradient shows strong dependence on unit quality; column shifts, especially for
 omission variants, show that architecture also matters.
 ```
 
 ## C. Per-unit detection (Δd′) across models
 
-Change in detectability from denoising, Δd′ = d′_deep − d′_raw, per unit × representative model (seeds
-averaged; full 10-unit × 78-endpoint matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made that
-unit *harder* to detect.
+Change in detectability from denoising, Δd′ = d′_deep − d′_raw, per unit × representative
+original-screen model (seeds averaged; the matched-R5 follow-up is reported immediately below; full
+10-unit × 87-endpoint matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made
+that unit *harder* to detect.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -122,9 +155,45 @@ Among the four weakest units, omission0 and the `*_om0` combinations improve mor
 The intervention ranking therefore depends on whether the objective is the all-unit mean or
 protection of marginal units.
 
+**Matched-R5 width/schedule/depth follow-up, all ten endpoints.** Values are paired Δd′ from each endpoint's
+common raw reference:
+
+```{include} ../results/tables/width_schedule_perunit_dprime_delta.md
+```
+
+The omission0 capacity gain is concentrated in units 2143 and 793; the four weak-unit deltas remain
+nearly unchanged. Omission1 further improves those two strong units while making each weak-unit mean
+worse, which explains the all-unit versus weak-unit reversal.
+
 ```{figure} figures/f7_perunit_dprime_delta_heatmap.png
 :label: fig-perunit-dprime
-**Per-unit change in detectability Δd′** (units × architectures; red = denoising hurts, blue = helps).
-Almost every cell is red; the strongest unit (2143) is the main exception. `arch` has the
-least-negative displayed column mean, while omission variants give the largest weak-unit gains.
+**Per-unit change in detectability Δd′ across all 31 architecture-comparison entries** (red =
+denoising hurts, blue = helps). The final ten columns are the matched-R5 reference and nine
+width/schedule/depth follow-ups. Almost every weak-unit cell is red; the strongest unit (2143) is the main
+exception. Capacity raises the aggregate mean mainly through strong-unit gains, while omission0
+retains the least-negative weak-unit columns.
 ```
+
+## D. Manuscript comparison coverage
+
+The manuscript uses two complementary comparison levels. Broad architecture figures compare the 21
+seed-averaged original configurations plus the matched R5 reference and nine scored follow-ups (**31
+comparison entries**). Family-specific figures preserve matched bodies, budgets, and objectives. The complete
+tables retain **all 87 scored endpoints**, including audit-only confounded runs.
+
+| manuscript surface | models included | models intentionally outside that surface |
+|---|---|---|
+| master, family, coverage, and full per-unit tables | all 87 scored endpoints | R7 PCGrad was aborted |
+| Figure 1, architecture definition/evolution | original DI, base32, R5 base64, one depth-2 and four depth-3 base96 designs, R13 NAF | wiring/loss variants that do not introduce a new depicted topology |
+| Figures 2, 3, and 5; Appendix heatmaps | 21 original architecture configurations + matched R5 base64 + nine scored width/schedule/depth follow-ups = 31 | recipe replicates, integration/sampling controls, weighting interventions, and long-duration repeats |
+| Figure 4 and matched-R5 tables | matched R5 base64 + nine scored width/schedule/depth follow-ups = 10 | models with a different body, recipe, or sample budget |
+| recipe figures | R0–R6 screen; R0/R1/R5 matched replications where applicable | architecture and method controls |
+| gradient figure | R8 trajectory only | endpoints without same-parameter microbatch diagnostics |
+| integration figure | R1 seed context + R9–R12 | unrelated architecture, weighting, and duration families |
+| NAF figure | R5 DoubleConv seeds + matched R13 NAF58 | non-capacity-matched architectures |
+| corrected weighting figure | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
+| duration figure | two 3.30-M-update `support_all` trajectories | short-budget endpoints |
+
+This coverage rule prevents a missing model from being mistaken for a favorable comparison while
+also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets
+as if they were independent architecture choices.

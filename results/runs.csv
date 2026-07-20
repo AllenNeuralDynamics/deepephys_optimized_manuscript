@@ -1,37 +1,37 @@
 label,tier,config,seed,loss,train_chunks,override,co_id,state,ckpt_downloaded,scored,notes
-ib_champion_s0,1,champion,0,charbonnier,4,,502ddbb2-ea96-40dc-b417-6bb112d74096,running,,,reference
-ib_champion_s1,1,champion,1,charbonnier,4,,6a46abd3-adef-441a-b9aa-8749eeb1d13c,running,,,
-ib_champion_s2,1,champion,2,charbonnier,4,,023a212a-66ff-4327-b26a-953827343b96,running,,,
-ib_champion_s3,1,champion,3,charbonnier,4,,789c0f0f-df99-4c49-ab42-b98ca62fcaa6,running,,,
-ib_champion_s4,1,champion,4,charbonnier,4,,4045a948-aa62-4c1c-98a9-44481f8a202d,running,,,
-ib_omission0_s0,1,omission0,0,charbonnier,4,omission=0,3920db25-e580-4219-86bb-556ca6deda15,running,,,retry prev 47ca01dd failed ~5.4h infra
-ib_omission0_s1,1,omission0,1,charbonnier,4,omission=0,0acb0d89-38ba-434d-b32e-12d6f064ddd0,running,,,
-ib_omission0_s2,1,omission0,2,charbonnier,4,omission=0,3ce49cac-0ce8-4038-a76d-77a26e43c515,running,,,
-ib_omission0_s3,1,omission0,3,charbonnier,4,omission=0,0c72fdc7-c4d1-47c2-b8a4-d48059e93992,running,,,
-ib_omission0_s4,1,omission0,4,charbonnier,4,omission=0,90c0be9b-50b7-4496-91ac-eeef313dbde4,running,,,
-ib_champ_l2_s0,1,champ_l2,0,l2,4,loss=l2,f952bacc-05b7-4681-89fd-362e61398f18,running,,,
-ib_champ_l2_s1,1,champ_l2,1,l2,4,loss=l2,f6ad0879-028c-4c88-ac4d-1a06ce8c4062,running,,,retry prev 2b81abf5 failed ~5.4h infra
-ib_champ_l2_s2,1,champ_l2,2,l2,4,loss=l2,4707df2e-2f14-4276-a9d7-7105baddb638,running,,,
-ib_omission0_l2_s0,1,omission0_l2,0,l2,4,omission=0 loss=l2,5ffe880e-7dd6-4b47-be0c-a95a7518fbed,running,,,
-ib_omission0_l2_s1,1,omission0_l2,1,l2,4,omission=0 loss=l2,f5b8a9e9-baee-46ff-b84a-e289486018a5,running,,,
-ib_omission0_l2_s2,1,omission0_l2,2,l2,4,omission=0 loss=l2,6a3102b0-7654-4a5e-9297-ec2fa464675c,running,,,
-ib_base64_s0,1,base64,0,charbonnier,4,base_channels=64,150de2af-e815-41d3-8807-737a307df53c,running,,,retry prev d7d6c3a7 failed ~5.4h infra
-ib_base64_s1,1,base64,1,charbonnier,4,base_channels=64,7ba528b9-b13d-4180-a70b-b07ddaac2822,running,,,
-ib_base64_s2,1,base64,2,charbonnier,4,base_channels=64,2aa9cede-0ef1-45a2-9428-094edb8db519,running,,,
-ib_support_sd_s0,2,support_sd,0,charbonnier,4,bs_stage=1 bs_dense=1,86def9b1-d235-4c52-85bc-2abe73f720b6,running,,,
-ib_support_all_s0,2,support_all,0,charbonnier,4,bs_stage=1 bs_dense=1 bs_multiscale=1,aac86bd9-921a-428c-84bf-f796754f5223,running,,,
-ib_support_all_l2_s0,2,support_all_l2,0,l2,4,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2,bff01ba8-b3b3-4991-84e1-ca27468ffde3,running,,,
-ib_fuse256_s0,2,fuse256,0,charbonnier,4,fuse_channels=256,4ef6e204-55ae-4204-be7a-aa20b20da19b,running,,,
-ib_fuse256_l2_s0,2,fuse256_l2,0,l2,4,fuse_channels=256 loss=l2,2527118b-1632-495a-849b-615133ed4655,running,,,
-ib_fuse512_s0,2,fuse512,0,charbonnier,4,fuse_channels=512,d696e955-4178-44ca-bf37-751ae05ffc19,running,,,
-ib_tmult8_s0,2,tmult8,0,charbonnier,4,temporal_mult=8,2e900263-189b-4e60-8ef5-8a4b8538b171,running,,,
-ib_base64_l2_s0,2,base64_l2,0,l2,4,base_channels=64 loss=l2,61adfe54-58e6-4415-b37e-8547dd46a18d,running,,,
-ib_no_norm_s0,2,no_norm,0,charbonnier,4,norm=none,ea57747a-8770-460c-83bf-3863e0e6eb9f,running,,,
-ib_ho_s0,2,ho,0,charbonnier,4,bs_frames=1,12b49fe9-954f-41d3-b897-6b48cd6baa41,running,,,
-ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7,4744910d-e966-4586-b16f-e9edae58c40f,running,,,
-ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,268ef4a5-de9a-486d-87da-96dd536ad5db,running,,,
-ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,4fe25467-e63f-49b3-8d01-0894d6eb6392,running,,,capacity + weak-unit amplitude rescue (deployment candidate); retry prev 26341aa2 failed ~1.3h infra (exit0 no results)
-ib_arch_om0_s0,2,arch_om0,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 omission=0,260da9a6-1900-46af-a7f7-798987d95c35,running,,,max capacity + rescue
+ib_champion_s0,1,champion,0,charbonnier,4,,502ddbb2-ea96-40dc-b417-6bb112d74096,completed,yes,yes,reference
+ib_champion_s1,1,champion,1,charbonnier,4,,6a46abd3-adef-441a-b9aa-8749eeb1d13c,completed,yes,yes,
+ib_champion_s2,1,champion,2,charbonnier,4,,023a212a-66ff-4327-b26a-953827343b96,completed,yes,yes,
+ib_champion_s3,1,champion,3,charbonnier,4,,789c0f0f-df99-4c49-ab42-b98ca62fcaa6,completed,yes,yes,
+ib_champion_s4,1,champion,4,charbonnier,4,,4045a948-aa62-4c1c-98a9-44481f8a202d,completed,yes,yes,
+ib_omission0_s0,1,omission0,0,charbonnier,4,omission=0,3920db25-e580-4219-86bb-556ca6deda15,completed,yes,yes,retry prev 47ca01dd failed ~5.4h infra
+ib_omission0_s1,1,omission0,1,charbonnier,4,omission=0,0acb0d89-38ba-434d-b32e-12d6f064ddd0,completed,yes,yes,
+ib_omission0_s2,1,omission0,2,charbonnier,4,omission=0,3ce49cac-0ce8-4038-a76d-77a26e43c515,completed,yes,yes,
+ib_omission0_s3,1,omission0,3,charbonnier,4,omission=0,0c72fdc7-c4d1-47c2-b8a4-d48059e93992,completed,yes,yes,
+ib_omission0_s4,1,omission0,4,charbonnier,4,omission=0,90c0be9b-50b7-4496-91ac-eeef313dbde4,completed,yes,yes,
+ib_champ_l2_s0,1,champ_l2,0,l2,4,loss=l2,f952bacc-05b7-4681-89fd-362e61398f18,completed,yes,yes,
+ib_champ_l2_s1,1,champ_l2,1,l2,4,loss=l2,f6ad0879-028c-4c88-ac4d-1a06ce8c4062,completed,yes,yes,retry prev 2b81abf5 failed ~5.4h infra
+ib_champ_l2_s2,1,champ_l2,2,l2,4,loss=l2,4707df2e-2f14-4276-a9d7-7105baddb638,completed,yes,yes,
+ib_omission0_l2_s0,1,omission0_l2,0,l2,4,omission=0 loss=l2,5ffe880e-7dd6-4b47-be0c-a95a7518fbed,completed,yes,yes,
+ib_omission0_l2_s1,1,omission0_l2,1,l2,4,omission=0 loss=l2,f5b8a9e9-baee-46ff-b84a-e289486018a5,completed,yes,yes,
+ib_omission0_l2_s2,1,omission0_l2,2,l2,4,omission=0 loss=l2,6a3102b0-7654-4a5e-9297-ec2fa464675c,completed,yes,yes,
+ib_base64_s0,1,base64,0,charbonnier,4,base_channels=64,150de2af-e815-41d3-8807-737a307df53c,completed,yes,yes,retry prev d7d6c3a7 failed ~5.4h infra
+ib_base64_s1,1,base64,1,charbonnier,4,base_channels=64,7ba528b9-b13d-4180-a70b-b07ddaac2822,completed,yes,yes,
+ib_base64_s2,1,base64,2,charbonnier,4,base_channels=64,2aa9cede-0ef1-45a2-9428-094edb8db519,completed,yes,yes,
+ib_support_sd_s0,2,support_sd,0,charbonnier,4,bs_stage=1 bs_dense=1,86def9b1-d235-4c52-85bc-2abe73f720b6,completed,yes,yes,
+ib_support_all_s0,2,support_all,0,charbonnier,4,bs_stage=1 bs_dense=1 bs_multiscale=1,aac86bd9-921a-428c-84bf-f796754f5223,completed,yes,yes,
+ib_support_all_l2_s0,2,support_all_l2,0,l2,4,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2,bff01ba8-b3b3-4991-84e1-ca27468ffde3,completed,yes,yes,
+ib_fuse256_s0,2,fuse256,0,charbonnier,4,fuse_channels=256,4ef6e204-55ae-4204-be7a-aa20b20da19b,completed,yes,yes,
+ib_fuse256_l2_s0,2,fuse256_l2,0,l2,4,fuse_channels=256 loss=l2,2527118b-1632-495a-849b-615133ed4655,completed,yes,yes,
+ib_fuse512_s0,2,fuse512,0,charbonnier,4,fuse_channels=512,d696e955-4178-44ca-bf37-751ae05ffc19,completed,yes,yes,
+ib_tmult8_s0,2,tmult8,0,charbonnier,4,temporal_mult=8,2e900263-189b-4e60-8ef5-8a4b8538b171,completed,yes,yes,
+ib_base64_l2_s0,2,base64_l2,0,l2,4,base_channels=64 loss=l2,61adfe54-58e6-4415-b37e-8547dd46a18d,completed,yes,yes,
+ib_no_norm_s0,2,no_norm,0,charbonnier,4,norm=none,ea57747a-8770-460c-83bf-3863e0e6eb9f,completed,yes,yes,
+ib_ho_s0,2,ho,0,charbonnier,4,bs_frames=1,12b49fe9-954f-41d3-b897-6b48cd6baa41,completed,yes,yes,
+ib_arch_s0,2,arch,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7,4744910d-e966-4586-b16f-e9edae58c40f,completed,yes,yes,
+ib_arch_l2_s0,2,arch_l2,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2,268ef4a5-de9a-486d-87da-96dd536ad5db,completed,yes,yes,
+ib_base64_om0_s0,2,base64_om0,0,charbonnier,4,base_channels=64 omission=0,4fe25467-e63f-49b3-8d01-0894d6eb6392,completed,yes,yes,capacity + weak-unit amplitude rescue (deployment candidate); retry prev 26341aa2 failed ~1.3h infra (exit0 no results)
+ib_arch_om0_s0,2,arch_om0,0,charbonnier,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 omission=0,260da9a6-1900-46af-a7f7-798987d95c35,completed,yes,yes,max capacity + rescue
 ib_arch_l2_om0_s0,3,arch_l2_om0,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,94a48016-146f-46ea-9ce0-c108a5b5dbb8,completed,yes,yes,arch+L2+om0 baseline (valid unweighted dose anchor)
 ib_arch_l2_om0_s1,3,arch_l2_om0,1,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,e30257da-9f6b-428a-ae45-147515e9da31,completed,yes,yes,valid unweighted replicate
 ib_arch_l2_om0_s2,3,arch_l2_om0,2,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0,0ac379c8-c9cf-42da-86ae-32baac33d78b,completed,yes,yes,valid unweighted replicate
@@ -45,9 +45,9 @@ ib_arch_l2_om0_g1000_s0,3,arch_l2_om0_g1000,0,l2,4,base_channels=64 depth=4 bs_c
 ib_arch_l2_om0_g1000h_s0,3,arch_l2_om0_g1000h,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=1000 spike_weight_thresh=8 spike_weight_hard=1 spike_weight_car=1,287e5075-fb3c-4bfd-a650-9fbccbadd384,completed,yes,yes,LEGACY CONFOUNDED: weighting path used Charbonnier despite requested L2
 ib_omission0_l2_w10_s0,3,omission0_l2_w10,0,l2,4,loss=l2 omission=0 spike_weight=10,61f83b06-73a0-4b6e-b429-aeae04931c36,completed,yes,yes,LEGACY CONFOUNDED: weighting path used Charbonnier despite requested L2
 ib_omission0_l2_g100_s0,3,omission0_l2_g100,0,l2,4,loss=l2 omission=0 spike_weight=100 spike_weight_thresh=5 spike_weight_car=1,1d200eaa-04d0-4184-9422-86aa9d1eb5d1,completed,yes,yes,LEGACY CONFOUNDED: weighting path used Charbonnier despite requested L2
-ib_origdi_s0,orig,origdi,0,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,0bb83903-4910-4f77-99a3-9a1b6318286f,running,,,faithful original DeepInterpolation ephys U-Net (Lecoq 2021 unet_single_ephys_1024) — temporal-only; no spatial blind spot
-ib_origdi_s1,orig,origdi,1,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,8bb9b688-57cc-4d24-ab3e-c2d9734a0fbc,running,,,
-ib_origdi_s2,orig,origdi,2,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,74f2d2ee-826d-45f3-9c03-6bf2ea264c21,running,,,
+ib_origdi_s0,orig,origdi,0,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,0bb83903-4910-4f77-99a3-9a1b6318286f,completed,yes,yes,faithful original DeepInterpolation ephys U-Net (Lecoq 2021 unet_single_ephys_1024) — temporal-only; no spatial blind spot
+ib_origdi_s1,orig,origdi,1,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,8bb9b688-57cc-4d24-ab3e-c2d9734a0fbc,completed,yes,yes,
+ib_origdi_s2,orig,origdi,2,charbonnier,4,geometry=orig base_channels=64 depth=4 blind_spot=0,74f2d2ee-826d-45f3-9c03-6bf2ea264c21,completed,yes,yes,
 ib_om0_scale,scale,support_all_l2_om0,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=0 bs_frames=1,ccf82c60-43c4-4829-9984-8d41e4639fc2,completed,yes,yes,RUN3 in-band trajectory scored (13 ckpts)
 ib_om1_scale,scale,support_all_l2_om1,0,l2,47,bs_stage=1 bs_dense=1 bs_multiscale=1 loss=l2 omission=1 bs_frames=3,5eec6d19-f063-4f9d-a17a-b11da5a65869,completed,yes,yes,RUN4 in-band trajectory scored (13 ckpts)
 ib_r0_base,recipe,r0_base,0,charbonnier,4,base_channels=64 omission=0,dd244a69-368f-4ff0-9bad-698df611e4fb,completed,yes,yes,R0 baseline adamw cosine lr1e-3 (base64_om0 body; trajectory; d'=4.350)
@@ -71,11 +71,15 @@ ib_r10_importance,opt2_method,importance,0,charbonnier,4,base_channels=64 omissi
 ib_r11_batchonly,opt2_method,batch_only,0,charbonnier,4,base_channels=64 omission=0 batch_size=256 lr=0.001 warmup_frac=0.03 checkpoint_steps=24,dc1cf515-0f4e-475c-a3e3-fe25526a05e1,completed,yes,yes,CO succeeded in 8845 s; archived with telemetry; 25-point trajectory scored and collated; endpoint d'=4.345; jobs 23216693-23216694 and 23216962-23217015 complete
 ib_r12_fixed256,opt2_method,fixed_accum256,0,charbonnier,4,base_channels=64 omission=0 batch_size=64 lr=0.001 warmup_frac=0.03 checkpoint_steps=24 grad_accum_max=4 grad_accum_mode=fixed,c33d9777-da97-4f33-a82d-dc7244d9a8c4,completed,yes,yes,CO succeeded in 9565 s; archived with telemetry; 23-point trajectory scored and collated; endpoint d'=4.347; jobs 23216698-23216699 and 23217016-23217064 complete
 ib_r13_naf58,opt3_arch,naf58,0,charbonnier,4,base_channels=58 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24 temporal_block=naf,05f40381-e3c1-4f47-8fff-f199407e5cf4,completed,yes,yes,CO succeeded in 12379 s; archived with telemetry; capacity-matched NAF-style temporal U-Net control with 3162950 params (+0.42% vs base64 baseline); R5 recipe held fixed; endpoint d'=4.335; training runtime 41% above matched R5 seed 0; CUDA smoke 50c8fe23-9253-4edf-8a16-0274c8720c58 succeeded with zero blind-spot gradient; 25-point trajectory scored and collated; jobs 23240398-23240447 complete
-ib_w96_om0_s0,opt4_width,width96_om0,0,charbonnier,4,base_channels=96 depth=3 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,edb49d0f-ca97-40e6-a0fc-fb0d3305f8f4,running,,,Width-only follow-up; 6962152 params; R5 recipe and base64 blind-spot branch held fixed; omission0 uses bs_frames=1
-ib_w96_om1_s0,opt4_width,width96_om1,0,charbonnier,4,base_channels=96 depth=3 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,50f7d07d-dea1-40fa-8c4b-c8b8a65c5b8b,running,,,Width-only follow-up; 6963688 params; R5 recipe and base64 blind-spot branch held fixed; omission1 uses bs_frames=3
-ib_w96_cap384_om0_s0,opt5_schedule,width96_cap384_om0,0,charbonnier,4,base_channels=96 depth=3 channel_mult=2 channel_cap=384 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,29f50c37-ce7e-450f-9147-83c0462ae7b1,running,,,Channel-schedule follow-up; 96-192-384-384; 4601320 params; R5 recipe and base64 blind-spot branch held fixed
-ib_w96_g15_om0_s0,opt5_schedule,width96_g15_om0,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.5 channel_cap=0 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,1eb46bac-c88b-4f6a-a358-6fec2b9f7704,running,,,Channel-schedule follow-up; 96-144-216-324; 2233936 params; R5 recipe and base64 blind-spot branch held fixed
-ib_w96_g15_om1_s0,opt5_schedule,width96_g15_om1,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.5 channel_cap=0 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,1d2e85d8-b745-4e72-9570-6a33cb521f87,running,,,Channel-schedule follow-up; 96-144-216-324; 2235472 params; R5 recipe and base64 blind-spot branch held fixed
+ib_w96_om0_s0,opt4_width,width96_om0,0,charbonnier,4,base_channels=96 depth=3 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,edb49d0f-ca97-40e6-a0fc-fb0d3305f8f4,completed,yes,yes,Width-only follow-up; 6962152 params; R5 recipe and base64 blind-spot branch held fixed; omission0 uses bs_frames=1; CO succeeded in 16672 s; checkpoint strict-loaded and staged; final dprime/diag jobs 23242421/23242422 completed using pinned inference commit 808d7fa
+ib_w96_om1_s0,opt4_width,width96_om1,0,charbonnier,4,base_channels=96 depth=3 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,50f7d07d-dea1-40fa-8c4b-c8b8a65c5b8b,completed,yes,yes,Width-only follow-up; 6963688 params; R5 recipe and base64 blind-spot branch held fixed; omission1 uses bs_frames=3; CO succeeded in 16610 s; checkpoint strict-loaded and staged; final dprime/diag jobs 23242423/23242424 completed using pinned inference commit 808d7fa
+ib_w96_cap384_om0_s0,opt5_schedule,width96_cap384_om0,0,charbonnier,4,base_channels=96 depth=3 channel_mult=2 channel_cap=384 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,29f50c37-ce7e-450f-9147-83c0462ae7b1,completed,yes,yes,Channel-schedule follow-up; 96-192-384-384; 4601320 params; R5 recipe and base64 blind-spot branch held fixed; CO succeeded in 14281 s; checkpoint strict-loaded and staged; final dprime/diag jobs 23242426/23242427 completed using pinned inference commit 808d7fa
+ib_w96_g15_om0_s0,opt5_schedule,width96_g15_om0,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.5 channel_cap=0 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,1eb46bac-c88b-4f6a-a358-6fec2b9f7704,completed,yes,yes,Channel-schedule follow-up; 96-144-216-324; 2233936 params; R5 recipe and base64 blind-spot branch held fixed; CO succeeded in 9915 s; checkpoint strict-loaded and staged; final dprime/diag jobs 23242419/23242417 completed using pinned inference commit 808d7fa
+ib_w96_g15_om1_s0,opt5_schedule,width96_g15_om1,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.5 channel_cap=0 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,1d2e85d8-b745-4e72-9570-6a33cb521f87,completed,yes,yes,Channel-schedule follow-up; 96-144-216-324; 2235472 params; R5 recipe and base64 blind-spot branch held fixed; CO succeeded in 10249 s; checkpoint strict-loaded and staged; final dprime/diag jobs 23242418/23242416 completed using pinned inference commit 808d7fa
+ib_w96_gsqrt2_om0_s0,opt5_schedule,width96_gsqrt2_om0,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.4142135623730951 channel_cap=0 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,ffeeb1d1-bfcf-47d9-9e54-78e9c15f2a9b,completed,yes,yes,Channel-schedule follow-up; 96-136-192-272; sqrt(2) growth; 1830896 params; R5 recipe and base64 blind-spot branch held fixed; CO succeeded in 9553 s; checkpoint strict-loaded and staged; endpoint d'=4.340; final dprime/diag jobs 23242682/23242683 completed using pinned inference commit 808d7fa
+ib_w96_gsqrt2_om1_s0,opt5_schedule,width96_gsqrt2_om1,0,charbonnier,4,base_channels=96 depth=3 channel_mult=1.4142135623730951 channel_cap=0 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,a447dddb-62f6-46ea-994a-59cf9d58c3b3,completed,yes,yes,Channel-schedule follow-up; 96-136-192-272; sqrt(2) growth; 1832432 params; R5 recipe and base64 blind-spot branch held fixed; CO succeeded in 9654 s; checkpoint strict-loaded and staged; endpoint d'=4.359; final dprime/diag jobs 23242684/23242685 completed using pinned inference commit 808d7fa
+ib_w96_d2_om0_s0,opt6_depth,width96_depth2_om0,0,charbonnier,4,base_channels=96 depth=2 bs_channels=64 bs_depth=5 omission=0 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,b43cb91d-7547-41e6-bbe7-bb147cb06c61,completed,yes,yes,Depth control; 96-192-384; 1796200 params; R5 recipe and base64 blind-spot branch held fixed; omission0 uses bs_frames=1; parameter-matched comparison to depth-3 sqrt2 schedule; CO succeeded in 9596 s; checkpoint strict-loaded and staged; sha256 d63e600719fc0f0fdad770e3f57e01dedcd814e393b87d0374f66abc50fa2df0; endpoint d'=4.354; dprime/diag jobs 23243308/23243309 completed using pinned inference commit 808d7fa
+ib_w96_d2_om1_s0,opt6_depth,width96_depth2_om1,0,charbonnier,4,base_channels=96 depth=2 bs_channels=64 bs_depth=5 omission=1 batch_size=256 lr=0.002 warmup_frac=0.05 checkpoint_steps=24,bc6ba5f8-3757-4851-a42f-6b3ff27e01ce,completed,yes,yes,Depth control; 96-192-384; 1797736 params; R5 recipe and base64 blind-spot branch held fixed; omission1 uses bs_frames=3; parameter-matched comparison to depth-3 sqrt2 schedule; CO succeeded in 9800 s; checkpoint strict-loaded and staged; sha256 511eb1d983c42b5b9a275163c1c580713e7050e1b6b70cc1acfd7cd60d8f5cf3; endpoint d'=4.365; dprime/diag jobs 23243310/23243311 completed using pinned inference commit 808d7fa
 ib_w2_soft3,weight2,weight_l2_soft3,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=3,a15615bf-c465-4241-b8e8-742a29002362,completed,yes,yes,Matched-L2 soft magnitude lambda3; CO succeeded in 21042 s; endpoint d'=4.373 (+0.006 vs matched unweighted seed 0); jobs 23221223-23221224 complete
 ib_w2_soft10,weight2,weight_l2_soft10,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=10,5119289d-09e2-4356-83d8-4ee463e2d5f0,completed,yes,yes,Matched-L2 soft magnitude lambda10; CO succeeded in 20655 s; endpoint d'=4.352 (-0.015 vs matched unweighted seed 0); jobs 23221225-23221226 complete
 ib_w2_soft30,weight2,weight_l2_soft30,0,l2,4,base_channels=64 depth=4 bs_channels=128 bs_depth=7 loss=l2 omission=0 spike_weight=30,b4041861-c9c9-4f45-ad78-e7d114d45536,completed,yes,yes,Matched-L2 soft magnitude lambda30; CO succeeded in 21059 s; endpoint d'=4.350 (-0.017 vs matched unweighted seed 0); jobs 23221227-23221228 complete

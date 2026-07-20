@@ -4,13 +4,14 @@
 # code/figures/collate.py consumes for the master table / noise floor.
 #
 # Usage (on the AIND HPC login node):
-#   score_best.sh <label> <ckpt_path>
+#   score_best.sh <label> <ckpt_path> [inference_code_dir]
 set -eo pipefail
 BASE=/allen/aind/scratch/jeromel/ephys_denoising
 LABEL="${1:?pass label, e.g. ib_champion_s0}"
 CKPT="${2:?pass checkpoint path}"
+INFERENCE_CODE="${3:-}"
 cd "$BASE"
 mkdir -p traj_scores logs
-sbatch --job-name="dp_${LABEL}" run_ckpt.sbatch      "$CKPT" "$BASE/traj_scores/${LABEL}_dprime.csv"
-sbatch --job-name="dg_${LABEL}" template_diag.sbatch "$CKPT" "traj_scores/${LABEL}"
+sbatch --job-name="dp_${LABEL}" run_ckpt.sbatch      "$CKPT" "$BASE/traj_scores/${LABEL}_dprime.csv" "$INFERENCE_CODE"
+sbatch --job-name="dg_${LABEL}" template_diag.sbatch "$CKPT" "traj_scores/${LABEL}" "$INFERENCE_CODE"
 echo "submitted $LABEL"

@@ -73,6 +73,8 @@ def experiment_family(run: pd.Series) -> str:
     config = str(run["config"])
     if tier == "scale":
         return "duration_diagnostic"
+    if tier in {"opt4_width", "opt5_schedule", "opt6_depth"}:
+        return "width_schedule_followup"
     if tier == "recipe":
         return "recipe_screen"
     if tier == "opt2_rep":
@@ -126,11 +128,18 @@ def main() -> None:
         loaded = load_run(label)
         if loaded is None:
             pending.append(label)
+            state = str(run["state"]).lower()
+            if state in {"running", "initializing"}:
+                reason = "training_in_progress"
+            elif state == "aborted":
+                reason = "aborted"
+            else:
+                reason = "no_endpoint_scores"
             coverage_rows.append({
                 "label": label, "experiment_family": experiment_family(run),
                 "budget_group": budget_group(run), "included": False,
                 "endpoint_layout": "", "dprime_path": "", "diag_path": "",
-                "reason": "no_endpoint_scores",
+                "reason": reason,
             })
             if str(run["scored"]).lower() == "yes":
                 raise FileNotFoundError(f"ledger marks {label} scored, but endpoint files are missing")

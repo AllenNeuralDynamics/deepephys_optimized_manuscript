@@ -32,18 +32,31 @@ deployment, not label leakage.
 
 ## Experiment families
 
-The study contains five related but non-equivalent experiments:
+The 87 scored endpoints belong to ten related but non-equivalent ledger families:
 
 | family | model body | training budget | replication | question |
 |---|---|---|---|---|
-| architecture screen | 21 short-budget configurations | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
-| recipe screen | `base64_om0` | the same ~18 M windows; update count depends on batch | one seed in the initial screen; R0/R1/R5 completed at three matched seeds | which tested compound recipe reaches a d′ target fastest? |
+| architecture screen | 21 short-budget configurations (39 endpoints) | ~0.281 M updates (~18 M windows at batch 64) | key configurations 3–5 seeds; most Tier 2 rows one seed | which model changes the fixed-budget endpoint? |
+| width/schedule/depth follow-up | R5 `base64_om0`; depth-3 base96 with full 2× growth, a 384-channel cap, 1.5× growth, or √2 growth; depth-2 base96 with full 2× growth; matched schedules use both omission routings | the R5 ~18 M-window budget at batch 256 | nine scored base96 follow-ups; matched R5 seed 0 reference | do base width, deeper channel growth, and U-Net depth explain d′ at matched compute or parameter count? |
+| recipe screen | `base64_om0`, R0–R6 | the same ~18 M windows; update count depends on batch | one seed per initial recipe | which tested compound recipe reaches a d′ target fastest? |
+| recipe replication | R0/R1/R5 | the same ~18 M windows | two added seeds per recipe, giving three matched seeds including each screen anchor | does the initial recipe ordering repeat across seeds? |
+| gradient diagnostic | R8 on the R1 body and recipe | the same ~18 M windows | one trajectory; 12 diagnostic states | when do same-parameter microbatch gradients stop agreeing? |
 | integration controls | `base64_om0` with the R1 recipe | the same ~18 M gradient windows; R10 additionally screens 4× candidates | one seed per control | do adaptive accumulation, importance sampling, or effective batch 256 improve detection or only alter compute? |
+| NAF control | R13 NAF58 versus R5 DoubleConv64 | the same ~18 M windows | one matched R13 seed; three R5 seeds for context | does a capacity-matched modern temporal block improve detection or runtime? |
+| legacy weighting audit | two omission0 bodies with the original weighting path | ~18 M windows | 10 single-seed endpoints | retained for provenance only; the requested L2 objective was silently replaced by Charbonnier in the weighted path |
 | corrected weighting screen | `arch_l2_om0`, L2 objective | ~18 M windows | one seed per arm; three unweighted seeds provide context | can center-excluded spike weighting improve amplitude or d′ without waveform distortion? |
 | duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
 
 The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
-uses a different body. Likewise, the recipe screen does not establish an architecture ordering.
+uses a different body. Likewise, the recipe screen does not establish an architecture ordering. The
+width/schedule/depth study is an exploratory, single-seed follow-up and is reported separately from the
+original 21-configuration architecture screen. The √2 schedule had synthetic compute measurements
+but no trained endpoint in the initial follow-up; its omission0 and omission1 runs were subsequently
+trained and scored under the same frozen endpoint protocol. A parameter-matched depth test was then
+completed with omission0 and omission1 `96→192→384` bodies; both received the same frozen endpoint
+scoring. The ten legacy weighting endpoints remain in the
+complete inventory and per-unit matrices, but are excluded from weighting-effect conclusions because
+their executed objective did not match the requested L2 comparison.
 
 **Gradient diagnostics.** R8 uses the R1 body and recipe and, at 12 scheduled parameter states,
 splits one physical batch of 64 into four equal microbatches. It computes each microbatch-mean
@@ -72,6 +85,12 @@ with thresholds of 5× and 8× the robust background scale, respectively. We tes
 10, 30; soft-gate λ = 100, 300, 1000; and hard-gate λ = 1000. The weights never use the target
 channel's own center sample, preserving the blind-spot objective. These are single-seed endpoint
 screens; the three unweighted seeds provide descriptive variation, not an inferential error bar.
+
+**Legacy weighting audit.** Ten earlier weighted endpoints are fully scored and retained in the
+87-endpoint master and per-unit tables. Their weighting implementation bypassed the requested L2
+path and executed a Charbonnier-weighted objective, so they are not matched-L2 controls. They are
+classified separately as `legacy_weighting_screen` and are not mixed into the corrected weighting
+figure or causal text.
 
 ## Architecture and the swept variants
 
@@ -107,9 +126,10 @@ baseline).
 **Architecture and tested evolution.** **A**, the shared R5/R13 topology uses 60 centre-excluded
 temporal neighbours and a separate centre-frame `ConvHole1D` branch; pointwise fusion preserves the
 self-supervised blind spot. **B**, the principal representation changes from original
-DeepInterpolation through `base32` to the replicated `base64_om0` R5 body. **C**, the capacity-matched
-R13 follow-up replaces only the temporal `DoubleConv1d` stages with 1-D NAF-style gated restoration
-blocks [@chen2022nafnet]. R13 is exploratory; training-recipe
+DeepInterpolation through `base32` and the replicated `base64_om0` R5 body to the completed
+base96 depth-2 body and four depth-3 channel schedules. **C**, the capacity-matched R13 follow-up replaces only the temporal
+`DoubleConv1d` stages with 1-D NAF-style gated restoration blocks [@chen2022nafnet]. R13 and the
+base96 schedules are exploratory; training-recipe
 changes are intentionally excluded from this architecture figure.
 ```
 
@@ -134,6 +154,7 @@ explicit combination rows test whether selected effects stack. All runs are enum
 |---|---|---|
 | capacity (U-Net width) | `base64` | `base_channels=64` |
 | capacity (both branches) | `arch` | `base_channels=64 depth=4 bs_channels=128 bs_depth=7` (~12.6 M params) |
+| matched R5 width/schedule/depth follow-up | `width96`, `width96_cap384`, `width96_g15`, `width96_gsqrt2`, `width96_depth2` | depth-3 schedules 96→192→384→768, 96→192→384→384, 96→144→216→324, or 96→136→192→272; depth-2 schedule 96→192→384 |
 | fuse-head width | `fuse256`, `fuse512` | `fuse_channels=256 / 512` |
 | temporal-feature width | `tmult8` | `temporal_mult=8` |
 | input normalisation | `no_norm` | `norm=none` |
@@ -148,6 +169,18 @@ published SUPPORT denoiser [@eom2023support]: dense re-injection of the centre i
 staging the temporal feature into the blind-spot branch (`bs_stage`), and a parallel multi-scale
 stack (`bs_multiscale`). Across the sweep, capacity and the enlarged `arch` body span
 **0.85 M → 12.6 M parameters**.
+
+**Matched R5 width, depth, and channel schedules.** The follow-up holds the R5 batch-256 recipe, sample
+budget, blind-spot branch (`bs_channels=64`, `bs_depth=5`), fusion head, loss, and seed fixed. Its
+omission0 reference is the 3.15-M-parameter base64 pyramid (64→128→256→512). The base96 full pyramid
+uses 96→192→384→768 (6.96 M parameters); the cap-384 and 1.5× schedules use 96→192→384→384
+(4.60 M) and 96→144→216→324 (2.23 M), respectively. Thus the 1.5× model has a wider first stage but
+fewer total parameters than base64: it tests an efficient schedule, not isolated monotonic growth in
+model size. The √2 schedule resolves to 96→136→192→272 and has 1.83 M parameters; both omission
+routes completed checkpoint validation and frozen endpoint scoring. Code Ocean `run_time` is used
+for end-to-end compute comparisons; it includes capsule overhead as well as training. The completed
+depth-2 controls use 96→192→384 and 1.796 / 1.798 M parameters under omission0 / omission1, making
+them parameter-matched tests of depth allocation against the depth-3 √2 pair.
 
 ## Quantification (identical for every run)
 
@@ -195,6 +228,12 @@ differences, target crossings versus windows seen, and an exact two-sided sign-f
 three paired seeds, the smallest attainable two-sided sign-flip p-value is 0.25; these comparisons
 are therefore directional effect estimates, not confirmatory tests. The ten benchmark units provide
 paired within-model resolution but are not independent training replicates.
+
+For the width/schedule/depth follow-up, we also report paired per-unit d′ differences and a descriptive
+nonparametric bootstrap that resamples the 10 fixed unit differences 200,000 times. Each comparison
+uses a recorded deterministic seed beginning at 20260719. These intervals describe sensitivity to
+the particular unit mix; they are not biological confidence intervals, and they do not replace
+training-seed replication.
 
 The short-budget screen saved a validation-loss-selected `best_model` and a terminal model. For all
 33 available Tier 1/2/original runs with both manifests, the selected checkpoint was the terminal

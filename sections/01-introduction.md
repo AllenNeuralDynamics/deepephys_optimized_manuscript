@@ -23,7 +23,8 @@ empirical waveform shape, particularly for weak units. The reference (`base32`) 
 `fold` model with a temporal U-Net, a spatial blind-spot branch, and a pointwise fuse head. The
 **omission configuration** controls where adjacent t±1 information enters the model. We compare that modern reference
 with the original temporal-only ephys network, wider and deeper bodies, alternative wiring and losses,
-training recipes, and two long-duration trajectories. All models are trained self-supervised and
+training recipes, a matched base96 width/depth/channel-schedule follow-up, and two long-duration trajectories.
+All models are trained self-supervised and
 scored against injected ground truth in one frozen AP-band hybrid recording. This design isolates
 model-output differences on that benchmark, but architecture selection on the same recording means
 the conclusions require replication on held-out recordings and with a full spike sorter.

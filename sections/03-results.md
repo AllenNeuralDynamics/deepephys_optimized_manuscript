@@ -1,16 +1,18 @@
 # Results
 
 :::{note} Current state
-All Code Ocean training and all 610 HPC scoring jobs underlying the analyses below are complete. Five
-post-report width-96 controls are training and are not included here: full doubling under
-`omission=0/1`, cap-384 under `omission=0`, and 1.5× growth under `omission=0/1`. The completed
-analyses include the 21-configuration architecture screen, six-recipe screen, original-network
-reference, R0/R1/R5 recipe replications, R8 gradient diagnostics, four integration and sampling
-controls, the capacity-matched NAF control, seven corrected matched-L2 weighting arms, and two
-long-duration trajectories. All results use the same AP-band `recording1_3` hybrid benchmark;
-the raw reference is **d′ = 4.497**. `results/tables/master_table.csv` contains all 78 completed
-endpoint runs with experiment-family and budget labels; `table_coverage.csv` records the sole
-exclusion, the intentionally aborted R7 run. The global table is an inventory rather than one causal
+All training and endpoint scoring underlying the 87 completed analyses below are complete. The two
+matched √2 channel-schedule runs added after the coverage audit are now checkpoint-validated and
+scored. The matched depth-2 base96 controls added afterward are also checkpoint-validated and
+scored. The completed analyses include the 21-configuration architecture screen, the nine-run matched R5
+width/channel-schedule/depth follow-up, six-recipe screen, original-network reference, R0/R1/R5 recipe
+replications, R8 gradient diagnostics, four integration and sampling controls, the capacity-matched
+NAF control, ten confounded legacy weighting audit endpoints, seven corrected matched-L2 weighting
+arms, and two long-duration trajectories. All
+results use the same AP-band `recording1_3` hybrid benchmark; the raw reference is **d′ = 4.497**.
+`results/tables/master_table.csv` contains all 87 completed endpoint runs with experiment-family and
+budget labels; `table_coverage.csv` records the intentionally aborted R7 run as the sole row without
+an endpoint. The global table is an inventory rather than one causal
 ranking. Matched architecture, recipe, integration, NAF, and weighting conclusions use their
 family-specific tables and seed context.
 :::
@@ -60,20 +62,24 @@ descriptive screening reference, not a confidence interval. Exploratory Welch co
 only for replicated rows and are not corrected for multiple testing. `base32_l2` has the widest seed
 spread (SD = 0.041), so its mean is particularly uncertain.
 
-**Read-out (a): denoising still lowers detectability.** Every configuration — the best
-included — sits below the raw d′ of 4.497, from **−0.09** (`arch`) to **−0.36** (`origdi`). Thus every
+**Read-out (a): denoising still lowers detectability.** Every original-screen configuration sits
+below the raw d′ of 4.497, from **−0.088** (`arch`) to **−0.362** (`origdi`). All nine completed width/schedule/depth
+follow-ups also remain below raw; the closest is full base96 omission1 at **−0.083**. Thus every
 tested short-budget denoised output reduces the all-unit matched-filter mean on this benchmark. This
 does not establish the same effect on other recordings or under a complete spike sorter.
 
 ```{figure} figures/f1_dprime_ranking.png
 :label: fig-dprime-ranking
-**d′ across the 21 short-budget architectures.** Bars are d′ (mean ± 2 seed SD where replicated;
-single-seed Tier-2 rows have no bar); base32 (grey) anchors a descriptive 5-seed ±2-SD band, the
-original DeepInterpolation network (`origdi`, **crimson**) is the published reference, and the dotted
-line is raw data (4.497). The `arch` / `base64` capacity family sits at the top, the fuse-width /
-temporal variants at or below the band, and **`origdi` sits far below all of them** — the optimized
-architecture has climbed most of the way from the original toward raw. The two 3.30-M-update
-`support_all` runs are compared separately in the final duration section.
+**d′ across the original architecture screen and matched R5 follow-up on one ranked axis.** The 21
+short-budget architectures and ten matched-R5 endpoints are sorted together for direct visual
+comparison. Original-screen bars show mean ± 2 seed SD where replicated; base32 (grey) anchors a
+descriptive 5-seed ±2-SD band, `origdi` (crimson) is the published reference, and the dotted line is
+raw data (4.497). Outlined bars are the matched-R5 follow-up, printed with their single-seed endpoint
+means; hatching marks omission1. Full base96 has the highest observed all-unit mean, cap384 is
+intermediate, growth1.5 and depth2 are near their matched base64 R5 reference, and √2 omission0 is
+lower. The shared ordering is for
+comparison, not evidence that the single-seed follow-up belongs to the original seed-averaged screen.
+The two 3.30-M-update `support_all` runs are compared separately in the final duration section.
 ```
 
 ## The modern model package improves detection despite lower template SNR
@@ -105,15 +111,25 @@ Across all 21 short-budget architectures, every template-SNR change is positive 
 while every d′ change is negative (−0.09 to −0.36). More importantly, the two changes have almost no
 rank association (**Spearman ρ = 0.02**; ρ = 0.18 after excluding `origdi`). Template SNR is therefore
 useful as a waveform/noise summary, but not as a selection objective for matched-filter detection.
+The ten matched-R5 endpoints make the instability more explicit: their aggregate changes rank
+together across all 10 units (ρ = 0.70), but the association reverses for the four post hoc weak
+units (ρ = −0.67). These ten designed endpoints are not independent samples for correlation
+inference; the reversal shows that the apparent SNR–d′ relationship depends on which units are
+aggregated.
 
 ```{figure} figures/f4_snr_vs_dprime.png
 :label: fig-snr-dprime
-**Peak-channel template SNR does not rank multichannel matched-filter detectability.** All 21
-short-budget architectures are shown. Blue marks capacity variants, orange marks omission0
-variants, black is base32, red is the original architecture, and grey marks the remaining screen.
-SNR is empirical-template peak-to-peak divided by spike-excluded background SD on one channel; d′
-uses multichannel temporal event scores. Their architecture-level changes are essentially
-uncorrelated.
+**Peak-channel template SNR does not provide a stable matched-filter ranking.** All 31 comparison
+entries are overlaid and direct-labeled. Fill color encodes the exact trainable parameter count on a
+logarithmic scale; circles denote omission0 and triangles omission1. The `origdi` triangle reflects
+its configured temporal context omission, although that temporal-only reference has no modern
+spatial blind-spot branch. The original-screen association is ρ = 0.02 and the combined 31-entry
+association remains weak (ρ = 0.14), even though the ten
+designed follow-up endpoints alone have ρ = 0.70. For the four post hoc weak units that follow-up
+association reverses to ρ = −0.67 (reported in the inset rather than overlaid because it changes the
+aggregation). These coefficients are descriptive, not inferential. SNR is empirical-template
+peak-to-peak divided by spike-excluded background SD on one channel; d′ uses multichannel temporal
+event scores.
 ```
 
 ## The tested L2 substitutions are small and inconsistent
@@ -147,6 +163,86 @@ increment over replicated `base64` is only +0.027, however, and neither `arch` r
 Thus the fixed-budget capacity sequence is monotone but sharply diminishing; `arch` is a promising
 screen result, not a demonstrated optimum or a long-budget conclusion.
 
+## A matched R5 follow-up separates depth and channel allocation from parameter count
+
+Nine single-seed follow-ups hold the R5 recipe, sample budget, blind-spot branch, fusion head, and
+seed fixed while changing temporal U-Net width, channel growth, or depth. Together with the matched
+base64 R5 reference, the ten directly compared endpoints are:
+
+| R5 body | omission | temporal schedule | params | CO runtime | d′ | Δ vs base64 om0 | weak-unit d′* | amp | temporal cos |
+|---|---:|---|---:|---:|---:|---:|---:|---:|---:|
+| base64 2× | 0 | 64→128→256→512 | 3.15 M | 2.65 h | 4.3575 | — | 1.7149 | 0.9404 | 0.99655 |
+| base96, growth √2 | 0 | 96→136→192→272 | 1.83 M | 2.65 h | 4.3395 | −0.0180 | 1.7124 | 0.9382 | 0.99663 |
+| base96, depth 2 | 0 | 96→192→384 | 1.80 M | 2.67 h | 4.3538 | −0.0037 | 1.7147 | 0.9400 | 0.99667 |
+| base96, growth 1.5× | 0 | 96→144→216→324 | 2.23 M | 2.75 h | 4.3599 | +0.0024 | 1.7122 | 0.9381 | 0.99674 |
+| base96, cap 384 | 0 | 96→192→384→384 | 4.60 M | 3.97 h | 4.3773 | +0.0198 | 1.7152 | 0.9404 | 0.99663 |
+| **base96, full 2×** | **0** | **96→192→384→768** | **6.96 M** | **4.63 h** | **4.3939** | **+0.0363** | **1.7165** | **0.9414** | **0.99668** |
+| base96, growth √2 | 1 | 96→136→192→272 | 1.83 M | 2.68 h | 4.3588 | +0.0013 | 1.6017 | 0.8767 | 0.98484 |
+| base96, depth 2 | 1 | 96→192→384 | 1.80 M | 2.72 h | 4.3651 | +0.0075 | 1.6049 | 0.8822 | 0.98593 |
+| base96, growth 1.5× | 1 | 96→144→216→324 | 2.24 M | 2.85 h | 4.3886 | +0.0311 | 1.6032 | 0.8790 | 0.98513 |
+| **base96, full 2×** | **1** | **96→192→384→768** | **6.96 M** | **4.61 h** | **4.4141** | **+0.0566** | **1.6376** | **0.8938** | **0.98712** |
+
+The √2 schedule (`96→136→192→272`) was added after the coverage audit found that it had only a
+synthetic GPU benchmark. Both matched runs reached 70,308 optimizer steps, their checkpoints
+strict-loaded under the schedule-aware inference code, and frozen scoring produced 10-unit d′ and
+waveform endpoints. At 1.83 M parameters and 2.65–2.68 h, √2 is the smallest and fastest base96
+schedule tested, but its omission0 endpoint is below matched base64.
+
+The depth-2 pair (`96→192→384`) was then added as a parameter-matched test against √2. Both runs
+completed the same 70,308-step budget, strict-loaded, and received frozen endpoint scoring. Under
+omission0, depth2 has 1.9% fewer parameters than √2 and nearly identical runtime, yet exceeds it by
+**+0.0143 d′** (7/10 units; descriptive paired-unit interval **[+0.0014, +0.0307]**). It is tied with
+base64 at −0.0037 (5/10; [−0.0208, +0.0103]). Thus an extra U-Net scale is not intrinsically
+beneficial at matched parameter count; where channels are allocated across scales matters.
+
+\*The four previously defined, post hoc weak units have raw d′ ≤ 2.2. The depth2, √2, and 1.5×
+models are smaller than base64 despite their wider first stage. Within the depth-3 base96 omission0
+series, d′ rises as deeper channel capacity expands: growth1.5 exceeds √2 by +0.0204 (7/10;
+[−0.0032, +0.0559]), cap384 exceeds growth1.5 by +0.0174
+(8/10 units improve; descriptive paired-unit bootstrap interval
+[+0.0045, +0.0340]), and full 2× exceeds cap384 by +0.0165 (9/10;
+[+0.0004, +0.0399]).
+
+Against matched base64 R5, √2 changes d′ by −0.0180 (4/10 units; [−0.0405, +0.0010]),
+depth2 by −0.0037 (5/10; [−0.0208, +0.0103]), growth1.5 by +0.0024 (4/10 units;
+[−0.0185, +0.0293]), cap384 by +0.0198 (5/10; [−0.0046, +0.0592]), and full base96 by
+**+0.0363, or +0.83%** (8/10; **[+0.0030, +0.0850]**). Only the full-pyramid interval excludes zero,
+but all five comparisons use one trained model per configuration and the same 10 fixed units. The
+intervals are descriptive unit-mixture sensitivity analyses, not independent biological or
+training-seed inference.
+
+The mean gain is not a weak-unit rescue. Relative to base64, full base96 changes the four-weak-unit
+mean by only +0.0016 while changing the other-six mean by +0.0595; cap384 gives +0.0003 and +0.0328,
+respectively; depth2 gives −0.0002 and −0.0060; √2 gives −0.0025 and −0.0283. Omission0 waveform
+fidelity is effectively tied across the models: FWHM ratio is 0.9764 throughout, amplitude spans
+0.9381–0.9414, temporal cosine 0.99655–0.99674, and spatial cosine 0.999799–0.999831.
+
+Compute generally rises with deeper capacity and the detection mean. Relative to full base96
+omission0, √2 reduces Code Ocean end-to-end runtime by 42.7%, depth2 by 42.4%, growth1.5 by 40.5%,
+and cap384 by 14.3%; full base96 takes 74.5% longer than base64. Thus full 2× is the all-unit d′
+choice, depth2 is the smallest base64-level omission0 model tested, growth1.5 is another base64-level
+compute-efficient choice, and cap384 is intermediate rather than a free replacement.
+
+The four omission1 endpoints sharpen the aggregation warning. √2, depth2, growth1.5, and full 2×
+reach d′ 4.3588, 4.3651, 4.3886, and 4.4141, +0.0193, +0.0112, +0.0287, and +0.0202 over their
+omission0 twins, but only 2/10 units improve in each comparison and all descriptive intervals are
+wide. Their weak-unit means fall to 1.6017, 1.6049, 1.6032, and 1.6376; amplitude falls to 0.8767,
+0.8822, 0.8790, and 0.8938; and temporal cosine falls to 0.9848, 0.9859, 0.9851, and 0.9871. Depth2
+omission1 is +0.0063 over √2 omission1 (8/10; [−0.0113, +0.0208]), so its small aggregate lead is
+not a resolved parameter-matched effect. Omission1 raises
+the ten-unit mean through heterogeneous strong-unit gains while moving the weak-unit and waveform
+objectives in the opposite direction.
+
+```{figure} figures/width_schedule_followup.png
+:label: fig-width-schedule-followup
+**Matched R5 width, depth, and channel-schedule follow-up.** **A**, omission0 mean d′ versus Code Ocean
+end-to-end runtime; marker area scales with parameter count and the dotted line is raw data. **B**,
+paired mean d′ changes from base64 with descriptive 95% paired-unit bootstrap intervals. **C**, all
+four paired models have a higher ten-unit mean under omission1. **D**, the same routing lowers the
+mean for the four weak units. All nine scored follow-ups use one training seed; panels B–D resolve the same
+10 benchmark units and are not biological-replicate inference.
+```
+
 ## The leading intervention depends on which units are averaged
 
 The ten-unit mean obscures the study's stated target: the four units with raw d′ ≤ 2.2. Their
@@ -169,20 +265,22 @@ effect cannot be assigned to t±1 alone.
 Because the subgroup threshold was chosen during analysis and contains only four units, it is
 descriptive rather than a population-level confirmatory test.
 
-The amplitude pattern is not confined to base32 and omission0. Across all 21 short-budget
-architectures, the per-model Spearman correlation between empirical-template amplitude and raw d′
-ranges from 0.66 to 0.94 (median 0.88). This is consistent with conditional-mean shrinkage: waveforms
-that are poorly constrained by surrounding samples are attenuated more. It is not direct evidence
-that neighbouring samples are pure noise or that regression-to-the-mean is the only mechanism.
+The amplitude pattern is not confined to base32 and omission0. Across all 31 architecture-comparison
+entries, including the ten matched-R5 endpoints, the per-model Spearman correlation between
+empirical-template amplitude and raw d′ ranges from 0.62 to 0.94 (median 0.85; original 21-model
+median 0.88). This is consistent with conditional-mean shrinkage: waveforms that are poorly
+constrained by surrounding samples are attenuated more. It is not direct evidence that neighbouring
+samples are pure noise or that regression-to-the-mean is the only mechanism.
 
 ```{figure} figures/f5_amp_vs_quality.png
 :label: fig-amp-quality
-**Amplitude preservation across the complete short-budget architecture screen.** **A**, all 21
-architectures (grey points) with the per-unit median and 10th–90th percentile across models (black).
-The unit-quality gradient persists across the full screen. **B**, the matched base32–omission0
-compound contrast: moving t±1 into the temporal branch while changing the spatial input and outer
-context raises amplitude primarily for weak units. Values are denoised/raw empirical
-template peak-to-peak ratios, not amplitudes relative to a noise-free injected waveform.
+**Amplitude preservation across all 31 architecture-comparison entries.** **A**, the original 21
+architectures plus the ten matched-R5 endpoints (grey points), with the per-unit median and
+10th–90th percentile across endpoints (black). The unit-quality gradient persists after adding the
+width/schedule family. **B**, the matched base32–omission0 compound contrast: moving t±1 into the
+temporal branch while changing the spatial input and outer context raises amplitude primarily for
+weak units. Values are denoised/raw empirical-template peak-to-peak ratios, not amplitudes relative
+to a noise-free injected waveform.
 ```
 
 Combining the two design choices yields a useful compromise. `base64_om0` and `arch_om0` preserve
@@ -388,6 +486,12 @@ to nearly the same value, but R13 trains 41% longer.
 The corrected matched-L2 screen compares seven center-excluded weighting rules with unweighted
 `arch_l2_om0` seed 0. Small magnitude weights raise empirical-template amplitude, but only λ = 3
 raises endpoint d′; all stronger rules reduce it.
+
+Ten earlier weighted endpoints are intentionally absent from this matched comparison. They remain
+in the 87-endpoint master and per-unit inventories, but their weighting implementation silently used
+Charbonnier despite requesting L2. Mixing them into the corrected figure would confound weighting
+with the executed objective; `table_coverage` identifies them as the separate
+`legacy_weighting_screen` family.
 
 | weighting arm | endpoint d′ | Δd′ vs unweighted seed 0 | amplitude ratio |
 |---|---:|---:|---:|

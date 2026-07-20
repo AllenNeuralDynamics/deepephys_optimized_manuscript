@@ -8,3 +8,4 @@ legacy_weighting_screen,short_~18M_windows,10,10,4.051060355375182,4.37834491278
 naf_control,short_~18M_windows,1,1,4.335240086620962,4.335240086620962
 recipe_replication,short_~18M_windows,6,3,4.342603883413127,4.372989576147659
 recipe_screen,short_~18M_windows,8,8,4.218658034958482,4.374094707145511
+width_schedule_followup,short_~18M_windows,9,9,4.339519158535147,4.414106574332431

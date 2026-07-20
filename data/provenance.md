@@ -27,7 +27,8 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 - **Scoring substrate (S3, AP-band):**
   `aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3`
 - **Ground truth:** 10 injected hybrid units; extraction `seed=0`.
-- Training slice `slice_start_s=60`, `slice_dur_s=150`; validation `0–60 s`; `checkpoint_steps=12`.
+- Training slice `slice_start_s=60`, `slice_dur_s=150`; validation `0–60 s`; default
+  `checkpoint_steps=12` (`24` for the width/schedule/depth follow-up).
 
 ## HPC (AIND scratch)
 
@@ -47,6 +48,27 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 
 Both computations completed and their trajectories are scored. Live and staged optimization runs
 are tracked in `results/runs.csv`, which supersedes static status prose here.
+
+## Matched R5 width, channel-schedule, and depth follow-up
+
+| run | computation id | temporal schedule | omission | Code Ocean runtime |
+|---|---|---|---:|---:|
+| full base96 | `edb49d0f-ca97-40e6-a0fc-fb0d3305f8f4` | 96→192→384→768 | 0 | 16,672 s |
+| full base96 | `50f7d07d-dea1-40fa-8c4b-c8b8a65c5b8b` | 96→192→384→768 | 1 | 16,610 s |
+| cap384 | `29f50c37-ce7e-450f-9147-83c0462ae7b1` | 96→192→384→384 | 0 | 14,281 s |
+| growth1.5 | `1eb46bac-c88b-4f6a-a358-6fec2b9f7704` | 96→144→216→324 | 0 | 9,915 s |
+| growth1.5 | `1d2e85d8-b745-4e72-9570-6a33cb521f87` | 96→144→216→324 | 1 | 10,249 s |
+| growth √2 | `ffeeb1d1-bfcf-47d9-9e54-78e9c15f2a9b` | 96→136→192→272 | 0 | 9,553 s |
+| growth √2 | `a447dddb-62f6-46ea-994a-59cf9d58c3b3` | 96→136→192→272 | 1 | 9,654 s |
+| depth 2, full 2× | `b43cb91d-7547-41e6-bbe7-bb147cb06c61` | 96→192→384 | 0 | 9,596 s |
+| depth 2, full 2× | `bc6ba5f8-3757-4851-a42f-6b3ff27e01ce` | 96→192→384 | 1 | 9,800 s |
+
+All nine computations completed successfully. Their checkpoints strict-loaded and were scored
+on HPC with the schedule-aware inference checkout pinned to commit `808d7fa`; final d′ and waveform
+job IDs are recorded in `results/runs.csv`. The two √2 computations were added after the coverage
+audit identified that only their synthetic GPU benchmark existed. The matched depth-2 pair compares
+a shallow 96→192→384 pyramid against the nearly parameter-matched depth-3 √2 schedule; its final
+d′/diagnostic jobs were `23243308`–`23243311`.
 
 ## Checkpoint schedule (`n_ckpt=12`)
 

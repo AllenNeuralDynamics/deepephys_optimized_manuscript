@@ -78,6 +78,12 @@ nested `best` scores from trajectory/control runs, and writes a ledger coverage 
 their exact inputs/outputs are documented in
 [`code/figures/`](../code/figures/README.md).
 
+```bash
+python code/figures/collate.py
+python code/figures/width_schedule_followup.py
+python code/figures/make_figures.py
+```
+
 ## 6. Build the manuscript (local HTML site)
 
 ```bash
@@ -87,6 +93,9 @@ myst build --html   # static site in _build/
 
 ## 7. Active and staged experiments
 
-Current computation IDs and states are tracked in `results/runs.csv`. All planned Code Ocean training
-and all 610 HPC scoring jobs are complete. The regenerated coverage table includes 78 endpoint runs;
-the only excluded ledger entry is the intentionally aborted R7 PCGrad experiment.
+Current computation IDs and states are tracked in `results/runs.csv`. All training and scoring jobs
+underlying the 87 current endpoints are complete. Two matched √2 schedule runs were added after the
+coverage audit and have completed training, checkpoint validation, and frozen scoring. The
+matched depth-2 base96 omission0/omission1 controls subsequently completed the same pipeline. The
+regenerated coverage table therefore shows 87 scored endpoints and the intentionally aborted R7
+PCGrad row as the sole exclusion.

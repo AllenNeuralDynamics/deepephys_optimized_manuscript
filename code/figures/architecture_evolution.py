@@ -155,22 +155,30 @@ def topology_panel(axis) -> None:
 def evolution_panel(axis) -> None:
     setup(axis)
     panel_heading(axis, "B", "Architectural evolution",
-                  "The diagram separates representation changes from the later training-recipe changes.")
+                  "Representation changes through the completed width, depth, and channel-schedule study.")
 
-    box(axis, 0.01, 0.29, 0.27, 0.42,
+    box(axis, 0.01, 0.29, 0.205, 0.42,
         "Original DeepInterpolation\n(2021 control)\n\n2-D temporal U-Net\ncenter frame absent\nno spatial branch",
-        COLORS["original"], COLORS["line"], fontsize=7.6, weight="bold")
-    box(axis, 0.365, 0.29, 0.27, 0.42,
+        COLORS["original"], COLORS["line"], fontsize=7.1, weight="bold")
+    box(axis, 0.265, 0.29, 0.205, 0.42,
         "base32 reference\n\nfolded NP1 geometry\n1-D U-Net along depth\nresidual GN + GELU\n+ ConvHole branch",
-        COLORS["base"], "#476F97", fontsize=7.6, weight="bold")
-    box(axis, 0.705, 0.29, 0.275, 0.42,
-        "replicated R5 body\n\nwidth 32 -> 64\nomission 1 -> 0\ncenter inputs 3 -> 1\n3.15 M parameters",
-        COLORS["temporal"], COLORS["temporal_edge"], fontsize=7.6, weight="bold")
+        COLORS["base"], "#476F97", fontsize=7.1, weight="bold")
+    box(axis, 0.52, 0.29, 0.205, 0.42,
+        "replicated R5 base64\n\n64 -> 128 -> 256 -> 512\nomission0 routing\n3.15 M parameters",
+        COLORS["temporal"], COLORS["temporal_edge"], fontsize=7.1, weight="bold")
+    box(axis, 0.775, 0.29, 0.205, 0.42,
+        "base96 depth + schedules\n\ndepth2: 96 -> 192 -> 384\n"
+        "full: 96 -> 192 -> 384 -> 768\ncap: 96 -> 192 -> 384 -> 384\n"
+        "1.5x: 96 -> 144 -> 216 -> 324\nsqrt2: 96 -> 136 -> 192 -> 272\n"
+        "1.80-6.96 M parameters",
+        COLORS["temporal"], COLORS["temporal_edge"], fontsize=5.9, weight="bold")
 
-    arrow(axis, (0.28, 0.50), (0.365, 0.50))
-    arrow(axis, (0.635, 0.50), (0.705, 0.50))
-    route_label(axis, 0.322, 0.795, "geometry + blind spot", COLORS["muted"])
-    route_label(axis, 0.670, 0.795, "capacity + frame routing", COLORS["muted"])
+    arrow(axis, (0.215, 0.50), (0.265, 0.50))
+    arrow(axis, (0.47, 0.50), (0.52, 0.50))
+    arrow(axis, (0.725, 0.50), (0.775, 0.50))
+    route_label(axis, 0.240, 0.795, "geometry + blind spot", COLORS["muted"])
+    route_label(axis, 0.495, 0.795, "capacity + routing", COLORS["muted"])
+    route_label(axis, 0.750, 0.795, "depth + channel schedule", COLORS["muted"])
     axis.text(0.5, 0.12,
               "Batch 256, learning rate, warmup, accumulation, and sampling\n"
               "are training controls, not architecture.",

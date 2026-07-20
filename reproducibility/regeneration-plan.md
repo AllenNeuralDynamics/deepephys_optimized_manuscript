@@ -130,6 +130,23 @@ Charbonnier objective, R5 training recipe, sample budget, and checkpoint schedul
 this is therefore the capacity-matched architecture control. It is exploratory and must pass the
 same blind-spot derivative check and frozen d′/waveform trajectory scoring as the existing recipes.
 
+### Matched width, channel-schedule, and depth follow-up added 2026-07-19
+
+Nine post-report controls hold the R5 recipe, ~18 M-window sample budget, seed 0, blind-spot branch,
+fusion head, and Charbonnier objective fixed. Full base96 uses temporal channels
+96→192→384→768 under omission0 and omission1. Efficient schedules test a 384-channel cap
+(96→192→384→384, omission0), 1.5× growth (96→144→216→324, omission0 and omission1), and √2
+growth (96→136→192→272, omission0 and omission1). The √2 pair was added after the initial five
+controls completed because the coverage audit found that √2 had been benchmarked synthetically but
+not trained; both added runs are now checkpoint-validated and scored.
+The final matched pair reduces the full-2× base96 body to depth 2 (96→192→384, omission0 and
+omission1; 1,796,200 / 1,797,736 parameters). These completed controls are parameter-matched against
+the depth-3 √2 pair and received the same frozen endpoint scoring.
+The omission0 reference is R5 `ib_r5_bs256` (64→128→256→512). These are exploratory single-seed
+capacity/compute controls, not additions to the original 21-configuration architecture ranking.
+Every endpoint receives the frozen ten-unit d′ and waveform diagnostics; paired-unit intervals are
+descriptive because units are not independent training or biological replicates.
+
 ### Deliberately excluded (were within-noise "does X stack on Y" combos in the old report)
 `fuse128/1024`, `archL3`, `fuse256_tmult8`, `fuse256_wL3/fuse512_wL3`, `uL30/300`, `support_sd_l2`. Pull any back if a section needs it.
 
@@ -216,7 +233,7 @@ The headline "who gets smoothed / who gets harder to detect" view (old report Ap
 - **Amplitude matrix** (App B eq.) — `amp_ratio` per unit × model + heatmap (green ≈1.0 preserved / red smoothed). Shows the vertical quality gradient (strong units ~0.97, weak units 0.66–0.83).
 - **Detection matrix** (App C eq.) — `dprime_deep` per unit × model (absolute) **and** a **Δd′ = dprime_deep − dprime_raw** heatmap (red = DI hurts, blue = DI helps). Exposes per-unit collapses (old: `arch` erased unit 337, 3.15→0.16).
 - **No extra runs:** every diagnostic run already stores per-unit values (§5.4); these matrices are
-	pure collation across all completed endpoints (78 in the current revision).
+	pure collation across all completed endpoints (87 in the current revision).
 - Because every model is a column, an intervention's effect is read **across the whole unit population at once**, not just at the 10-unit mean.
 
 ### 5.4 Per-run outputs (uniform)
@@ -248,26 +265,34 @@ binary "real/within noise" label.
 
 ## 6. Analysis, tables & figure collection (regenerated in-band)
 
-Every §5 quantification gets a table and/or a plot. This is the in-band regeneration of the old report's figure set (8 data plots + 2 schematics) plus 2 new plots.
+Every §5 quantification gets a table and/or a plot. The authoritative current manuscript collection
+contains 15 figure directives; family-specific plots preserve matched bodies, objectives, and budgets.
 
 ### 6.1 Tables
 - **T1 — Master results** (sorted by d′_self, read against ±2σ): per model → `amp_ratio`, `d′_self`, `d′_fixed`, `fwhm_ratio`, `temporal_cos`, `spatial_cos`, `snr_deep`, `params`, **`training loss`**.
 - **T2 — Seed variability**: SD_d′ and SD_amp for replicated configurations plus exploratory Welch comparisons.
 - **T4 — Per-unit amp matrix** (App B) and **T5 — Per-unit d′ / Δd′ matrix** (App C): 10 units × all models, mean row.
+- **T6 — Width/schedule/depth follow-up**: ten scored matched-R5 endpoints, paired-unit effects,
+	and per-unit amplitude/Δd′ tables.
+- **T7 — Coverage audit**: all 88 ledger rows mapped to broad or family-specific comparison
+	surfaces, with 87 scored endpoints and the intentional R7 exclusion stated.
 
 ### 6.2 Figure collection (one+ per quantification family)
-| fig | plot | quantification (§5) | old fig / asset |
-|---|---|---|---|
-| F1 | d′ ranking — 21 short-budget architectures, base32 ±2 seed SD, raw line | detection + seed variability | Fig 3 / `fig1_dprime_ranking` |
-| F2 | loss × capacity 2×2 | detection, loss axis | Fig 4 / `fig2_loss_capacity_2x2` |
-| F3 | **loss-axis pairs — 6 charbonnier↔L2 Δ (NEW)** | loss axis (added pairs) | new |
-| F4 | peak-channel template-SNR change vs matched-filter Δd′ | metric dissociation | Fig 5 / `f4_snr_vs_dprime` |
-| F5 | amp vs unit quality: all architectures + omission contrast | per-unit amp / Spearman | Fig 7 / `f5_amp_vs_quality` |
-| F6 | per-unit amp heatmap (units × all models) | §5.3 per-unit (App B) | Fig 9 / `fig6_perunit_heatmap` |
-| F7 | per-unit Δd′ heatmap (units × all models) | §5.3 per-unit (App C) | Fig 10 / `fig7_dprime_delta_heatmap` |
-| F8 | loss×omission trajectories — d′ & amp vs updates | training progress / saturation | Fig 8 / `fig_trajectory` |
-| F9 | val-loss / overfit curves + best-ckpt markers | checkpoint selection | Fig 6 / `fig_overfit` |
-| F10 | PSD band-mismatch (train vs eval) **(NEW)** | provenance / the band correction | new / `psd_plot` |
+| manuscript figure | plot | comparison scope |
+|---|---|---|
+| 1 | topology and architectural evolution through base96 schedules, plus R13 block substitution | architecture definitions |
+| 2 | combined d′ ranking | 21 original configurations + ten matched-R5 endpoints |
+| 3 | template-SNR change versus matched-filter Δd′ | same 31 architecture-comparison entries |
+| 4 | width/schedule/depth compute, paired effects, routing, and weak units | ten matched-R5 endpoints |
+| 5 | amplitude versus unit quality | same 31 architecture-comparison entries |
+| 6 | R0/R1/R5 matched-seed replication | nine recipe endpoints |
+| 7–8 | recipe convergence on linear and log-deficit axes | R0–R6 screen |
+| 9 | microbatch gradient diagnostics | R8 trajectory |
+| 10 | integration and sampling controls | R1 seed context + R9–R12 |
+| 11 | capacity-matched temporal block | R5 seeds + R13 NAF58 |
+| 12 | corrected weighting | unweighted seed context + seven corrected arms |
+| 13 | long-duration omission trajectories | two 3.30-M-update `support_all` runs |
+| 14–15 | per-unit amplitude and Δd′ heatmaps | same 31 architecture-comparison entries |
 
 The current architecture schematic is regenerated by `code/figures/architecture_evolution.py`;
 the historical omission-gap schematic is retained unchanged.
@@ -283,8 +308,8 @@ the historical omission-gap schematic is retained unchanged.
 |---|---|---|---|---|---|---|---|
 | ib_champion_s0 | | | | | | | |
 | … (per run) | | | | | | | |
-| RUN3 ib_om0_scale | ccf82c60-43c4-4829-9984-8d41e4639fc2 | running | | | | | in-domain om0 |
-| RUN4 ib_om1_scale | 5eec6d19-f063-4f9d-a17a-b11da5a65869 | init | | | | | in-domain om1 |
+| RUN3 ib_om0_scale | ccf82c60-43c4-4829-9984-8d41e4639fc2 | completed | yes | yes | 4.3630 | 0.9389 | in-domain om0 |
+| RUN4 ib_om1_scale | 5eec6d19-f063-4f9d-a17a-b11da5a65869 | completed | yes | yes | 4.2745 | 0.8690 | in-domain om1 |
 
 ---
 

@@ -5,6 +5,9 @@ package substantially improves matched-filter detection and empirical waveform a
 short-budget denoised output remains below the raw all-unit d′. The important qualification is that
 the answer depends on which units are averaged: width leads the ten-unit mean, whereas the compound
 omission0 routing has the larger effect on the four weakest units and on their waveform amplitude.
+The matched R5 follow-up extends that distinction: full base96 raises the ten-unit omission0 mean,
+but its gain is concentrated in the six units outside the weak subgroup and costs substantially more
+compute.
 
 ## The optimization target changes the apparent winner
 
@@ -18,10 +21,24 @@ one frame pair alone.
 
 This is not a contradiction; it is an aggregation issue. A deployment objective that values total
 mean d′ favors width in this screen. An objective that protects marginal units favors adjacent-frame
-context. Empirical-template amplitude follows raw unit quality across the complete architecture set
-(median per-model Spearman ρ = 0.88), consistent with conditional-mean shrinkage, and t±1 context
-raises the lower end of that distribution. The four-unit threshold was selected during analysis, so
-the subgroup result should be replicated on a larger, prespecified weak-unit cohort.
+context. Empirical-template amplitude follows raw unit quality across all 31 architecture-comparison
+entries (median per-model Spearman ρ = 0.85; 0.88 in the original 21-model screen), consistent with
+conditional-mean shrinkage, and t±1 context raises the lower end of that distribution. The four-unit
+threshold was selected during analysis, so the subgroup result should be replicated on a larger,
+prespecified weak-unit cohort.
+
+The width/schedule/depth follow-up reinforces capacity as an all-unit lever but narrows the
+mechanism. The small depth-3 √2 pyramid is −0.018 d′ versus base64 despite its wider first stage, but
+the nearly parameter-matched depth-2 `96→192→384` model is tied with base64 and exceeds √2 by +0.014
+d′, with a descriptive paired-unit interval above zero. Extra depth is therefore not intrinsically
+beneficial at matched parameter count; allocating channels across scales matters. Within the
+depth-3 base96 schedules, 1.5× growth is effectively tied with base64, cap384 is intermediate, and
+only the full 96→192→384→768 pyramid has a descriptive paired-unit interval above zero versus
+base64. That conditional ordering implicates deeper channel capacity rather than base width alone. The
+full model's +0.036 d′ gain accompanies a 74.5% increase in Code Ocean runtime over base64, while the
+four-weak-unit mean changes by only +0.002. Under omission1, all four paired models raise the all-unit
+mean but lower weak-unit d′, amplitude, and temporal waveform cosine. Capacity therefore does not
+remove the aggregation tradeoff identified in the original screen.
 
 ## Template SNR is not a detection objective
 
@@ -31,7 +48,10 @@ if either numerator or denominator changes. Matched-filter d′ instead separate
 event scores. Across 21 architectures their changes are essentially uncorrelated (Spearman ρ = 0.02),
 and `origdi` combines the highest template SNR with the lowest d′. The appropriate conclusion is not
 that greater noise suppression necessarily harms detection, but that this SNR ratio cannot select a
-model for the matched-filter objective.
+model for the matched-filter objective. The matched-R5 follow-up strengthens that qualification:
+its ten endpoints have ρ = 0.70 when all units are averaged but ρ = −0.67 for the four weak units.
+The relationship can therefore reverse under a deployment-relevant change in aggregation even
+within one controlled model family.
 
 ## Training optimization has only a provisional compound-recipe lead
 
@@ -93,6 +113,8 @@ waveform stability. The primary self-template d′ estimates each denoised templ
 hit events it scores, making its absolute value in-sample optimistic; the fixed raw-template metric
 and paired comparisons provide complementary checks, but a cross-fitted endpoint remains desirable.
 Third, many Tier 2 rows, every R9–R13 method control, and each weighted arm have one training seed;
+the nine width/schedule/depth follow-ups also have one training seed, and their paired-unit bootstrap
+intervals resample fixed benchmark units rather than independent recordings;
 exploratory Welch tests are not multiple-comparison corrected, the recipe replication has only three
 paired seeds, and the weak-unit analysis contains four post hoc selected units. Finally,
 long-duration evidence uses a different body from the architecture and recipe candidates.
@@ -102,6 +124,13 @@ long-duration evidence uses a different body from the architecture and recipe ca
 For this benchmark and short budget, `base64` is the best replicated choice for the all-unit mean;
 omission0 is the clearest tested configuration for preserving weak-unit amplitude and detectability;
 `arch_l2_om0` is a balanced candidate that combines those properties but does not dominate every unit.
+In the matched R5 follow-up, full base96 gives the highest omission0 all-unit d′ (4.394), but requires
+6.96 M parameters and 4.63 h end-to-end versus 3.15 M and 2.65 h for base64, with no material
+weak-unit gain. Growth1.5 retains base64-level d′ at 40.5% lower runtime than full base96; cap384 is
+the intermediate option. Depth2 also retains base64-level d′ with 43% lower runtime than full
+base96 and 43% fewer parameters than base64, but its 2.67 h runtime is essentially the same as
+base64 because parameter count does not determine convolution cost. Omission1 reaches still higher all-unit means but should not be selected
+when weak-unit detection or waveform amplitude is the deployment objective.
 Among the replicated training recipes, R5 is the provisional compound-recipe choice and warmup alone
 is not supported. Adaptive accumulation and importance sampling do not improve the endpoint; fixed
 and physical effective-batch-256 controls both finish lower. The capacity-matched NAF substitution is
