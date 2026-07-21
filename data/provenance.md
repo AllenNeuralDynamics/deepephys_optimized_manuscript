@@ -98,6 +98,25 @@ displays remove only each channel's median for visualization. Scoring uses the
 native calibrated windows without that display centering. CSV and metadata hashes
 are recorded in `results/qualitative/README.md`.
 
+## Template-support sensitivity
+
+The post hoc linear-filter support diagnostic used the same inference commit,
+recording/sorting URLs, seed-0 event selection, 100 GT events/unit, and 200
+background centers as the frozen endpoint. It swept 0.5/1/2/3/4-ms crops and
+top-1/2/4/8/16/24 raw-ranked channels plus the endpoint rule, both in-sample and
+with deterministic two-fold event-level cross-fitting.
+
+| model | HPC job | elapsed | GPU |
+|---|---:|---:|---|
+| `ib_w96_om0_s0` | `23258586` | 00:08:46 | TITAN Xp |
+| `ib_w96_om1_s0` | `23258587` | 00:08:41 | TITAN Xp |
+| `ib_origdi_s0` | `23258588` | 00:08:40 | TITAN X (Pascal) |
+
+All jobs completed with exit 0. Each 4-ms in-sample endpoint reproduced committed
+raw/denoised d′ within `1e-6` and its per-unit channel count. Exact result-file
+hashes and schemas are in
+[`results/template_support/README.md`](../results/template_support/README.md).
+
 ## Checkpoint schedule (`n_ckpt=12`)
 
 Log-spaced steps: 1, 4, 15, 60, 235, 919, 3597, 14078, 55103, 215688, 844255, 3304616 —

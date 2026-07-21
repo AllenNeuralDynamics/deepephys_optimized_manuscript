@@ -99,12 +99,17 @@ python code/figures/collate.py
 python code/figures/width_schedule_followup.py
 python code/figures/make_figures.py
 python code/figures/qualitative_examples.py
+python code/figures/template_support_sweep.py
 ```
 
 The first three manuscript figures read the three committed compact artifacts in
 `results/qualitative/`. Recreating those artifacts from S3 and their checkpoints
 is a GPU step documented in [`code/scoring/`](../code/scoring/README.md); ordinary
 local regeneration needs neither S3 nor a GPU.
+
+Figure 19 reads the committed support-sweep CSVs in `results/template_support/`.
+Recreating those tables is a three-checkpoint GPU/S3 operation documented in
+[`code/scoring/`](../code/scoring/README.md).
 
 ## 6. Build the manuscript (local HTML site)
 

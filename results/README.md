@@ -46,3 +46,6 @@ row explicitly marked `scored=yes` fails loudly if its endpoint pair is missing.
 
 - [`scores/`](scores/README.md) — raw per-unit CSVs from HPC scoring (the input schema).
 - [`tables/`](tables/README.md) — collated master table + per-unit matrices (the manuscript inputs).
+- [`qualitative/`](qualitative/README.md) — endpoint-validated compact arrays for Figures 1–3.
+- [`template_support/`](template_support/README.md) — in-sample/cross-fitted temporal and spatial
+        support sensitivity for Figure 19.

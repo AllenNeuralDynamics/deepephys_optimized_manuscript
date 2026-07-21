@@ -2,7 +2,9 @@
 
 On this hybrid benchmark, replacing the original temporal-only network with the modern two-branch
 package substantially improves matched-filter detection and empirical waveform amplitude. Yet every
-short-budget denoised output remains below the raw all-unit d′. The important qualification is that
+short-budget denoised output remains below the raw all-unit d′ under the frozen 4-ms endpoint. The
+support sensitivity shows that this aggregate direction can reverse for compact filters. The more
+important qualification is that
 the answer depends on which units are averaged: width leads the ten-unit mean, whereas the compound
 omission0 routing has the larger effect on the four weakest units and on their waveform amplitude.
 The matched R5 follow-up extends that distinction: full base96 raises the ten-unit omission0 mean,
@@ -52,6 +54,17 @@ model for the matched-filter objective. The matched-R5 follow-up strengthens tha
 its ten endpoints have ρ = 0.70 when all units are averaged but ρ = −0.67 for the four weak units.
 The relationship can therefore reverse under a deployment-relevant change in aggregation even
 within one controlled model family.
+
+The support sweep adds a second qualification: matched-filter d′ is not a support-invariant property
+of a recording. Compact 1-ms, one- or two-channel filters remove the aggregate Full96 deficit in both
+the in-sample and event-level cross-fitted analyses. This supports the concern that the 4-ms
+multichannel endpoint includes dimensions that do not contribute equally to raw and denoised
+separability. It does not reduce to raw-template overfitting, because the reversal survives when
+templates and channel rankings are learned on separate training events. However, the reversal is
+concentrated in strong units; compact support makes the weak-unit gap more negative, and original DI
+remains below raw. The defensible interpretation is therefore narrower than either extreme: the
+frozen endpoint overstates the modern models' aggregate disadvantage, while the weak-unit problem is
+robust and can be hidden by all-unit averaging.
 
 ## Training optimization has only a provisional compound-recipe lead
 
@@ -111,7 +124,10 @@ overfitting of design decisions to this benchmark. Second, matched-filter d′ i
 measured before common-median referencing; it is not sorter-level precision, recall, unit yield, or
 waveform stability. The primary self-template d′ estimates each denoised template from the same 100
 hit events it scores, making its absolute value in-sample optimistic; the fixed raw-template metric
-and paired comparisons provide complementary checks, but a cross-fitted endpoint remains desirable.
+and paired comparisons provide complementary checks. Event-level cross-fitting and support sweeps
+reduce that concern for three representative models, but they remain post hoc, reuse one background
+set, and show that aggregate d′ depends on the chosen linear filter. Neither the frozen nor compact
+filter reproduces Kilosort's whitening, temporal search, template competition, or clustering.
 Third, many Tier 2 rows, every R9–R13 method control, and each weighted arm have one training seed;
 the nine width/schedule/depth follow-ups also have one training seed, and their paired-unit bootstrap
 intervals resample fixed benchmark units rather than independent recordings;
@@ -136,5 +152,7 @@ is not supported. Adaptive accumulation and importance sampling do not improve t
 and physical effective-batch-256 controls both finish lower. The capacity-matched NAF substitution is
 slower and lower in d′, while soft λ = 3 weighting remains only an unreplicated lead and stronger
 weighting is harmful. The modern package still outperforms `origdi` under the matched-filter proxy on
-this benchmark. Stronger claims require a prespecified held-out recording, cross-fitted scoring,
-long-budget validation of the selected body, and end-to-end spike-sorter evaluation.
+this benchmark. The 4-ms endpoint is retained for uniform model ranking, but compact-support
+sensitivity should accompany claims about absolute raw-versus-denoised detectability. Stronger claims
+require a prespecified held-out recording, long-budget validation of the selected body, and
+end-to-end spike-sorter evaluation.

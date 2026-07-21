@@ -65,8 +65,8 @@ random hit score exceeds a random background score.
 empirical template for denoised windows, analogous to a sorter learning templates in its input
 domain. `d′_fixed` projects denoised windows onto the raw empirical template. Both use exactly the
 same event and background centers. Because template estimation and hit scoring reuse the same 100
-events, absolute d′ is optimistically in-sample; comparisons are frozen identically, but a
-cross-fitted endpoint remains necessary.
+events, absolute d′ is optimistically in-sample. Comparisons are frozen identically; the event-level
+cross-fitted sensitivity below tests this optimism for three representative models.
 
 Lower voltage variance alone does not guarantee higher d′. Denoising can attenuate or reshape the
 spike, reducing $\mu_h-\mu_b$, and structured residual background can still project onto the learned
@@ -83,6 +83,29 @@ between means is d′. All 100 GT-event scores and 200 spike-excluded background
 the same centers enter raw and denoised calculations. The empirical template and hit scores reuse
 events, so absolute separation is in-sample optimistic even though model comparisons are frozen.
 ```
+
+## Template-support sensitivity
+
+The primary endpoint intentionally freezes one filter definition across all 87 scored models, but a
+linear matched-filter result can depend on how much time and space enter the template. We therefore
+ran a post hoc support sensitivity on Full96 omission0, Full96 omission1, and seed-0 original DI.
+Each run reused the endpoint's 100 GT events, 200 background centers, seed 0, and raw/denoised
+windows. Temporal support was centered on the GT frame and swept over 0.5, 1, 2, 3, and 4 ms.
+Spatial support used the top 1, 2, 4, 8, 16, or 24 channels ranked by raw empirical-template
+peak-to-peak amplitude; the frozen 50%-amplitude channel rule was retained as a separate endpoint
+cell. Raw and denoised scores always used the same events, crop, and channels, while each domain
+learned its own normalized filter.
+
+We report both the frozen in-sample calculation and deterministic two-fold event-level cross-fitting.
+For cross-fitting, selected spike times were sorted and assigned to alternating folds; raw channel
+ranking and both domain templates were learned only from the 50 training events, then scored on the
+other 50 events, with folds averaged within unit before averaging the 10 units. The same 200
+background windows enter both folds, preserving paired raw/denoised comparison but making fold
+estimates correlated. The fold-specific 50%-amplitude rule is less stable with 50 events than the
+frozen 100-event rule (mean 8.8 versus 5.4 channels), so temporal conclusions are also shown at fixed
+top-2 support and spatial conclusions at fixed 1 ms. No support was selected as an optimum; the full
+prespecified curves and six named cells are reported. This analysis remains post hoc, unwhitened,
+and specific to one recording; it tests metric support, not Kilosort performance.
 
 ## The in-domain rule
 

@@ -18,6 +18,7 @@ regenerate deterministically.
 | `channel_schedule_benchmark.py` | summarize exploratory synthetic-GPU throughput/memory for width-96 channel pyramids; does not measure d′ |
 | `width_schedule_followup.py` | validate and summarize the matched R5 base64/base96 width/depth/schedule study, paired unit effects, runtime, weak-unit behavior, and omission routing |
 | `qualitative_examples.py` | render the all-probe raw/three-model view, GT-event close-up, multi-unit attenuation comparison, and omission0 d′ score distributions from three compact validated artifacts |
+| `template_support_sweep.py` | render in-sample/cross-fitted temporal and spatial d′ sensitivity plus all/weak/other aggregation from three representative endpoints |
 | `validation_loss_headroom.py` | exploratory GT-support/off-GT contrast; retained for audit but excluded from the manuscript because off-GT data mix multiple signal/noise sources |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |

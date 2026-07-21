@@ -62,10 +62,12 @@ descriptive screening reference, not a confidence interval. Exploratory Welch co
 only for replicated rows and are not corrected for multiple testing. `base32_l2` has the widest seed
 spread (SD = 0.041), so its mean is particularly uncertain.
 
-**Read-out (a): denoising still lowers detectability.** Every original-screen configuration sits
+**Read-out (a): denoising lowers the frozen 4-ms endpoint.** Every original-screen configuration sits
 below the raw d′ of 4.497, from **−0.088** (`arch`) to **−0.362** (`origdi`). All nine completed width/schedule/depth
 follow-ups also remain below raw; the closest is full base96 omission1 at **−0.083**. Thus every
-tested short-budget denoised output reduces the all-unit matched-filter mean on this benchmark. This
+tested short-budget denoised output reduces this particular all-unit matched-filter mean on this
+benchmark. The support-sensitivity analysis below shows that the aggregate direction is not invariant
+to filter duration and channel count. This
 direction is not unique to the pooled-variance d′ formula: for full96 omission0, the threshold-free
 mean AUC also falls from 0.9612 to 0.9536, with 8/10 units lower. Neither metric establishes the same
 effect on other recordings or under a complete spike sorter.
@@ -83,6 +85,31 @@ lower. The shared ordering is for
 comparison, not evidence that the single-seed follow-up belongs to the original seed-averaged screen.
 The two 3.30-M-update `support_all` runs are compared separately in the final duration section.
 ```
+
+## The aggregate d′ deficit depends on template support, but weak-unit losses do not
+
+The frozen endpoint uses a 4-ms window and a raw-template 50%-amplitude channel rule (2–12 channels,
+median 5). At fixed top-2 support, shortening the filter from 4 to 1 ms changes the cross-fitted mean
+denoised-minus-raw d′ from **−0.043 to +0.016** for Full96 omission0 and from **−0.036 to +0.090**
+for Full96 omission1. These are not reversals caused by making both domains unusable: at 1 ms/top-2,
+raw d′ is 4.543, versus 4.559 for omission0 and 4.633 for omission1. The original DI gap narrows but
+remains negative (**−0.322 to −0.170**; denoised d′ 4.372). The in-sample estimator gives the same
+qualitative result at 1 ms/top-2: gaps of −0.004, +0.054, and −0.242, respectively.
+
+Space matters too. At fixed 1 ms, widening the cross-fitted filter from two to four raw-ranked
+channels changes the Full96 gaps from +0.016 to −0.046 and from +0.090 to −0.013. Thus the frozen
+4-ms multichannel endpoint overstates the **aggregate** Full96 disadvantage relative to a compact
+linear filter. It does not establish that the larger support is intrinsically wrong for a sorter;
+whitening, temporal search, template competition, and clustering are absent here.
+
+Most importantly, the aggregate reversal is driven by stronger units. At the cross-fitted frozen
+endpoint, the four post hoc weak units have mean gaps of −0.061 (omission0) and −0.097 (omission1).
+At 1 ms/top-2 those weak-unit gaps become **more negative**, −0.167 and −0.291, while the other six
+units move to +0.139 and +0.344. Only 3/10 units improve in either Full96 model at that compact
+support. Original DI likewise remains negative overall, with its weak-unit gap worsening from −0.207
+to −0.587. Smaller support therefore explains why the all-unit Full96 mean need not be below raw; it
+does **not** explain away denoising's weak-unit attenuation or loss of separability. Full curves and
+unit bands are in [Appendix E](#appendix-template-support).
 
 ## The modern model package improves detection despite lower template SNR
 

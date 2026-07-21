@@ -16,6 +16,8 @@ labels are never used during self-supervised training; they enter only here.
 | `score_best.sh` | submits one d′ job and one waveform job for a checkpoint |
 | `export_qualitative_examples.py` | reproduces a committed endpoint, then exports compact raw/denoised traces, templates, and score distributions |
 | `export_qualitative_examples.sbatch` | GPU/S3 wrapper for that qualitative export |
+| `template_support_sweep.py` | in-sample and two-fold event-level cross-fitted temporal/channel support sensitivity |
+| `template_support_sweep.sbatch` | frozen GPU/S3 wrapper for one checkpoint's support sweep |
 
 The scoring/model checkout used for the width, schedule, and depth endpoints is
 inference commit `808d7fa`. Computation IDs, HPC job IDs, checkpoint hashes, and
@@ -152,15 +154,34 @@ that their raw/event/template domains match before writing Figures 1–2:
 python code/figures/qualitative_examples.py
 ```
 
+## Run the template-support sensitivity
+
+The post hoc support diagnostic rescans 0.5–4 ms and top 1–24 raw-ranked
+channels while preserving the frozen events and backgrounds. It writes detail,
+fold-averaged per-unit, and model-summary CSVs and aborts unless the 4-ms
+in-sample endpoint reproduces committed d′ and channel counts:
+
+```bash
+sbatch "$SCORING/template_support_sweep.sbatch" \
+   <checkpoint.pt> <reference_dprime.csv> \
+   "$BASE/support_sweep/<label>" "$INFERENCE" <label> "$SCORING"
+```
+
+The manuscript runs this for `ib_w96_om0_s0`, `ib_w96_om1_s0`, and
+`ib_origdi_s0`. Exact commands, jobs, hashes, named cells, and interpretation are
+in [`results/template_support/`](../../results/template_support/README.md).
+
 ## Tests
 
 ```bash
 python code/tests/test_detection_metrics.py
+python code/tests/test_template_support_sweep.py
 python -m py_compile \
    code/scoring/detection_metrics.py \
    code/scoring/run_hybrid_s3.py \
    code/scoring/template_diag.py \
-   code/scoring/export_qualitative_examples.py
+   code/scoring/export_qualitative_examples.py \
+   code/scoring/template_support_sweep.py
 bash -n code/scoring/*.sbatch code/scoring/score_best.sh
 ```
 

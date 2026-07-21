@@ -195,7 +195,29 @@ tables retain **all 87 scored endpoints**, including audit-only confounded runs.
 | Figure 14, NAF control | R5 DoubleConv seeds + matched R13 NAF58 | non-capacity-matched architectures |
 | Figure 15, corrected weighting | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
 | Figure 16, duration diagnostic | two 3.30-M-update `support_all` trajectories | short-budget endpoints |
+| Figure 19, template-support sensitivity | Full96 omission0/omission1 and seed-0 original DI; in-sample and two-fold event-level cross-fitted d′ | other models and sorter-level outcomes |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while
 also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets
 as if they were independent architecture choices.
+
+(appendix-template-support)=
+## E. Template-support sensitivity
+
+Figure 19 tests whether the raw-versus-denoised d′ result is caused by a template that is too large
+in time or space. It does not replace the frozen endpoint used to rank all models: it measures how
+that endpoint's interpretation changes across nested linear filters in three representative models.
+
+```{figure} figures/template_support_sweep.png
+:label: fig-template-support-sweep
+**The all-unit Full96 d′ deficit is support-sensitive, whereas weak-unit losses persist.** Columns
+show Full96 omission0, Full96 omission1, and seed-0 original DI. **Top**, denoised-minus-raw d′ versus
+template duration at fixed top-2 raw-ranked channels. **Middle**, the same gap versus raw-ranked
+channel count at fixed 1 ms. Grey circles are in-sample estimates; orange squares are deterministic
+two-fold event-level cross-fitted estimates. Bands span the 10th–90th percentile over the 10 fixed GT
+units; stars mark each estimator's frozen 4-ms/50%-amplitude endpoint. **Bottom**, cross-fitted gaps
+at the frozen endpoint and at 1 ms/top-2 for all 10 units, the four post hoc weak units, and the other
+six. Compact support makes the Full96 all-unit means neutral or positive but makes the weak-unit gaps
+more negative. Original DI remains below raw overall at every tested support. This post hoc linear
+filter sensitivity does not measure Kilosort precision, recall, or yield.
+```
