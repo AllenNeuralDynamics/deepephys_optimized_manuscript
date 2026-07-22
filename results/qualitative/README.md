@@ -33,6 +33,13 @@ Auxiliary file SHA-256 values are:
 | `origdi_s0_examples.csv` | `628e68404b7861fd15dbd6210a31430ae53ff922f648e35449166fba086a9d50` |
 | `origdi_s0_examples_metadata.json` | `eb050a3f9e55e6860b9b1a9e4ed7b4cd247de57480f94cd1238207e4121dcacf` |
 
+Figures 20–22 use a second collection of 10 checkpoint-specific triplets under
+[`learning_stages/`](learning_stages/README.md): five scheduled states from each
+Full96 omission route. The collection fixes the raw event, display contacts, and
+four GT units across every checkpoint. Its manifest records the export jobs,
+checkpoint hashes, and SHA-256 values for all 30 files, including the strict
+Pascal-node replacement for one rejected A100 replay.
+
 Regenerate the figures locally with:
 
 ```bash

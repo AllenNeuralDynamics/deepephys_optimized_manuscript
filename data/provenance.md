@@ -113,6 +113,35 @@ displays remove only each channel's median for visualization. Scoring uses the
 native calibrated windows without that display centering. CSV and metadata hashes
 are recorded in `results/qualitative/README.md`.
 
+## Learning-stage qualitative export (Figures 20–22)
+
+The learning-stage collection applies the same exporter to steps 135, 459, 1565,
+61903, and 210923 of both Full96 duration runs. The checkpoints correspond to
+34.6k, 117.5k, 400.6k, 15.85M, and 54.0M cumulative training windows. All stages
+reuse the qualitative benchmark's fixed event, contact set, and four detail units.
+
+| route | step | export job | node | checkpoint SHA-256 | NPZ SHA-256 |
+|---|---:|---:|---|---|---|
+| om0 | 135 | `23281634` | `n202` | `9a29206746aec7645dfb0c6feddf0fa84fc0ff9708e76ff25fa6e381b6f8a806` | `1dd424a0f465d34fda780671a12648069c658cad375352aefca8764fcf820402` |
+| om0 | 459 | `23281635` | `n203` | `84677244c7c7ce3b98b8411b994727946e6d945da8a4ba36694966c901b2c31d` | `e710d097db17dca254c53c59d863f70b7228b83860337c9e188e779085ac9f1d` |
+| om0 | 1565 | `23281636` | `n69` | `456f68d1930160e00a40580e6474e0d5f6510ca4e37dd4ab2228f3d9aab0ba87` | `dde13b73a136e44612644f8ce67991b60927a962d925e714ee389547f38d39fd` |
+| om0 | 61903 | `23281637` | `n202` | `1802490a9831d0cadf04d0775a20596c3b279a262b6308d6c383c748dd1757de` | `d9d4e0845215e77f70364c027b38d89725b6b29c53712d6f113686052334943a` |
+| om0 | 210923 | `23281638` | `n203` | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `ecf17a2f07bd4107297ca2973b32334bd93dca202fd78fa8be2fe93f088602fd` |
+| om1 | 135 | `23281639` | `n69` | `2aad7a8281a4f6e0e983481d34912c049c1a5c1a720d99599cbd8a8b81291657` | `1ce7a9f03bb7adc412b50dfc53266f429cdbb7d727eaecc8f670f9b93505f3d8` |
+| om1 | 459 | `23281688` | `n69` | `67e599839a38da86eb46f2e11a88869f88dafb992cd2ff3509004cda4e6ab232` | `098caa48cf337bb88b8d5152473f271314941b31255dceb87e0e1b62c19cf6f2` |
+| om1 | 1565 | `23281641` | `n69` | `35539113812b1787bf38798f52daba13584224c7634a1b4f4ad3ab6ab91e85dd` | `0d9ef59025148b49330512aae72eacf4fc20c7db5a33a666f5491e6bfcc685f0` |
+| om1 | 61903 | `23281642` | `n202` | `4d32a22a455a67c8ecb5c84b2ee5af1c450c8df5adc3622734d54760ceac214f` | `d83194d261cd9e964d81ad173c032896dd476c9cf3318112d3d555b5b8a030b6` |
+| om1 | 210923 | `23281643` | `n203` | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `56b7e76a9b51b4f5525c443a2cb6a3b869066389319f5f38568beb564a440628` |
+
+Nodes `n69`, `n202`, and `n203` use Pascal-generation TITAN X, GTX 1080 Ti, and
+TITAN Xp GPUs. A first om1 step-459 attempt (`23281640`) on A100 node `n04` was
+rejected by the unchanged `1e-6` replay gate (`snr_deep` error
+`0.0012331008911132812`); replacement `23281688` passed on `n69`. Every retained
+artifact passed the exporter gate, and the renderer then verified the shared
+raw/event/template domain and committed aggregate d′. Complete CSV/metadata
+hashes and final figure hashes are recorded in
+[`results/qualitative/learning_stages/README.md`](../results/qualitative/learning_stages/README.md).
+
 ## Template-support sensitivity
 
 The post hoc linear-filter support diagnostic used the same inference commit,

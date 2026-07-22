@@ -1,0 +1,23 @@
+{
+  "recording_url": "s3://aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3/recording.zarr",
+  "sorting_url": "s3://aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3/sorting.zarr",
+  "model_label": "ib_w96_om1_scale_s00061903",
+  "checkpoint_sha256": "4d32a22a455a67c8ecb5c84b2ee5af1c450c8df5adc3622734d54760ceac214f",
+  "inference_commit": "808d7fa",
+  "scoring_seed": 0,
+  "n_spikes_per_unit": 100,
+  "n_background_events": 200,
+  "detail_units": [
+    2143,
+    1143,
+    720,
+    1129
+  ],
+  "exemplar_unit": 1143,
+  "exemplar_event_frame": 107200608,
+  "exemplar_isolation_ms": 14.666666666666666,
+  "overview_ms": 30.0,
+  "local_ms": 4.0,
+  "voltage_unit": "uV",
+  "reference_scores": "/allen/aind/scratch/jeromel/ephys_denoising/traj_scores/ib_w96_om1_scale_s00061903_dprime.csv"
+}

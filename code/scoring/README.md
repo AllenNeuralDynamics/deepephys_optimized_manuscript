@@ -156,6 +156,39 @@ that their raw/event/template domains match before writing Figures 1–2:
 python code/figures/qualitative_examples.py
 ```
 
+Figures 20–22 use the same exporter at five scheduled states of each Full96
+duration run: steps 135, 459, 1565, 61903, and 210923 (34.6k, 117.5k, 400.6k,
+15.85M, and 54.0M cumulative windows). For each omission route, substitute the
+trajectory checkpoint and its matching committed score file:
+
+```bash
+OUTDIR=$BASE/qualitative_learning
+for route in 0 1; do
+   label="ib_w96_om${route}_scale"
+   for step in 00000135 00000459 00001565 00061903 00210923; do
+      stem="${label}_s${step}_examples"
+      sbatch "$SCORING/export_qualitative_examples.sbatch" \
+         "$SCORING/export_qualitative_examples.py" \
+         "$SCORING/detection_metrics.py" \
+         "$BASE/checkpoints_sweep/ib/$label/ckpt_step_${step}.pt" \
+         "$BASE/traj_scores/${label}_s${step}_dprime.csv" \
+         "$OUTDIR/${stem}.npz" \
+         "$OUTDIR/${stem}_metadata.json" \
+         "$INFERENCE" "${label}_s${step}"
+   done
+done
+```
+
+After copying the 10 NPZ/CSV/metadata triplets to
+`results/qualitative/learning_stages/`, regeneration is local:
+
+```bash
+python code/figures/learning_evolution.py
+```
+
+The renderer requires one shared event/raw/template domain and reproduces every
+selected checkpoint's committed aggregate d′ before writing the figures.
+
 ## Run the template-support sensitivity
 
 The post hoc support diagnostic rescans 0.5–4 ms and top 1–24 raw-ranked

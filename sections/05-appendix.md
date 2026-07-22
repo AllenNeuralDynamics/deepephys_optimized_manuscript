@@ -200,6 +200,7 @@ tables retain **all 89 scored endpoints**, including audit-only confounded runs.
 | Figure 15, corrected weighting | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
 | Figure 16, duration diagnostic | two 54.0-M-window Full96 trajectories | legacy `support_all` duration pair and short-budget endpoints |
 | Figure 19, template-support sensitivity | Full96 omission0/omission1 and seed-0 original DI; in-sample and two-fold event-level cross-fitted d′ | other models and sorter-level outcomes |
+| Figures 20–22, learning-stage voltage and unit profiles | five repeated checkpoints from each 54.0-M-window Full96 trajectory; one fixed event and four fixed GT units | independent seeds, other events/units, and sorter-level outcomes |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while
 also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets
@@ -224,4 +225,53 @@ at the frozen endpoint and at 1 ms/top-2 for all 10 units, the four post hoc wea
 six. Compact support makes the Full96 all-unit means neutral or positive but makes the weak-unit gaps
 more negative. Original DI remains below raw overall at every tested support. This post hoc linear
 filter sensitivity does not measure Kilosort precision, recall, or yield.
+```
+
+(appendix-learning-evolution)=
+## F. Qualitative evolution during learning
+
+Figures 20–22 revisit one fixed event and four fixed GT units at five scheduled
+checkpoints from each Full96 duration run. Every stage uses the same raw voltage,
+event, contacts, unit templates, and physical heatmap limits. The colored trace
+bands are normalized by the raw peak-to-peak voltage only to make shape and
+relative amplitude legible; each row reports its unnormalized stage/raw
+peak-to-peak ratio. These are repeated observations from one training seed per
+route, not independent replicates.
+
+```{figure} figures/learning_voltage_evolution.png
+:label: fig-learning-voltage-evolution
+**The same-event voltage estimate forms rapidly, then changes more subtly at late
+exposure.** Columns show raw voltage and five checkpoints spanning 34.6k to 54.0M
+cumulative training windows; rows compare omission0 and omission1. All-probe and
+local-contact heatmaps retain fixed physical voltage scales within their display
+domains. The bottom band in each route overlays every checkpoint's peak-channel
+trace on the same raw trace (gray), normalized by raw peak-to-peak voltage; labels
+give the corresponding unnormalized amplitude ratio. Both routes are nearly
+collapsed at 34.6k windows, acquire a recognizable event by 117.5k, and are close
+to their mature same-event waveform by 400.6k. Later exposure mainly refines
+amplitude and background structure rather than introducing a new event shape.
+```
+
+```{figure} figures/learning_unit_profile_evolution_om0.png
+:label: fig-learning-units-om0
+**Omission0 learns strong-unit templates first and preserves unit-dependent
+attenuation.** Each row follows one fixed GT unit from raw through the five
+checkpoints. Heatmaps share the raw unit's physical voltage range across columns;
+the annotations report per-unit d′ and peak-channel amplitude ratio. Separated
+trace bands overlay each stage on raw (gray), making the rapid transition between
+34.6k and 400.6k windows visible without independently rescaling checkpoints.
+Strong unit 2143 forms earliest and approaches raw amplitude most closely, while
+weaker units 720 and 1129 remain more attenuated at the endpoint.
+```
+
+```{figure} figures/learning_unit_profile_evolution_om1.png
+:label: fig-learning-units-om1
+**Omission1 develops the same unit hierarchy more slowly and continues evolving
+later.** Layout, units, domains, and scales match Figure 21 exactly. The route has
+smaller intermediate amplitudes than omission0, especially at 117.5k and 400.6k
+windows, but continues to improve through the two late checkpoints. The endpoint
+therefore combines the duration trajectory's higher aggregate d′ with lower mean
+amplitude preservation than omission0. This selected-event view illustrates that
+trajectory; it does not establish sorter-level recovery or seed-level
+reproducibility.
 ```
