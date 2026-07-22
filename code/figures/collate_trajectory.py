@@ -2,7 +2,7 @@
 """Collate a trajectory run's per-checkpoint scores into a metric-vs-step table.
 
 Reads ``results/scores/<label>/<label>_<tag>_{dprime,diag}.csv`` where ``<tag>`` is
-``best`` (validation-loss-selected checkpoint) or ``s<step>`` (the 12 log-spaced
+``best`` (validation-loss-selected checkpoint) or ``s<step>`` (the log-spaced
 checkpoints), averages each metric over the GT units, and writes
 ``results/tables/<label>_trajectory.{csv,md}`` sorted by training step.
 

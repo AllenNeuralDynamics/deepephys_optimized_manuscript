@@ -1,5 +1,6 @@
 experiment_family,budget_group,runs,configurations,dprime_min,dprime_max
-duration_diagnostic,long_3.30M_updates,2,2,4.274495227736301,4.362950698333062
+duration_diagnostic,duration_54.0M_windows,2,2,4.429837961488812,4.503711105778454
+duration_diagnostic,long_211.5M_windows,2,2,4.274495227736301,4.362950698333062
 architecture_screen,short_~18M_windows,39,21,4.12453198446805,4.409408695162808
 corrected_weighting,short_~18M_windows,7,7,4.104648847788395,4.372544240106761
 gradient_diagnostic,short_~18M_windows,1,1,4.3829175397207205,4.3829175397207205

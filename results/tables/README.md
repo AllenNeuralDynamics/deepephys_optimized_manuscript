@@ -7,7 +7,7 @@ rerun the owning script.
 
 | file | contents | used by |
 |---|---|---|
-| `master_table.{csv,md}` | all completed endpoints: family, budget, config, loss, seed, and mean-over-units metrics (currently 87 runs) | Results / complete inventory |
+| `master_table.{csv,md}` | all completed endpoints: family, budget, config, loss, seed, and mean-over-units metrics (currently 89 runs) | Results / complete inventory |
 | `model_family_summary.{csv,md}` | run/config counts and d′ range by experiment family and budget | Appendix A / comparison boundaries |
 | `table_coverage.{csv,md}` | every ledger row, resolved endpoint layout, inclusion status, and exclusion reason | coverage audit |
 | `perunit_amp.{csv,md}` | `amp_ratio`, units (rows, by baseline d′) × all completed endpoint models (cols) | Appendix B (T4) |

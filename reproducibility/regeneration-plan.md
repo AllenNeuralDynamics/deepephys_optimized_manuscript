@@ -234,7 +234,7 @@ The headline "who gets smoothed / who gets harder to detect" view (old report Ap
 - **Amplitude matrix** (App B eq.) — `amp_ratio` per unit × model + heatmap (green ≈1.0 preserved / red smoothed). Shows the vertical quality gradient (strong units ~0.97, weak units 0.66–0.83).
 - **Detection matrix** (App C eq.) — `dprime_deep` per unit × model (absolute) **and** a **Δd′ = dprime_deep − dprime_raw** heatmap (red = DI hurts, blue = DI helps). Exposes per-unit collapses (old: `arch` erased unit 337, 3.15→0.16).
 - **No extra runs:** every diagnostic run already stores per-unit values (§5.4); these matrices are
-	pure collation across all completed endpoints (87 in the current revision).
+	pure collation across all completed endpoints (89 in the current revision).
 - Because every model is a column, an intervention's effect is read **across the whole unit population at once**, not just at the 10-unit mean.
 
 ### 5.4 Per-run outputs (uniform)
@@ -275,8 +275,8 @@ contains 19 figure directives; family-specific plots preserve matched bodies, ob
 - **T4 — Per-unit amp matrix** (App B) and **T5 — Per-unit d′ / Δd′ matrix** (App C): 10 units × all models, mean row.
 - **T6 — Width/schedule/depth follow-up**: ten scored matched-R5 endpoints, paired-unit effects,
 	and per-unit amplitude/Δd′ tables.
-- **T7 — Coverage audit**: all 88 ledger rows mapped to broad or family-specific comparison
-	surfaces, with 87 scored endpoints and the intentional R7 exclusion stated.
+- **T7 — Coverage audit**: all 90 ledger rows mapped to broad or family-specific comparison
+	surfaces, with 89 scored endpoints and the intentional R7 exclusion stated.
 
 ### 6.2 Figure collection (one+ per quantification family)
 | manuscript figure | plot | comparison scope |
@@ -295,7 +295,7 @@ contains 19 figure directives; family-specific plots preserve matched bodies, ob
 | 13 | integration and sampling controls | R1 seed context + R9–R12 |
 | 14 | capacity-matched temporal block | R5 seeds + R13 NAF58 |
 | 15 | corrected weighting | unweighted seed context + seven corrected arms |
-| 16 | long-duration omission trajectories | two 3.30-M-update `support_all` runs |
+| 16 | selected-candidate duration trajectories | two 54.0-M-window Full96 runs |
 | 17–18 | per-unit amplitude and Δd′ heatmaps | same 31 architecture-comparison entries |
 | 19 | temporal/channel matched-filter support sensitivity and subgroup aggregation | Full96 omission0/omission1 + seed-0 original DI; in-sample and two-fold cross-fitted |
 

@@ -121,8 +121,9 @@ myst build --html   # static site in _build/
 ## 7. Active and staged experiments
 
 Current computation IDs and states are tracked in `results/runs.csv`. All training and scoring jobs
-underlying the 87 current endpoints are complete. Two matched √2 schedule runs were added after the
+underlying the 89 current endpoints are complete. Two matched √2 schedule runs were added after the
 coverage audit and have completed training, checkpoint validation, and frozen scoring. The
 matched depth-2 base96 omission0/omission1 controls subsequently completed the same pipeline. The
-regenerated coverage table therefore shows 87 scored endpoints and the intentionally aborted R7
+selected Full96 omission pair then completed 54.0 M-window trajectories. The regenerated coverage
+table therefore shows 89 scored endpoints and the intentionally aborted R7
 PCGrad row as the sole exclusion.

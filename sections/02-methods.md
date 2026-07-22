@@ -86,7 +86,7 @@ events, so absolute separation is in-sample optimistic even though model compari
 
 ## Template-support sensitivity
 
-The primary endpoint intentionally freezes one filter definition across all 87 scored models, but a
+The primary endpoint intentionally freezes one filter definition across all 89 scored models, but a
 linear matched-filter result can depend on how much time and space enter the template. We therefore
 ran a post hoc support sensitivity on Full96 omission0, Full96 omission1, and seed-0 original DI.
 Each run reused the endpoint's 100 GT events, 200 background centers, seed 0, and raw/denoised
@@ -123,7 +123,7 @@ deployment, not label leakage.
 
 ## Experiment families
 
-The 87 scored endpoints belong to ten related but non-equivalent ledger families:
+The 89 scored endpoints belong to ten related but non-equivalent ledger families:
 
 | family | model body | training budget | replication | question |
 |---|---|---|---|---|
@@ -136,11 +136,12 @@ The 87 scored endpoints belong to ten related but non-equivalent ledger families
 | NAF control | R13 NAF58 versus R5 DoubleConv64 | the same ~18 M windows | one matched R13 seed; three R5 seeds for context | does a capacity-matched modern temporal block improve detection or runtime? |
 | legacy weighting audit | two omission0 bodies with the original weighting path | ~18 M windows | 10 single-seed endpoints | retained for provenance only; the requested L2 objective was silently replaced by Charbonnier in the weighted path |
 | corrected weighting screen | `arch_l2_om0`, L2 objective | ~18 M windows | one seed per arm; three unweighted seeds provide context | can center-excluded spike weighting improve amplitude or d′ without waveform distortion? |
-| duration diagnostic | `support_all` + L2, om0 vs om1 | 3.30 M updates (~11.8× the short screen) | one seed per arm | do amplitude and d′ stabilize at the same rate? |
+| duration diagnostics | legacy `support_all` + L2 pair; selected Full96 `96→192→384→768` Charbonnier pair displayed in Figure 16 | 211.5 M windows for the legacy pair; 54.0 M windows for Full96 (210,924 updates at batch 256) | one seed per route and body; 11 scheduled Full96 states | how does the selected capacity candidate evolve beyond the screen budget? |
 
-The duration diagnostic is not a long-budget validation of the architecture or recipe winner; it
-uses a different body. Likewise, the recipe screen does not establish an architecture ordering. The
-width/schedule/depth study is an exploratory, single-seed follow-up and is reported separately from the
+The duration diagnostic follows the selected width candidate but is a post-screen, single-seed
+trajectory comparison rather than independent validation of that selection. Likewise, the recipe
+screen does not establish an architecture ordering. The width/schedule/depth study is an exploratory,
+single-seed follow-up and is reported separately from the
 original 21-configuration architecture screen. The √2 schedule had synthetic compute measurements
 but no trained endpoint in the initial follow-up; its omission0 and omission1 runs were subsequently
 trained and scored under the same frozen endpoint protocol. A parameter-matched depth test was then
@@ -178,7 +179,7 @@ channel's own center sample, preserving the blind-spot objective. These are sing
 screens; the three unweighted seeds provide descriptive variation, not an inferential error bar.
 
 **Legacy weighting audit.** Ten earlier weighted endpoints are fully scored and retained in the
-87-endpoint master and per-unit tables. Their weighting implementation bypassed the requested L2
+89-endpoint master and per-unit tables. Their weighting implementation bypassed the requested L2
 path and executed a Charbonnier-weighted objective, so they are not matched-L2 controls. They are
 classified separately as `legacy_weighting_screen` and are not mixed into the corrected weighting
 figure or causal text.

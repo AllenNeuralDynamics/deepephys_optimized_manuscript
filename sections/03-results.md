@@ -1,16 +1,16 @@
 # Results
 
 :::{note} Current state
-All training and endpoint scoring underlying the 87 completed analyses below are complete. The two
+All training and endpoint scoring underlying the 89 completed analyses below are complete. The two
 matched √2 channel-schedule runs added after the coverage audit are now checkpoint-validated and
 scored. The matched depth-2 base96 controls added afterward are also checkpoint-validated and
 scored. The completed analyses include the 21-configuration architecture screen, the nine-run matched R5
 width/channel-schedule/depth follow-up, six-recipe screen, original-network reference, R0/R1/R5 recipe
 replications, R8 gradient diagnostics, four integration and sampling controls, the capacity-matched
 NAF control, ten confounded legacy weighting audit endpoints, seven corrected matched-L2 weighting
-arms, and two long-duration trajectories. All
+arms, two legacy duration trajectories, and two Full96 duration trajectories. All
 results use the same AP-band `recording1_3` hybrid benchmark; the raw reference is **d′ = 4.497**.
-`results/tables/master_table.csv` contains all 87 completed endpoint runs with experiment-family and
+`results/tables/master_table.csv` contains all 89 completed endpoint runs with experiment-family and
 budget labels; `table_coverage.csv` records the intentionally aborted R7 run as the sole row without
 an endpoint. The global table is an inventory rather than one causal
 ranking. Matched architecture, recipe, integration, NAF, and weighting conclusions use their
@@ -83,7 +83,8 @@ means; hatching marks omission1. Full base96 has the highest observed all-unit m
 intermediate, growth1.5 and depth2 are near their matched base64 R5 reference, and √2 omission0 is
 lower. The shared ordering is for
 comparison, not evidence that the single-seed follow-up belongs to the original seed-averaged screen.
-The two 3.30-M-update `support_all` runs are compared separately in the final duration section.
+The selected Full96 omission routes are compared over a separate 54.0-M-window trajectory in the
+final duration section.
 ```
 
 ## The aggregate d′ deficit depends on template support, but weak-unit losses do not
@@ -517,7 +518,7 @@ The corrected matched-L2 screen compares seven center-excluded weighting rules w
 raises endpoint d′; all stronger rules reduce it.
 
 Ten earlier weighted endpoints are intentionally absent from this matched comparison. They remain
-in the 87-endpoint master and per-unit inventories, but their weighting implementation silently used
+in the 89-endpoint master and per-unit inventories, but their weighting implementation silently used
 Charbonnier despite requesting L2. Mixing them into the corrected figure would confound weighting
 with the executed objective; `table_coverage` identifies them as the separate
 `legacy_weighting_screen` family.
@@ -547,33 +548,33 @@ unweighted three-seed range shaded. **B**, modest amplitude increases do not pre
 that the λ = 3 lead is distributed but small, whereas high weights produce large losses.
 ```
 
-## Do the two omission trajectories stabilize with longer training?
+## How do the selected Full96 omission trajectories evolve with longer training?
 
-Two single-seed `support_all` + L2 runs extend the omission comparison to 3.30 M updates, ~11.8× the
-short-screen update budget, with 12 log-spaced checkpoints. They are duration diagnostics for this
-body, not long-budget validations of `base64`, `arch`, or the recipe winner.
+Two single-seed Full96 runs repeat the matched omission comparison under a 54.0 M-window training
+horizon (210,924 updates at batch 256), with 11 log-spaced scheduled states. Both use the
+selected `96→192→384→768` body, Charbonnier objective, and R5 recipe; only the omission route differs.
+This is a post-selection trajectory diagnostic, not independent validation of the width choice. Its
+cosine schedule spans 12 chunks, so its intermediate states are not spliced to the earlier 4-chunk
+runs, whose schedule completed at ~18.0 M windows.
 
-- **Empirical-template amplitude stabilizes early in both trajectories** — changing by −0.016 (om0)
-  and +0.027 (om1) across the final 2.4 decades of updates.
-- **All-unit d′ remains duration-sensitive.** From 14 k to 3.3 M updates, d′ rises by +0.11 for om0
-  and +0.30 for om1. The last om1 interval (844 k → 3.3 M) adds another +0.11, so om1 is not visibly
-  flat at the final checkpoint.
+- **Both d′ trajectories remain duration-sensitive.** From 15.85 M to 54.0 M windows, d′ rises by
+  +0.107 for om0 and +0.205 for om1. Neither curve is visibly flat at the final state.
+- **The observed routing order reverses in the last sampled interval.** At 15.85 M windows om0 leads
+  by 0.022 d′; at 54.0 M, om1 leads by 0.075 (4.504 versus 4.429). The crossover is interval-censored
+  because no state was scored between those exposures.
+- **Detection and amplitude still disagree.** At 54.0 M windows om1 is 0.007 d′ above raw while om0
+  remains 0.068 below raw, but om1 retains the lower amplitude ratio (0.920 versus 0.949).
 
-These trajectories demonstrate that a reconstruction-loss endpoint need not imply a stable detection
-metric and that fixed-budget screens can mix optimization speed with endpoint quality. They do not
-show that every screened architecture is undertrained or predict how the capacity and recipe winners
-would rank after 3.3 M updates.
-
-At the final sampled checkpoint the two all-unit means happen to be equal (4.361), while amplitude
-remains separated (0.931 om0 versus 0.870 om1). Because om1 is still rising, equality at that one point
-does not establish equal asymptotes or that omission affects only convergence speed. The om1
-validation-best checkpoint (d′ 4.275) is also below its final checkpoint (4.361), showing directly
-that validation-loss selection can miss the best observed detection checkpoint on a long run.
+The validation-best model for each route occurs at the final update and gives essentially the same
+values as the final scheduled state. These trajectories therefore show that the within-run routing
+order is exposure-sensitive and that omission routing changes both convergence and the
+detection–amplitude tradeoff. They do not establish either route's asymptote, and d′ remains the
+frozen 4-ms all-unit surrogate rather than sorter-level performance.
 
 ```{figure} figures/f8_trajectory.png
 :label: fig-trajectory
-**Long-duration `support_all` omission diagnostic.** d′ (left) and empirical-template amplitude
-(right) versus updates for one om0 and one om1 run; dotted line is raw d′. Amplitude stabilizes much
-earlier than d′, and om1 is still rising at 3.3 M. Transfer of this behavior to the capacity and
-recipe candidates is untested.
+**Full96 duration diagnostic.** Frozen 4-ms all-unit d′ (left) and empirical-template amplitude
+(right) versus cumulative training windows for matched omission0 and omission1 runs. The dotted line
+is raw d′. Both routes improve in the final sampled interval; omission1 finishes higher in d′ but
+lower in amplitude. Curves show repeated states from one seed per route, not independent replicates.
 ```

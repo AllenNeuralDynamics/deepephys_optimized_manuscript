@@ -38,8 +38,12 @@ probe-axis blind-spot branch). Every override is defined in the
   4.282, `fuse512` 4.244 (wider fusion); `tmult8` 4.257 (deeper temporal hand-off); `no_norm` 4.284;
   `ho` 4.272 (1-frame blind spot, omission on). Only the unreplicated `support_sd` and `support_all`
   observations exceed the upper edge of the base32 ±2-seed-SD reference; amp is ~0.86 throughout.
-- **om0_scale / om1_scale** — the two long-duration runs (`support_all` wiring, L2, ~3.3 M updates)
-  with `omission=0` / `omission=1`. Final-step d′ 4.361 / 4.361; amp 0.931 / 0.870.
+- **om0_scale / om1_scale** — the two long-duration runs (`support_all` wiring, L2, ~211.5 M training windows)
+  with `omission=0` / `omission=1`. Final-step d′ 4.361 / 4.361; amp 0.931 / 0.870. These remain in
+  the evidence inventory but are no longer the Figure 16 comparison.
+- **w96_om0_scale / w96_om1_scale** — the selected Full96 body under the matched R5 recipe and
+  Charbonnier objective, trained under a 54.0 M-window horizon with 11 scheduled states. This is the
+  Figure 16 duration comparison; both routes use batch 256 and seed 0.
 - **R0–R6 recipe family** — eight single-seed recipe-screen endpoints on `base64_om0`; R0, R1,
   and R5 each have two additional matched seeds. These change optimization, not architecture.
 - **R8–R12 diagnostics and integration controls** — R8 records same-parameter gradient diagnostics;
@@ -52,7 +56,7 @@ probe-axis blind-spot branch). Every override is defined in the
   scored but audit-only because their executed objective was Charbonnier rather than requested L2.
 
 **Complete endpoint coverage.** `results/tables/master_table.csv` and its Markdown twin contain all
-87 completed run endpoints with all detection and waveform metrics. The associated
+89 completed run endpoints with all detection and waveform metrics. The associated
 `model_family_summary` and `table_coverage` tables make comparison boundaries and exclusions
 explicit:
 
@@ -67,8 +71,8 @@ explicit:
 | integration controls | ~18 M windows | 4 |
 | NAF control | ~18 M windows | 1 |
 | corrected weighting | ~18 M windows | 7 |
-| duration diagnostic | 3.30 M updates | 2 |
-| **total completed endpoints** |  | **87** |
+| duration diagnostics | 54.0 M and 211.5 M training windows | 4 |
+| **total completed endpoints** |  | **89** |
 
 The global d′ sort is an inventory, not an omnibus method ranking. Comparisons should stay within
 the relevant family, body, budget, and seed context; the dedicated recipe, integration, NAF, and
@@ -81,7 +85,7 @@ the sole row without an endpoint in `table_coverage`.
 representative set of the **original short-budget screen**; seeds averaged. The matched-R5 follow-up
 is reported immediately below. The two long `support_all` runs are excluded here (different training
 budget — see the duration section);
-the full 10-unit × 87-endpoint matrix is in `results/tables/perunit_amp.csv`.
+the full 10-unit × 89-endpoint matrix is in `results/tables/perunit_amp.csv`.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |
 |---|---|---|---|---|---|---|---|---|---|
@@ -127,7 +131,7 @@ omission variants, show that architecture also matters.
 
 Change in detectability from denoising, Δd′ = d′_deep − d′_raw, per unit × representative
 original-screen model (seeds averaged; the matched-R5 follow-up is reported immediately below; full
-10-unit × 87-endpoint matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made
+10-unit × 89-endpoint matrix in `results/tables/perunit_dprime_delta.csv`). Negative = denoising made
 that unit *harder* to detect.
 
 | unit | base d′ | base32 | omission0 | base32_l2 | omission0_l2 | base64 | arch | base64_om0 | arch_om0 |
@@ -179,11 +183,11 @@ retains the least-negative weak-unit columns.
 The manuscript uses two complementary comparison levels. Broad architecture figures compare the 21
 seed-averaged original configurations plus the matched R5 reference and nine scored follow-ups (**31
 comparison entries**). Family-specific figures preserve matched bodies, budgets, and objectives. The complete
-tables retain **all 87 scored endpoints**, including audit-only confounded runs.
+tables retain **all 89 scored endpoints**, including audit-only confounded runs.
 
 | manuscript surface | models included | models intentionally outside that surface |
 |---|---|---|
-| master, family, coverage, and full per-unit tables | all 87 scored endpoints | R7 PCGrad was aborted |
+| master, family, coverage, and full per-unit tables | all 89 scored endpoints | R7 PCGrad was aborted |
 | Figures 1–2, qualitative benchmark and template diagnostics | raw + matched Full96 omission routes + seed-0 original DI; four displayed GT units | all other models; post-screen illustration is not held-out model evidence |
 | Figure 3, d′ score distributions | Full96 omission0; complete scores for one strong and one weak unit | other endpoints; this panel explains the metric rather than comparing models |
 | Figure 4, architecture definition/evolution | original DI, base32, R5 base64, one depth-2 and four depth-3 base96 designs, R13 NAF | wiring/loss variants that do not introduce a new depicted topology |
@@ -194,7 +198,7 @@ tables retain **all 87 scored endpoints**, including audit-only confounded runs.
 | Figure 13, integration controls | R1 seed context + R9–R12 | unrelated architecture, weighting, and duration families |
 | Figure 14, NAF control | R5 DoubleConv seeds + matched R13 NAF58 | non-capacity-matched architectures |
 | Figure 15, corrected weighting | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
-| Figure 16, duration diagnostic | two 3.30-M-update `support_all` trajectories | short-budget endpoints |
+| Figure 16, duration diagnostic | two 54.0-M-window Full96 trajectories | legacy `support_all` duration pair and short-budget endpoints |
 | Figure 19, template-support sensitivity | Full96 omission0/omission1 and seed-0 original DI; in-sample and two-fold event-level cross-fitted d′ | other models and sorter-level outcomes |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while

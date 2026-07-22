@@ -71,7 +71,7 @@ def endpoint_paths(label: str) -> tuple[str, Path, Path] | None:
 def experiment_family(run: pd.Series) -> str:
     tier = str(run["tier"])
     config = str(run["config"])
-    if tier == "scale":
+    if tier in {"scale", "full96_duration"}:
         return "duration_diagnostic"
     if tier in {"opt4_width", "opt5_schedule", "opt6_depth"}:
         return "width_schedule_followup"
@@ -95,7 +95,9 @@ def experiment_family(run: pd.Series) -> str:
 
 def budget_group(run: pd.Series) -> str:
     if str(run["tier"]) == "scale":
-        return "long_3.30M_updates"
+        return "long_211.5M_windows"
+    if str(run["tier"]) == "full96_duration":
+        return "duration_54.0M_windows"
     if str(run["train_chunks"]) == "4":
         return "short_~18M_windows"
     return f"train_chunks_{run['train_chunks']}"

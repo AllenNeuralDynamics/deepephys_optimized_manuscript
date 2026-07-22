@@ -14,6 +14,8 @@ labels are never used during self-supervised training; they enter only here.
 | `run_ckpt.sbatch` | frozen GPU job for `run_hybrid_s3.py` |
 | `template_diag.sbatch` | frozen GPU job for `template_diag.py` |
 | `score_best.sh` | submits one d′ job and one waveform job for a checkpoint |
+| `score_trajectory.sh` | submits paired d′ and waveform jobs for every saved state in a trajectory |
+| `validate_trajectory_outputs.py` | verifies trajectory state counts, required columns, and 10 GT-unit rows before collation |
 | `export_qualitative_examples.py` | reproduces a committed endpoint, then exports compact raw/denoised traces, templates, and score distributions |
 | `export_qualitative_examples.sbatch` | GPU/S3 wrapper for that qualitative export |
 | `template_support_sweep.py` | in-sample and two-fold event-level cross-fitted temporal/channel support sensitivity |
@@ -180,6 +182,7 @@ python -m py_compile \
    code/scoring/detection_metrics.py \
    code/scoring/run_hybrid_s3.py \
    code/scoring/template_diag.py \
+   code/scoring/validate_trajectory_outputs.py \
    code/scoring/export_qualitative_examples.py \
    code/scoring/template_support_sweep.py
 bash -n code/scoring/*.sbatch code/scoring/score_best.sh

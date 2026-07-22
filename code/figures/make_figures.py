@@ -12,7 +12,7 @@ Figures produced (data permitting):
   F5  amplitude vs unit quality (the shrinkage law)
   F6  per-unit amplitude heatmap (units × models)          [colored table]
   F7  per-unit Δd' heatmap (units × models)                [colored table]
-  F8  d' & amplitude vs training updates (om0 vs om1)
+    F8  d' & amplitude vs cumulative training windows (om0 vs om1)
 """
 from __future__ import annotations
 
@@ -69,8 +69,8 @@ CFG = [
     # published reference — the ORIGINAL DeepInterpolation ephys architecture (Lecoq 2021),
     # temporal-only, no spatial blind spot; highlighted distinctly in F1.
     ("origdi", "ib_origdi_s*", "orig"),
-    # NOTE: the 3.30-M-update support_all runs (om0_scale / om1_scale) are deliberately
-    # not ranked against the short-budget models here; they appear only in F8.
+    # NOTE: duration trajectories are deliberately not ranked against short-budget models.
+    # The Full96 omission pair appears only in F8 once its checkpoint scores are available.
 ]
 
 
@@ -493,28 +493,37 @@ heatmap("dprime", "dprime_deep", True, "f7_perunit_dprime_delta_heatmap.png", "R
     center=0.0)
 
 # ---- F8: trajectories ----
-def traj(label):
+def traj(label, effective_batch):
     f = T / f"{label}_trajectory.csv"
     if not f.exists():
         return None
     rows = [r for r in csv.DictReader(open(f)) if r["tag"].startswith("s") and r["step"]]
     rows.sort(key=lambda r: float(r["step"]))
-    return ([float(r["step"]) for r in rows],
+    return ([float(r.get("samples_seen") or float(r["step"]) * effective_batch) for r in rows],
             [float(r["dprime_deep"]) for r in rows],
             [float(r["amp_ratio"]) for r in rows])
 
 
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
-for lab, name, c in [("ib_om0_scale", "om0 (t±1 in temporal branch)", "#4c72b0"),
-                     ("ib_om1_scale", "om1 (t±1 in spatial branch)", "#d55e00")]:
-    tr = traj(lab)
-    if tr:
-        s, d, amp = tr
-        a1.semilogx(s, d, "-o", c=c, label=name, ms=3)
-        a2.semilogx(s, amp, "-o", c=c, label=name, ms=3)
-a1.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.2f})")
-a1.set_xlabel("training updates"); a1.set_ylabel("d′"); a1.set_title("Detection vs training"); a1.legend(fontsize=8)
-a2.set_xlabel("training updates"); a2.set_ylabel("amp_ratio"); a2.set_title("Amplitude vs training"); a2.legend(fontsize=8)
-fig.tight_layout(); fig.savefig(FIG / "f8_trajectory.png", dpi=150); plt.close(fig)
+trajectory_specs = [
+    ("ib_w96_om0_scale", "Full96 om0 (t±1 temporal)", "#4c72b0", 256),
+    ("ib_w96_om1_scale", "Full96 om1 (t±1 spatial)", "#d55e00", 256),
+]
+trajectories = [
+    (name, c, tr)
+    for lab, name, c, effective_batch in trajectory_specs
+    if (tr := traj(lab, effective_batch)) is not None
+]
+
+if len(trajectories) == len(trajectory_specs):
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
+    for name, c, (windows, d, amp) in trajectories:
+        a1.semilogx(windows, d, "-o", c=c, label=name, ms=3)
+        a2.semilogx(windows, amp, "-o", c=c, label=name, ms=3)
+    a1.axhline(RAW, ls=":", c="k", label=f"raw ({RAW:.2f})")
+    a1.set_xlabel("cumulative training windows"); a1.set_ylabel("d′"); a1.set_title("Detection vs training"); a1.legend(fontsize=8)
+    a2.set_xlabel("cumulative training windows"); a2.set_ylabel("amp_ratio"); a2.set_title("Amplitude vs training"); a2.legend(fontsize=8)
+    fig.tight_layout(); fig.savefig(FIG / "f8_trajectory.png", dpi=150); plt.close(fig)
+else:
+    print("skipped f8_trajectory.png: both Full96 trajectory tables are required")
 
 print("wrote:", sorted(p.name for p in FIG.glob("f*.png")))

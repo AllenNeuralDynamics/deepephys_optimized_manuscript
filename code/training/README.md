@@ -12,7 +12,10 @@ Training is launched in the `aind-ephys-deepinterpolation` capsule
 Shared, in-band for every run:
 `train_recording_path = hybrid_np1/…ProbeC-AP_recording1_3/recording.zarr`,
 `slice_start_s=60, slice_dur_s=150`, `val_slice 0–60`, `checkpoint_steps=12`.
-Short runs use `train_chunks=4` (~0.28 M updates); SUPPORT-scale uses `train_chunks=47` (~3.3 M).
+Short runs use `train_chunks=4` (~18.0 M training windows); SUPPORT-scale uses `train_chunks=47`
+(~211.5 M training windows). Optimizer-update counts depend on the effective batch size.
+The Figure 16 Full96 duration pair uses `train_chunks=12`, batch 256, and 11 saved checkpoints
+(~54.0 M training windows, ~211 k optimizer updates).
 
 ## Overrides
 

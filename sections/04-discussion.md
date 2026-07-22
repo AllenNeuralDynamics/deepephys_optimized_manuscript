@@ -110,11 +110,11 @@ large center-excluded neighbours can optimize a waveform statistic while harming
 Soft λ = 3 is worth replication as a lead; the present screen does not establish it as an
 improvement, and the stronger weighting rules should not be advanced.
 
-The duration evidence is narrower still: it consists of one om0 and one om1 `support_all` + L2
-trajectory. In those runs amplitude stabilizes early while d′ remains duration-sensitive, and om1 is
-still rising at 3.3 M updates. This motivates long-budget validation, but does not show that `arch`,
-`base64`, or R5 has the same trajectory. Equality of the two d′ means at their last checkpoint also
-does not establish equal asymptotes.
+The duration evidence remains single-seed: one omission0 and one omission1 trajectory for the
+selected Full96 body. At 54.0 M windows omission1 leads by 0.075 d′ but retains a 0.029 lower
+amplitude ratio, and both d′ curves are still rising in the final sampled interval. The observed
+ordering reversal therefore argues against treating the ~18 M-window screen as a converged ranking,
+but it does not establish either asymptote or sorter-level superiority.
 
 ## Limitations
 

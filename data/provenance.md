@@ -28,7 +28,7 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
   `aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3`
 - **Ground truth:** 10 injected hybrid units; extraction `seed=0`.
 - Training slice `slice_start_s=60`, `slice_dur_s=150`; validation `0–60 s`; default
-  `checkpoint_steps=12` (`24` for the width/schedule/depth follow-up).
+  `checkpoint_steps=12` (`24` for the width/schedule/depth follow-up; `11` for the Full96 duration pair).
 
 ## HPC (AIND scratch)
 
@@ -37,17 +37,32 @@ Parameters are passed as `key=val` and appear in the capsule as env var `DI_<KEY
 | Base | `/allen/aind/scratch/jeromel/ephys_denoising` |
 | Conda env | `/allen/aind/scratch/jeromel/ephys_denoising/env` |
 | Conda init | `/allen/aind/scratch/jeromel/astro_voltage_deepinterp/miniforge3/etc/profile.d/conda.sh` |
-| Login | `ssh -o BatchMode=yes jeromel@hpc-login` |
+| Login | `ssh -o BatchMode=yes hpc-login.corp.alleninstitute.org` (SSH config selects `jeromel`) |
 
-## Long-duration omission diagnostic
+## Full96 duration diagnostic (Figure 16)
+
+| run | computation id | budget | checkpoints | runtime |
+|---|---|---:|---:|---:|
+| Full96 om0 | `307fe678-bd24-48e8-90e8-bc41b6314ec2` | 53,996,544 windows | 11 scheduled + validation-best | 48,377 s |
+| Full96 om1 | `d8d53304-974e-4980-84a1-10286252af71` | 53,996,544 windows | 11 scheduled + validation-best | 49,363 s |
+
+Both use the full `96→192→384→768` body, batch 256, Charbonnier, seed 0, and the R5 optimizer
+recipe. Omission0 uses `bs_frames=1`; omission1 uses `bs_frames=3`. Checkpoints are stored under
+`models/ib_w96_om{0,1}_scale/`, hash-verified locally and after HPC transfer, and scored with pinned
+inference commit `808d7fa`. Figure 16 uses the 11 scheduled states and exact `samples_seen` telemetry.
+HPC scoring jobs were `23276157–23276204`; strict paired-state validation job `23276217` completed
+with 12 d′/diagnostic state pairs × 10 units for each route.
+
+## Legacy SUPPORT duration diagnostic (provenance only)
 
 | run | computation id | override | loss |
 |---|---|---|---|
 | RUN3 (om0) | `ccf82c60-43c4-4829-9984-8d41e4639fc2` | support_all, `omission=0 bs_frames=1`, `train_chunks=47` | L2 |
 | RUN4 (om1) | `5eec6d19-f063-4f9d-a17a-b11da5a65869` | support_all, `omission=1 bs_frames=3`, `train_chunks=47` | L2 |
 
-Both computations completed and their trajectories are scored. Live and staged optimization runs
-are tracked in `results/runs.csv`, which supersedes static status prose here.
+Both computations completed and their trajectories remain in the complete evidence inventory, but
+they are no longer displayed in Figure 16. Live and staged runs are tracked in `results/runs.csv`,
+which supersedes static status prose here.
 
 ## Matched R5 width, channel-schedule, and depth follow-up
 
