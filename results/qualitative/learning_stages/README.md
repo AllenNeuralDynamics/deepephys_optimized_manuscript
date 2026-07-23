@@ -52,8 +52,8 @@ Rendered figure SHA-256 values are:
 | figure | SHA-256 |
 |---|---|
 | `learning_voltage_evolution.png` | `dce01b6a34018fd8cc4f76c199bbe1fe8bde0502057e3f2239f47b609d020fc2` |
-| `learning_unit_profile_evolution_om0.png` | `34bb471912f7bd04f2f77325e3bb93ea37b3101afba5c232598f3dc6b59b82c8` |
-| `learning_unit_profile_evolution_om1.png` | `ce4a7a5ce0226174c6259de91a11612d37df5d48b17c183af37614cb726708b0` |
+| `learning_unit_profile_evolution_om0.png` | `e6e5fadc25b6d137f5142d4e85bb3493ddd89fe439adf4abb45c87e485bc8ddb` |
+| `learning_unit_profile_evolution_om1.png` | `3be32e44a42408c60bab5de30058c7c39e6ac06635503d9a9bb0b5eef846ad63` |
 
 Regenerate the figures locally from this directory with:
 

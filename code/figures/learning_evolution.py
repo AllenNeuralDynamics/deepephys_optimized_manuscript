@@ -79,6 +79,7 @@ def _plot_stage_trace_bands(
     raw_trace: np.ndarray,
     stage_traces: list[np.ndarray],
     colors: tuple[str, ...],
+    ylabel: str | None = "Training windows\n(stage p-p / raw p-p)",
 ) -> None:
     raw_scale = max(float(np.ptp(raw_trace)), 1e-9)
     offsets = np.arange(len(stage_traces) - 1, -1, -1, dtype=float) * 1.35
@@ -93,7 +94,10 @@ def _plot_stage_trace_bands(
     axis.set_yticks(offsets, labels)
     axis.set_ylim(offsets[-1] - 0.85, offsets[0] + 0.85)
     axis.set_xlabel("Time from GT event (ms)")
-    axis.set_ylabel("Training windows\n(stage p-p / raw p-p)")
+    if ylabel:
+        axis.set_ylabel(ylabel)
+    else:
+        axis.tick_params(axis="y", labelsize=8.5, pad=3)
     axis.grid(axis="x", alpha=0.2)
 
 
@@ -232,7 +236,10 @@ def plot_unit_profile_evolution(data: dict[str, list[np.lib.npyio.NpzFile]]) -> 
     for route, config in ROUTES.items():
         figure = plt.figure(figsize=(21.5, 12.8))
         grid = figure.add_gridspec(
-            len(UNITS), 7, width_ratios=(1, 1, 1, 1, 1, 1, 1.4), hspace=0.68, wspace=0.36,
+            len(UNITS), 8,
+            width_ratios=(1, 1, 1, 1, 1, 1, 0.45, 1.4),
+            hspace=0.68,
+            wspace=0.3,
         )
         for row_index, unit_id in enumerate(UNITS):
             raw_full = _center_template(reference[f"unit_{unit_id}_raw_template_uV"])
@@ -268,17 +275,20 @@ def plot_unit_profile_evolution(data: dict[str, list[np.lib.npyio.NpzFile]]) -> 
                     metric = f"d′ {dprime:.2f} | amp {amplitude:.2f}"
                 axis.set_xlabel(f"Time (ms)\n{metric}", fontsize=8.2)
                 _depth_ticks(axis, depths, f"Unit {unit_id}\nDepth (µm)" if column == 0 else "")
-            trace_axis = figure.add_subplot(grid[row_index, 6])
+            trace_axis = figure.add_subplot(grid[row_index, 7])
             _plot_stage_trace_bands(
                 trace_axis,
                 time,
                 raw_trace,
                 [values[:, peak_index] for values in stage_templates],
                 config["colors"],
+                ylabel=None,
             )
             if row_index == 0:
                 trace_axis.set_title(
-                    "Stage profiles over raw (gray)", fontweight="bold", fontsize=10,
+                    "Stage profiles over raw (gray)\nwindows (stage p-p / raw p-p)",
+                    fontweight="bold",
+                    fontsize=9.2,
                 )
         figure.suptitle(
             f"{config['label']}: GT-unit templates emerge at different rates across unit strengths",
