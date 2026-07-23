@@ -578,3 +578,22 @@ frozen 4-ms all-unit surrogate rather than sorter-level performance.
 is raw d′. Both routes improve in the final sampled interval; omission1 finishes higher in d′ but
 lower in amplitude. Curves show repeated states from one seed per route, not independent replicates.
 ```
+
+## Do the final Full96 models leave Gaussian-white residuals?
+
+We tested the off-injected-event residual $x-\hat{x}$ for the same final scheduled checkpoints
+([Appendix G](#appendix-residual-diagnostics), Figures 23–25). The selected probe interval shows that
+the prediction captures most coherent raw structure on a shared physical voltage scale, while the
+residual is visibly lower amplitude. Across 512 deterministic 4-ms windows, median residual/raw
+variance is 0.360 for omission0 and 0.499 for omission1. Marginal distributions also move toward a
+standard normal: median excess kurtosis falls from 0.588 raw to 0.068 and 0.094, and normal-QQ RMSE
+falls from 0.085 to 0.011 and 0.014.
+
+The improvement is not exact whiteness. Median mean absolute lag-1–30 autocorrelation falls from
+0.110 to 0.024/0.045, and near-contact absolute correlation falls from 0.374 to 0.058/0.081, but
+the nominal Ljung–Box diagnostic rejects temporal whiteness in 100% of residual channels after FDR.
+Nominal Jarque–Bera likewise rejects residual normality in 81.5%/87.0% of channels, and both residual
+spectra retain pronounced color. Omission0 removes more variance and has lower mean lag and near-contact dependence;
+omission1 has slightly greater spectral flatness and lower far-contact correlation. Thus both models
+remove substantial structured variation, but neither leaves Gaussian white noise and neither route
+dominates every residual statistic.

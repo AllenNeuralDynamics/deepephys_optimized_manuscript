@@ -18,6 +18,8 @@ rerun the owning script.
 | `width_schedule_paired_effects.{csv,md}` | paired unit-level d′ contrasts and deterministic descriptive bootstrap intervals | Results / width-schedule follow-up |
 | `width_schedule_perunit_amp.{csv,md}` | all 10 units × matched R5 reference/nine follow-ups for amplitude | Appendix B |
 | `width_schedule_perunit_dprime_delta.{csv,md}` | all 10 units × matched R5 reference/nine follow-ups for Δd′ | Appendix C |
+| `residual_diagnostics_summary.csv` | full raw/prediction/residual aggregate statistics for both final Full96 routes | Appendix G / Figures 23–25 |
+| `residual_diagnostics_summary.md` | compact raw-versus-residual effect sizes, nominal-test rejection fractions, and Gaussian-white references | Appendix G |
 
 The `validation_loss_*` files are retained as exploratory audit artifacts and are not manuscript
 inputs. Their off-GT reference combines independent noise, correlated background, and unlabeled

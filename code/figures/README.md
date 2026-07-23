@@ -20,6 +20,7 @@ regenerate deterministically.
 | `qualitative_examples.py` | render the all-probe raw/three-model view, GT-event close-up, multi-unit attenuation comparison, and omission0 d′ score distributions from three compact validated artifacts |
 | `learning_evolution.py` | render same-event all-probe/local voltage and four-unit template evolution across five validated Full96 checkpoints per omission route |
 | `template_support_sweep.py` | render in-sample/cross-fitted temporal and spatial d′ sensitivity plus all/weak/other aggregation from three representative endpoints |
+| `residual_diagnostics.py` | validate shared raw domains and render probe, marginal/temporal, and spatial residual diagnostics plus summary tables |
 | `validation_loss_headroom.py` | exploratory GT-support/off-GT contrast; retained for audit but excluded from the manuscript because off-GT data mix multiple signal/noise sources |
 | `gradient_diagnostics.py` | plot gradient-noise scale, microbatch alignment, and covariance spectrum over training |
 | `adaptive_accumulation.py` | plot adaptive noise measurements, integration decisions, alignment, and optimizer-update compression |

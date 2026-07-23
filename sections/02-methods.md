@@ -43,6 +43,44 @@ tests are in [`code/tests/test_detection_metrics.py`](code/tests/test_detection_
 commands and every output column are documented in the
 [`code/scoring` README](code/scoring/README.md).
 
+## Post hoc residual Gaussianity and whiteness diagnostics
+
+DeepInterpolation's output is the predicted structured signal, not the leftover noise. We therefore
+define the diagnostic residual on channel $c$ as
+
+$$
+r_c(t) = x_c(t) - \hat{x}_c(t),
+$$
+
+where $x$ is the calibrated raw AP-band voltage and $\hat{x}$ is the model prediction. The analysis
+uses the final scheduled Full96 omission0 and omission1 checkpoints at the same 53,996,288-window
+exposure. Checkpoint SHA-256 is verified before data access. Both routes then reuse 512 deterministic,
+non-overlapping 4-ms windows whose centers are more than 4 ms from every injected GT event. This
+provides 61,440 samples/channel/domain for raw, prediction, and residual summaries. A separate set of
+32 recording-spanning, 1,024-sample intervals containing no injected GT event supports Welch power
+spectra; one 30-ms injected-GT-free interval nearest the recording midpoint supports the probe image.
+All values are converted to microvolts before subtraction or analysis.
+
+Marginal Gaussianity is described per channel by absolute skewness, excess kurtosis, normal-quantile
+RMSE over probabilities 0.001–0.999, and fractions beyond 3 and 5 standard deviations. Jarque–Bera
+tests provide a formal normality check. Temporal dependence is summarized by autocorrelation at lags
+1–30 (0.033–1 ms), mean and maximum absolute autocorrelation, a 30-lag Ljung–Box test, and spectral
+flatness (geometric/arithmetic mean power) over 0.3–7.5 kHz. Zero-lag Pearson correlation across
+channels measures spatial dependence; summaries distinguish contacts within 40 µm from those at
+least 200 µm apart. Jarque–Bera and Ljung–Box p-values are Benjamini–Hochberg corrected at 5% across
+the 384 channels, separately for each domain and test family.
+
+With tens of thousands of observations per channel, tiny departures can be statistically
+detectable. Moreover, Jarque–Bera pools temporally dependent samples and Ljung–Box combines repeated
+disjoint windows, so their large-sample p-values are nominal diagnostic flags rather than
+confirmatory error-calibrated inference; FDR addresses channel multiplicity, not those assumptions.
+Interpretation therefore leads with effect sizes, probe maps, and raw-to-residual
+changes rather than treating rejection as a binary model failure. Injected GT events are excluded,
+but the hybrid sorting does not label native spikes or every biological and instrumental source.
+Consequently, an exactly Gaussian-white residual is neither expected nor a necessary condition for
+successful spike-preserving denoising. The paired renderer additionally aborts unless both routes
+share identical raw windows, spectral intervals, overview voltage, geometry, and calibration.
+
 ## What matched-filter d′ measures
 
 For each unit, the raw empirical template determines the peak channel and up to 24 channels whose

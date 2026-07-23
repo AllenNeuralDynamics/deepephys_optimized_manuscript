@@ -20,6 +20,9 @@ labels are never used during self-supervised training; they enter only here.
 | `export_qualitative_examples.sbatch` | GPU/S3 wrapper for that qualitative export |
 | `template_support_sweep.py` | in-sample and two-fold event-level cross-fitted temporal/channel support sensitivity |
 | `template_support_sweep.sbatch` | frozen GPU/S3 wrapper for one checkpoint's support sweep |
+| `residual_statistics.py` | per-channel Gaussianity, temporal, spectral, and spatial residual statistics |
+| `export_residual_diagnostics.py` | hash-checked compact raw/prediction/residual export from deterministic off-injected-event intervals |
+| `export_residual_diagnostics.sbatch` | frozen GPU/S3 wrapper for one checkpoint's residual export |
 
 The scoring/model checkout used for the width, schedule, and depth endpoints is
 inference commit `808d7fa`. Computation IDs, HPC job IDs, checkpoint hashes, and
@@ -189,6 +192,37 @@ python code/figures/learning_evolution.py
 The renderer requires one shared event/raw/template domain and reproduces every
 selected checkpoint's committed aggregate d′ before writing the figures.
 
+## Export residual Gaussianity and whiteness diagnostics
+
+Figures 23–25 use the final scheduled state of each Full96 duration route. The
+exporter verifies the requested checkpoint hash, exact 384-channel/10-unit
+benchmark, and frame alignment before selecting 512 deterministic non-overlapping
+4-ms windows away from injected GT events, 32 strictly injected-GT-free spectral
+segments, and one 30-ms overview interval. For omission0:
+
+```bash
+sbatch --job-name=resid_om0 "$SCORING/export_residual_diagnostics.sbatch" \
+   "$BASE/models/ib_w96_om0_scale/ckpt_step_00210923.pt" \
+   f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506 \
+   "$BASE/residual_diagnostics/full96_om0" \
+   "$INFERENCE" ib_w96_om0_scale "$SCORING"
+```
+
+For omission1, substitute `om1` in the job name, checkpoint path, output stem,
+and model label, and use checkpoint hash
+`90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a`.
+Each stem contains an NPZ, per-channel CSV, summary CSV, and metadata JSON. After
+copying both stems to `results/residual_diagnostics/`, rendering is local:
+
+```bash
+python code/figures/residual_diagnostics.py
+```
+
+The renderer requires exact shared raw windows, spectral segments, overview,
+geometry, and calibration between routes. Jobs, hashes, output schema, and the
+important native-spike caveat are recorded in
+[`results/residual_diagnostics/`](../../results/residual_diagnostics/README.md).
+
 ## Run the template-support sensitivity
 
 The post hoc support diagnostic rescans 0.5–4 ms and top 1–24 raw-ranked
@@ -211,13 +245,16 @@ in [`results/template_support/`](../../results/template_support/README.md).
 ```bash
 python code/tests/test_detection_metrics.py
 python code/tests/test_template_support_sweep.py
+python code/tests/test_residual_statistics.py
 python -m py_compile \
    code/scoring/detection_metrics.py \
    code/scoring/run_hybrid_s3.py \
    code/scoring/template_diag.py \
    code/scoring/validate_trajectory_outputs.py \
    code/scoring/export_qualitative_examples.py \
-   code/scoring/template_support_sweep.py
+   code/scoring/template_support_sweep.py \
+   code/scoring/residual_statistics.py \
+   code/scoring/export_residual_diagnostics.py
 bash -n code/scoring/*.sbatch code/scoring/score_best.sh
 ```
 

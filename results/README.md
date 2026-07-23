@@ -49,3 +49,5 @@ row explicitly marked `scored=yes` fails loudly if its endpoint pair is missing.
 - [`qualitative/`](qualitative/README.md) — endpoint-validated compact arrays for Figures 1–3.
 - [`template_support/`](template_support/README.md) — in-sample/cross-fitted temporal and spatial
         support sensitivity for Figure 19.
+- [`residual_diagnostics/`](residual_diagnostics/README.md) — final Full96 raw/prediction/residual
+        Gaussianity and whiteness artifacts for Figures 23–25.

@@ -120,6 +120,7 @@ python code/figures/width_schedule_followup.py
 python code/figures/make_figures.py
 python code/figures/qualitative_examples.py
 python code/figures/learning_evolution.py
+python code/figures/residual_diagnostics.py
 python code/figures/template_support_sweep.py
 ```
 
@@ -134,6 +135,15 @@ and four-unit template domain across five learning stages per omission route.
 Recreating those artifacts is also documented in
 [`code/scoring/`](../code/scoring/README.md); rendering them locally requires no
 checkpoint, S3 access, or GPU.
+
+Figures 23–25 read the two final-checkpoint artifact stems in
+`results/residual_diagnostics/`. The renderer first proves that both routes share
+the same 512 off-injected-event windows, 32 spectral segments, 30-ms overview,
+raw arrays, and geometry, then writes the probe, marginal/temporal, and spatial
+figures plus full/compact summary tables. Recreating those compact artifacts is
+a two-checkpoint GPU/S3 operation documented in
+[`code/scoring/`](../code/scoring/README.md); local rendering needs no checkpoint,
+S3 access, or GPU.
 
 Figure 19 reads the committed support-sweep CSVs in `results/template_support/`.
 Recreating those tables is a three-checkpoint GPU/S3 operation documented in

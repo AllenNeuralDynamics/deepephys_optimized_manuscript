@@ -116,6 +116,25 @@ amplitude ratio, and both d′ curves are still rising in the final sampled inte
 ordering reversal therefore argues against treating the ~18 M-window screen as a converged ranking,
 but it does not establish either asymptote or sorter-level superiority.
 
+## Residual structure is reduced, not eliminated
+
+The post hoc residual analysis answers a narrower question than d′ or spike sorting: whether
+subtracting the model prediction makes off-injected-event voltage more Gaussian and less dependent.
+It does, by large descriptive margins. Both Full96 routes sharply reduce heavy tails, temporal
+autocorrelation, and spatial correlation, and the model prediction contains the coherent structures
+visible in the raw probe image. This is evidence that the networks learned structured variation
+rather than merely rescaling the input. It is not evidence for an exact white-noise decomposition:
+every residual channel triggers the nominal 30-lag Ljung–Box rejection flag after FDR, most trigger
+the nominal Jarque–Bera rejection flag, and both spectra retain pronounced color.
+
+The route comparison also resists a one-number winner. Omission0 removes more variance and has lower
+mean lag and near-contact dependence; omission1 has slightly flatter spectra and lower far-contact
+correlation. Those differences may matter to downstream preprocessing, but they cannot by
+themselves explain sorter precision or recall. The sampled intervals exclude injected GT events but
+can contain unlabeled native spikes, and a spike-preserving predictor is not required to make its
+residual exactly Gaussian. Residual diagnostics should therefore accompany, not replace, GT-event
+and sorter-level evaluation.
+
 ## Limitations
 
 First, architecture and recipe choices were developed and evaluated on one recording with ten
@@ -128,6 +147,9 @@ and paired comparisons provide complementary checks. Event-level cross-fitting a
 reduce that concern for three representative models, but they remain post hoc, reuse one background
 set, and show that aggregate d′ depends on the chosen linear filter. Neither the frozen nor compact
 filter reproduces Kilosort's whitening, temporal search, template competition, or clustering.
+The residual analysis is likewise post hoc, uses deterministic subsets from the same recording,
+and cannot exclude unlabeled native spikes; its nominal diagnostics have enough observations to
+flag small deviations that may not be operationally important.
 Third, many Tier 2 rows, every R9–R13 method control, and each weighted arm have one training seed;
 the nine width/schedule/depth follow-ups also have one training seed, and their paired-unit bootstrap
 intervals resample fixed benchmark units rather than independent recordings;

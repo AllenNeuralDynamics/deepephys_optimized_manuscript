@@ -174,6 +174,27 @@ raw/event/template domain and committed aggregate d′. Complete CSV/metadata
 hashes and final figure hashes are recorded in
 [`results/qualitative/learning_stages/README.md`](../results/qualitative/learning_stages/README.md).
 
+## Full96 residual Gaussianity and whiteness export (Figures 23–25)
+
+The residual export applies the final scheduled Full96 checkpoints to the same
+frozen ProbeC recording with inference commit `808d7fa`, defining residual as
+raw minus model prediction in microvolts. Both jobs selected the same 512
+deterministic, non-overlapping 4-ms windows away from all injected GT events,
+32 strictly injected-GT-free 1,024-sample spectral segments, and one 30-ms
+injected-GT-free overview interval.
+
+| route | checkpoint SHA-256 | HPC job | elapsed / node | NPZ SHA-256 |
+|---|---|---:|---|---|
+| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `23303153` | 00:05:42 / `n69` | `72835760d9ce1054a037966dc1b63a3e8b3939f59ec955cb6574bf5e36f3b6a0` |
+| omission1 | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `23303154` | 00:05:30 / `n69` | `40fa1854e815f9d25a2a9c7baba93ea65f415753d35cf62c383c455a28bd0fe4` |
+
+Both jobs completed on a TITAN X (Pascal). Compact outputs originated at
+`$BASE/residual_diagnostics/full96_om{0,1}*` and are committed under
+[`results/residual_diagnostics/`](../results/residual_diagnostics/README.md).
+That manifest records all eight artifact hashes, exact shared-raw validation,
+output schemas, final figure/table hashes, and the native-spike interpretation
+caveat.
+
 ## Template-support sensitivity
 
 The post hoc linear-filter support diagnostic used the same inference commit,

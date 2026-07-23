@@ -200,7 +200,8 @@ tables retain **all 89 scored endpoints**, including audit-only confounded runs.
 | Figure 15, corrected weighting | unweighted `arch_l2_om0` seed context + seven corrected arms | ten legacy weighting endpoints whose executed loss was confounded |
 | Figure 16, duration diagnostic | two 54.0-M-window Full96 trajectories | legacy `support_all` duration pair and short-budget endpoints |
 | Figure 19, template-support sensitivity | Full96 omission0/omission1 and seed-0 original DI; in-sample and two-fold event-level cross-fitted d′ | other models and sorter-level outcomes |
-| Figures 20–22, learning-stage voltage and unit profiles | five repeated checkpoints from each 54.0-M-window Full96 trajectory; one fixed event and four fixed GT units | independent seeds, other events/units, and sorter-level outcomes |
+| Figures 20–22, learning-stage voltage and unit profiles | five scheduled states from each Full96 duration route; one fixed event and four fixed GT units | other checkpoints, seeds, units, and sorter-level outcomes |
+| Figures 23–25, residual Gaussianity and whiteness | shared raw AP windows plus final scheduled Full96 omission0/omission1 predictions and residuals | other models; GT-event recovery and sorter accuracy |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while
 also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets
@@ -274,4 +275,57 @@ therefore combines the duration trajectory's higher aggregate d′ with lower me
 amplitude preservation than omission0. This selected-event view illustrates that
 trajectory; it does not establish sorter-level recovery or seed-level
 reproducibility.
+```
+
+(appendix-residual-diagnostics)=
+## G. Residual Gaussianity and whiteness
+
+Figures 23–25 test the post hoc hypothesis that subtracting the model prediction leaves a more
+Gaussian and less correlated signal. Both routes move strongly in that direction, but neither
+produces an exactly Gaussian-white residual. Omission0 retains a median 0.360 of raw variance and
+omission1 retains 0.499. Median excess kurtosis falls from 0.588 in raw AP voltage to 0.068 and
+0.094, while median mean absolute autocorrelation falls from 0.110 to 0.024 and 0.045. Near-contact
+absolute correlation falls from 0.374 to 0.058 and 0.081. Despite those large effect-size changes,
+nominal Jarque–Bera still rejects normality in 81.5% and 87.0% of residual channels after FDR, and
+nominal Ljung–Box rejects temporal whiteness in every channel for both routes. The complete
+machine-readable table also retains prediction-domain values and per-channel results.
+
+```{include} ../results/tables/residual_diagnostics_summary.md
+```
+
+```{figure} figures/residual_probe_overview.png
+:label: fig-residual-probe-overview
+**The model prediction captures most visually coherent structure in one fixed injected-GT-free
+interval.** Rows apply the final scheduled omission0 and omission1 checkpoints to the same 30-ms
+raw interval; columns show raw AP voltage, the model prediction, and residual $x-\hat{x}$. Contact
+order, time, and the symmetric physical voltage scale are shared across all six heatmaps after
+removing each displayed channel's median. The repeated raw panels are numerically identical. The
+residual panels have much lower amplitude on this raw-scale display, but they are not blank and are
+not evidence that all biological signal was predicted. The injected sorting has no event in this
+interval; native spikes and other structure remain unlabeled.
+```
+
+```{figure} figures/residual_distribution_temporal.png
+:label: fig-residual-distribution-temporal
+**Residual margins are substantially more Gaussian, but temporal color remains.** **A**, pooled
+per-channel standardized density against a standard normal reference. **B**, median channel QQ
+curves with 10th–90th percentile bands. **C**, median lag autocorrelation with channel bands; legend
+percentages are channels rejected by the nominal 30-lag Ljung–Box test after 5% FDR. **D**, median
+Welch power relative to each channel's 0.3–7.5-kHz band mean. **E**, per-channel excess kurtosis with
+medians annotated. **F**, each channel's mean absolute lag-1–30 autocorrelation versus spectral
+flatness. Both residuals largely remove raw heavy tails, but all channels trigger the nominal
+temporal-whiteness rejection flag and the spectra retain route-specific oscillatory structure. Omission0 has the lower
+median lag dependence; omission1 has slightly greater median spectral flatness.
+```
+
+```{figure} figures/residual_spatial_whiteness.png
+:label: fig-residual-spatial-whiteness
+**Both models remove most raw spatial dependence, with route- and depth-specific residual
+structure.** Top matrices show zero-lag channel correlation in depth order on one fixed symmetric
+scale; self-correlations are masked. **D**, median absolute correlation versus physical contact
+distance in 20-µm bins, with 10th–90th percentile bands. **E–F**, probe maps of each channel's
+residual SD divided by raw SD on one shared robust scale. Omission0 has lower median near-contact
+absolute correlation (0.058 versus 0.081) and lower residual variance, whereas omission1 has slightly
+lower all-pair and far-contact correlation. Neither route is uniformly superior under every
+residual diagnostic, and these off-injected-event summaries do not measure spike recovery.
 ```

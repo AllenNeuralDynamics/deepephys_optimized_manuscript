@@ -1,0 +1,18 @@
+{
+  "recording_url": "s3://aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3/recording.zarr",
+  "sorting_url": "s3://aind-benchmark-data/ephys-hybrid-evaluation/sorters/np1/ecephys_681532_2023-10-18_13-01-15/experiment1_Record Node 103#Neuropix-PXI-100.ProbeC-AP_recording1_3/sorting.zarr",
+  "model_label": "ib_w96_om0_scale",
+  "checkpoint_sha256": "f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506",
+  "inference_commit": "808d7fa",
+  "seed": 0,
+  "background_windows": 512,
+  "window_ms": 4.0,
+  "spectral_segments": 32,
+  "spectral_samples": 1024,
+  "overview_ms": 30.0,
+  "overview_start_frame": 107171642,
+  "injected_gt_spikes": 1070127,
+  "raw_overview_sha256": "3e8e8c588d88e13622c834f3f37333c058d042f79f285cad1e0256d3ca7ca130",
+  "background_times_sha256": "e51d881c9d98a5bf1b6b61635b7c9ee0b1d3ce34ea01ca51dece072ffc4b535d",
+  "interpretation": "Residual equals raw minus model prediction. Injected GT events are excluded from analysis windows, but native spikes remain unlabeled. Gaussianity and whiteness are descriptive diagnostics, not necessary success conditions."
+}
