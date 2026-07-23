@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Launch the exact ProbeC raw-vs-Full96-om1 Kilosort4 benchmark.
+"""Launch an exact-ProbeC raw-vs-Full96 Kilosort4 benchmark.
 
 The command is a dry run unless ``--launch`` is supplied. Full-recording launch
 resumes a proven exact-case cache and requires a succeeded model smoke.
@@ -22,11 +22,19 @@ PIPELINE_ID = "5a096db9-3fd7-4984-b5a3-f409b4c8b6ee"
 INFERENCE_CAPSULE_ID = "fa034446-63c2-40f3-8a39-a95ea2b4f5fd"
 EXACT_CASE_CACHE_ID = "6962e3fb-8ff9-40c1-8d7f-e0cb058cb036"
 CASE_ASSET_ID = "8046af5a-6e53-420e-9e28-52bd54514342"
-MODEL_ASSET_ID = "d7821e06-dbba-4060-a7bb-6eab2d8c2ba6"
 CASE_MOUNT = "probec_recording1_3"
-MODEL_MOUNT = "full96_om1_duration_outputs"
-CHECKPOINT = f"../data/{MODEL_MOUNT}/ckpt_step_00210923.pt"
-CHECKPOINT_SHA256 = "90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a"
+MODEL_SPECS = {
+    "om0": {
+        "asset_id": "a9bcbf5b-0e7c-49ad-a9d5-c36c77647cc2",
+        "mount": "full96_om0_duration_outputs",
+        "sha256": "f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506",
+    },
+    "om1": {
+        "asset_id": "d7821e06-dbba-4060-a7bb-6eab2d8c2ba6",
+        "mount": "full96_om1_duration_outputs",
+        "sha256": "90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a",
+    },
+}
 
 DISPATCH = "capsule_job_dispatch_hybrid_ecephys_1"
 INFERENCE = "capsule_aind_ephys_deepinterpolation_inference_8"
@@ -36,7 +44,11 @@ KS4_RAW = "capsule_spikesort_kilosort_4_ecephys_5"
 KS4_DEEP = "capsule_spikesort_kilosort_4_ecephys_9"
 
 
-def build_full_request() -> RunParams:
+def checkpoint_path(route: str) -> str:
+    return f"../data/{MODEL_SPECS[route]['mount']}/ckpt_step_00210923.pt"
+
+
+def build_full_request(route: str) -> RunParams:
     preprocess = [
         "cmr", "highpass", "true", "true", "0.5", "compute",
         "dredge_fast", "2", "", "", "120", "-1",
@@ -56,7 +68,7 @@ def build_full_request() -> RunParams:
             PipelineProcessParams(
                 name=INFERENCE,
                 parameters=[
-                    "--checkpoint", CHECKPOINT,
+                    "--checkpoint", checkpoint_path(route),
                     "--device", "cuda",
                     "--batch-size", "256",
                     "--chunk-duration", "1s",
@@ -71,15 +83,16 @@ def build_full_request() -> RunParams:
     )
 
 
-def build_model_smoke_request() -> RunParams:
+def build_model_smoke_request(route: str) -> RunParams:
+    model = MODEL_SPECS[route]
     return RunParams(
         capsule_id=INFERENCE_CAPSULE_ID,
         data_assets=[
             DataAssetsRunParam(id=CASE_ASSET_ID, mount=CASE_MOUNT),
-            DataAssetsRunParam(id=MODEL_ASSET_ID, mount=MODEL_MOUNT),
+            DataAssetsRunParam(id=model["asset_id"], mount=model["mount"]),
         ],
         parameters=[
-            "--checkpoint", CHECKPOINT,
+            "--checkpoint", checkpoint_path(route),
             "--device", "cuda",
             "--batch-size", "256",
             "--chunk-duration", "1s",
@@ -90,11 +103,14 @@ def build_model_smoke_request() -> RunParams:
     )
 
 
-def expected_smoke_assets() -> list[tuple[str, str]]:
-    return [(CASE_ASSET_ID, CASE_MOUNT), (MODEL_ASSET_ID, MODEL_MOUNT)]
+def expected_smoke_assets(route: str) -> list[tuple[str, str]]:
+    model = MODEL_SPECS[route]
+    return [(CASE_ASSET_ID, CASE_MOUNT), (model["asset_id"], model["mount"])]
 
 
-def require_succeeded_smoke(client: CodeOcean, computation_id: str) -> None:
+def require_succeeded_smoke(
+    client: CodeOcean, computation_id: str, route: str
+) -> None:
     computation = client.computations.get_computation(computation_id)
     if not str(computation.end_status).lower().endswith("succeeded"):
         raise RuntimeError(
@@ -104,7 +120,7 @@ def require_succeeded_smoke(client: CodeOcean, computation_id: str) -> None:
     if not computation.has_results:
         raise RuntimeError(f"smoke computation {computation_id} has no results")
     actual = [(asset.id, asset.mount) for asset in computation.data_assets or []]
-    if actual != expected_smoke_assets():
+    if actual != expected_smoke_assets(route):
         raise RuntimeError(f"smoke computation used unexpected assets: {actual!r}")
     outputs = {
         item.path for item in client.computations.list_computation_results(computation_id).items
@@ -113,11 +129,28 @@ def require_succeeded_smoke(client: CodeOcean, computation_id: str) -> None:
         raise RuntimeError(f"smoke computation has unexpected outputs: {sorted(outputs)}")
 
 
+def isolate_inference_model(client: CodeOcean, route: str, attach: bool) -> None:
+    for model in MODEL_SPECS.values():
+        client.capsules.detach_data_assets(
+            INFERENCE_CAPSULE_ID, [model["asset_id"]]
+        )
+    if not attach:
+        return
+    model = MODEL_SPECS[route]
+    attached = client.capsules.attach_data_assets(
+        INFERENCE_CAPSULE_ID,
+        [DataAssetAttachParams(id=model["asset_id"], mount=model["mount"])],
+    )
+    if not attached or not attached[0].ready:
+        raise RuntimeError(f"model asset is not ready on inference capsule: {attached}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--mode", choices=("model-smoke", "full"), default="model-smoke"
     )
+    parser.add_argument("--route", choices=tuple(MODEL_SPECS), default="om1")
     parser.add_argument("--launch", action="store_true", help="submit to Code Ocean")
     parser.add_argument(
         "--validated-smoke",
@@ -125,9 +158,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    request = build_model_smoke_request() if args.mode == "model-smoke" else build_full_request()
+    request = (
+        build_model_smoke_request(args.route)
+        if args.mode == "model-smoke"
+        else build_full_request(args.route)
+    )
     print(json.dumps(request.to_dict(), indent=2))
-    print(f"checkpoint_sha256={CHECKPOINT_SHA256}")
+    print(f"checkpoint_sha256={MODEL_SPECS[args.route]['sha256']}")
     if not args.launch:
         print("DRY RUN: no computation launched")
         return
@@ -139,13 +176,10 @@ def main() -> None:
     if args.mode == "full":
         if not args.validated_smoke:
             parser.error("--validated-smoke is required to launch --mode full")
-        require_succeeded_smoke(client, args.validated_smoke)
-        attached = client.capsules.attach_data_assets(
-            INFERENCE_CAPSULE_ID,
-            [DataAssetAttachParams(id=MODEL_ASSET_ID, mount=MODEL_MOUNT)],
-        )
-        if not attached or not attached[0].ready:
-            raise RuntimeError(f"model asset is not ready on inference capsule: {attached}")
+        require_succeeded_smoke(client, args.validated_smoke, args.route)
+        isolate_inference_model(client, args.route, attach=True)
+    else:
+        isolate_inference_model(client, args.route, attach=False)
 
     computation = (
         client.computations.run_capsule(request)
@@ -153,15 +187,15 @@ def main() -> None:
         else client.computations.run_pipeline(request)
     )
     label = (
-        "Full96 om1 checkpoint 2s inference smoke"
+        f"Full96 {args.route} checkpoint 2s inference smoke"
         if args.mode == "model-smoke"
-        else "Full96 om1 ProbeC KS4 two-arm full"
+        else f"Full96 {args.route} ProbeC KS4 two-arm full"
     )
     client.computations.rename_computation(computation.id, label)
     created = client.computations.get_computation(computation.id)
     if args.mode == "model-smoke":
         actual = [(asset.id, asset.mount) for asset in created.data_assets or []]
-        if actual != expected_smoke_assets():
+        if actual != expected_smoke_assets(args.route):
             client.computations.delete_computation(created.id)
             raise RuntimeError(f"Code Ocean changed smoke mounts: {actual!r}")
     print(f"launched {created.id}: {label}")

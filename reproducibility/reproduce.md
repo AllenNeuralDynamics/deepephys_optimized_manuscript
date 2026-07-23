@@ -88,17 +88,17 @@ d′ equation, output schema, qualitative export command, and focused tests.
 
 ## 4a. Launch the paired Kilosort4 benchmark
 
-The guarded launcher defaults to a dry run. It first validates deployment of the final long-trained
-Full96 omission1 checkpoint, then allows the complete raw-versus-denoised sorter run only when given
-the succeeded smoke computation:
+The guarded launcher defaults to a dry run. It first validates deployment of one final long-trained
+Full96 omission checkpoint, then allows the complete raw-versus-denoised sorter run only when given
+that route's succeeded smoke computation:
 
 ```bash
 set -a; source ~/.codeocean.env; set +a
-python code/benchmarking/launch_ks4_two_arm.py --mode model-smoke
-python code/benchmarking/launch_ks4_two_arm.py --mode model-smoke --launch
+python code/benchmarking/launch_ks4_two_arm.py --route om0 --mode model-smoke
+python code/benchmarking/launch_ks4_two_arm.py --route om0 --mode model-smoke --launch
 python code/benchmarking/launch_ks4_two_arm.py \
-  --mode full --launch \
-  --validated-smoke 0e027dc4-e16e-4935-948d-e037abba5c00
+  --route om0 --mode full --launch \
+  --validated-smoke 723ac820-576a-4da9-a274-759afdea3584
 ```
 
 The full request resumes a successful computation already verified to contain ProbeC

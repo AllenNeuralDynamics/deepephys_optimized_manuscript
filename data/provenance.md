@@ -53,13 +53,12 @@ inference commit `808d7fa`. Figure 16 uses the 11 scheduled states and exact `sa
 HPC scoring jobs were `23276157–23276204`; strict paired-state validation job `23276217` completed
 with 12 d′/diagnostic state pairs × 10 units for each route.
 
-## Full96 omission1 Kilosort4 benchmark (active)
+## Full96 Kilosort4 benchmarks
 
 The first sorter-level follow-up compares the existing raw and DeepInterpolation arms on the same
 ProbeC `recording1_3` hybrid case. Both arms use identical high-pass + CMR preprocessing, motion
-estimation, and Kilosort4 settings before the common hybrid evaluator. The selected model is the
-final scheduled omission1 state at 53,996,288 windows, not `best_model.pt`: its frozen d′ is
-4.504218 versus 4.503711 for the validation-selected file.
+estimation, and Kilosort4 settings before the common hybrid evaluator. Each route uses its final
+scheduled state at 53,996,288 windows so omission0 and omission1 are matched by exposure.
 
 | role | identifier |
 |---|---|
@@ -67,18 +66,24 @@ final scheduled omission1 state at 53,996,288 windows, not `best_model.pt`: its 
 | proven exact-case cache | `6962e3fb-8ff9-40c1-8d7f-e0cb058cb036` |
 | inference capsule | `fa034446-63c2-40f3-8a39-a95ea2b4f5fd`, synced to `808d7fa` |
 | exact ProbeC smoke asset | `8046af5a-6e53-420e-9e28-52bd54514342` |
+| omission0 output/checkpoint asset | `a9bcbf5b-0e7c-49ad-a9d5-c36c77647cc2` |
 | omission1 output/checkpoint asset | `d7821e06-dbba-4060-a7bb-6eab2d8c2ba6` |
-| checkpoint | `ckpt_step_00210923.pt`; SHA-256 `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` |
-| deployment smoke | `0e027dc4-e16e-4935-948d-e037abba5c00` (succeeded; 247 s) |
-| full two-arm computation | `2ad21011-a937-44dc-a370-5280049621ef` (launched 2026-07-22) |
 
-The 2-s deployment smoke strict-loaded the checkpoint on the 384-channel ProbeC recording and wrote
-a materialized `recording_denoised` result. The full computation resumes the proven exact-case cache,
-whose result paths identify ProbeC `recording1_3`; unchanged dispatch and raw-arm stages can be
-reused, while explicit checkpoint arguments invalidate the denoised branch and final comparison.
-The primary outputs will be per-GT-unit accuracy, precision, recall, and the count above 80%
-accuracy. No sorter-level claim is made until the full computation succeeds and its case identity
-and output tables are validated.
+| route | checkpoint SHA-256 | deployment smoke | full computation | status |
+|---|---|---|---|---|
+| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` | `28b36eb8-2763-47b1-8fd6-19b007f08bf5` | active |
+| omission1 | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `0e027dc4-e16e-4935-948d-e037abba5c00` | `2ad21011-a937-44dc-a370-5280049621ef` | succeeded, 45,960 s |
+
+Each 2-s deployment smoke strict-loaded its checkpoint on the 384-channel ProbeC recording and wrote
+a materialized `recording_denoised` result. Each full computation resumes the proven exact-case
+cache, whose result paths identify ProbeC `recording1_3`; unchanged dispatch and raw-arm stages can
+be reused, while explicit checkpoint arguments invalidate the denoised branch and final comparison.
+
+For omission1, raw versus denoised-KS4 mean accuracy was 0.4471 versus 0.4503, precision was 0.5851
+versus 0.4808, and recall was 0.4939 versus 0.6124. Both arms detected 7/10 GT units at all and 2/10
+above 0.8 accuracy. Thus omission1 shifted the fixed Kilosort configuration toward recall at the
+expense of precision without improving well-detected-unit count. The omission0 run is pending; no
+cross-route sorter conclusion is made until it completes and passes the same identity checks.
 
 ## Legacy SUPPORT duration diagnostic (provenance only)
 
