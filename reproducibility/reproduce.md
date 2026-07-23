@@ -86,6 +86,26 @@ Both are pinned to the benchmark recording, 10 GT units, `seed=0` (see
 files are missing. See [`code/scoring/`](../code/scoring/README.md) for the exact
 d′ equation, output schema, qualitative export command, and focused tests.
 
+## 4a. Launch the paired Kilosort4 benchmark
+
+The guarded launcher defaults to a dry run. It first validates deployment of the final long-trained
+Full96 omission1 checkpoint, then allows the complete raw-versus-denoised sorter run only when given
+the succeeded smoke computation:
+
+```bash
+set -a; source ~/.codeocean.env; set +a
+python code/benchmarking/launch_ks4_two_arm.py --mode model-smoke
+python code/benchmarking/launch_ks4_two_arm.py --mode model-smoke --launch
+python code/benchmarking/launch_ks4_two_arm.py \
+  --mode full --launch \
+  --validated-smoke 0e027dc4-e16e-4935-948d-e037abba5c00
+```
+
+The full request resumes a successful computation already verified to contain ProbeC
+`recording1_3`. This avoids random one-case dispatch while preserving the existing two-arm pipeline.
+Exact process settings, assets, checkpoint hash, and current computation IDs are documented in
+[`code/benchmarking/`](../code/benchmarking/README.md) and [](../data/provenance.md).
+
 ## 5. Collate + figures
 
 Collate mean-over-10-units into the complete endpoint master table and per-unit matrices, then render

@@ -8,6 +8,7 @@ outputs, environment assumptions, and exact commands.
 |---|---|---|
 | [`training/`](training/README.md) | launch Code Ocean training runs | documented (capsule-side) |
 | [`scoring/`](scoring/README.md) | event/background d′, waveform diagnostics, support sensitivity, S3/HPC drivers, qualitative export | vendored and tested |
+| [`benchmarking/`](benchmarking/README.md) | launch paired raw/DeepInterpolation Kilosort4 evaluation | Full96 om1 run launched |
 | [`figures/`](figures/README.md) | collate tables and render every committed manuscript figure | vendored and regenerated |
 
 :::{note}

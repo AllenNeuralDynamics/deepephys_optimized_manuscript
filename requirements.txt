@@ -5,3 +5,4 @@ matplotlib>=3.7    # figure generation (code/figures/make_*.py)
 adjustText>=1.3    # collision-aware direct labels in comparison figures
 numpy>=1.24
 scipy>=1.10        # PSD (Welch) for the band-mismatch figure; stats for the noise floor
+codeocean>=0.16    # guarded Code Ocean training/benchmark launches and result retrieval
