@@ -164,4 +164,7 @@ coverage audit and have completed training, checkpoint validation, and frozen sc
 matched depth-2 base96 omission0/omission1 controls subsequently completed the same pipeline. The
 selected Full96 omission pair then completed 54.0 M-window trajectories. The regenerated coverage
 table therefore shows 89 scored endpoints and the intentionally aborted R7
-PCGrad row as the sole exclusion.
+PCGrad row as the sole exclusion. The omission1 sorter benchmark is complete.
+The first omission0 sorter computation (`28b36eb8-2763-47b1-8fd6-19b007f08bf5`)
+failed on a transient internal-S3 download after inference; guarded resume retry
+`db76c533-9f39-46e6-98fe-e83adf56ea51` is active.

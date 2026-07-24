@@ -38,10 +38,28 @@ python code/benchmarking/launch_ks4_two_arm.py \
   --route om0 --mode full --launch --validated-smoke <computation-id>
 ```
 
-| route | checkpoint SHA-256 | model smoke | full computation |
+To retry a failed compatible full run while preserving its successful cache,
+add `--resume-run`. The launcher accepts only a completed nonzero-exit source
+with the seven expected processes and the selected route's exact checkpoint:
+
+```bash
+python code/benchmarking/launch_ks4_two_arm.py \
+  --route om0 --mode full --launch \
+  --validated-smoke 723ac820-576a-4da9-a274-759afdea3584 \
+  --resume-run 28b36eb8-2763-47b1-8fd6-19b007f08bf5
+```
+
+| route | checkpoint SHA-256 | model smoke | full computation(s) |
 |---|---|---|---|
-| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` (succeeded) | `28b36eb8-2763-47b1-8fd6-19b007f08bf5` (active) |
+| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` (succeeded) | `28b36eb8-2763-47b1-8fd6-19b007f08bf5` (failed); `db76c533-9f39-46e6-98fe-e83adf56ea51` (resume retry active) |
 | omission1 | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `0e027dc4-e16e-4935-948d-e037abba5c00` (succeeded) | `2ad21011-a937-44dc-a370-5280049621ef` (succeeded) |
+
+The first omission0 run completed raw Kilosort4 (672 units) and the 16,668-s
+DeepInterpolation inference, then exited 1 when denoised preprocessing received
+an incomplete 8-MiB download from Code Ocean's internal S3 cache. It produced no
+evaluation results. Retry `db76c533-9f39-46e6-98fe-e83adf56ea51` resumes that
+run so successful upstream stages are eligible for cache reuse; the failure was
+an infrastructure transfer error, not a model or sorter exception.
 
 The inference capsule was synced to commit `808d7fa` before these launches. The
 launcher detaches the other route's asset before every submission so model

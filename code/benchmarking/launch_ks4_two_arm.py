@@ -2,7 +2,8 @@
 """Launch an exact-ProbeC raw-vs-Full96 Kilosort4 benchmark.
 
 The command is a dry run unless ``--launch`` is supplied. Full-recording launch
-resumes a proven exact-case cache and requires a succeeded model smoke.
+resumes a proven exact-case cache, or a guarded compatible failed run, and
+requires a succeeded model smoke.
 """
 from __future__ import annotations
 
@@ -48,7 +49,9 @@ def checkpoint_path(route: str) -> str:
     return f"../data/{MODEL_SPECS[route]['mount']}/ckpt_step_00210923.pt"
 
 
-def build_full_request(route: str) -> RunParams:
+def build_full_request(
+    route: str, resume_run_id: str = EXACT_CASE_CACHE_ID
+) -> RunParams:
     preprocess = [
         "cmr", "highpass", "true", "true", "0.5", "compute",
         "dredge_fast", "2", "", "", "120", "-1",
@@ -56,7 +59,7 @@ def build_full_request(route: str) -> RunParams:
     ks4 = ["true", "false", "64", "false"]
     return RunParams(
         pipeline_id=PIPELINE_ID,
-        resume_run_id=EXACT_CASE_CACHE_ID,
+        resume_run_id=resume_run_id,
         processes=[
             PipelineProcessParams(
                 name=DISPATCH,
@@ -129,6 +132,45 @@ def require_succeeded_smoke(
         raise RuntimeError(f"smoke computation has unexpected outputs: {sorted(outputs)}")
 
 
+def require_compatible_failed_resume(
+    client: CodeOcean, computation_id: str, route: str
+) -> None:
+    computation = client.computations.get_computation(computation_id)
+    if not str(computation.state).lower().endswith("completed"):
+        raise RuntimeError(
+            f"resume computation {computation_id} is not completed: "
+            f"state={computation.state}"
+        )
+    if computation.exit_code in (None, 0):
+        raise RuntimeError(
+            f"resume computation {computation_id} is not a failed run: "
+            f"exit_code={computation.exit_code}"
+        )
+    processes = {process.name: process for process in computation.processes or []}
+    expected = {
+        DISPATCH,
+        INFERENCE,
+        PREPROCESS_RAW,
+        PREPROCESS_DEEP,
+        KS4_RAW,
+        KS4_DEEP,
+        "capsule_hybrid_evaluation_ecephys_6",
+    }
+    if set(processes) != expected:
+        raise RuntimeError(
+            f"resume computation has unexpected processes: {sorted(processes)}"
+        )
+    inference_values = [
+        parameter.value for parameter in processes[INFERENCE].parameters or []
+    ]
+    expected_checkpoint = checkpoint_path(route)
+    if expected_checkpoint not in inference_values:
+        raise RuntimeError(
+            "resume computation used an unexpected inference checkpoint: "
+            f"expected {expected_checkpoint}, got {inference_values}"
+        )
+
+
 def isolate_inference_model(client: CodeOcean, route: str, attach: bool) -> None:
     for model in MODEL_SPECS.values():
         client.capsules.detach_data_assets(
@@ -156,12 +198,22 @@ def main() -> None:
         "--validated-smoke",
         help="succeeded smoke computation ID; required to launch --mode full",
     )
+    parser.add_argument(
+        "--resume-run",
+        help=(
+            "failed compatible full computation to resume; defaults to the "
+            "proven exact-case cache"
+        ),
+    )
     args = parser.parse_args()
+
+    if args.mode != "full" and args.resume_run:
+        parser.error("--resume-run is valid only with --mode full")
 
     request = (
         build_model_smoke_request(args.route)
         if args.mode == "model-smoke"
-        else build_full_request(args.route)
+        else build_full_request(args.route, args.resume_run or EXACT_CASE_CACHE_ID)
     )
     print(json.dumps(request.to_dict(), indent=2))
     print(f"checkpoint_sha256={MODEL_SPECS[args.route]['sha256']}")
@@ -177,6 +229,8 @@ def main() -> None:
         if not args.validated_smoke:
             parser.error("--validated-smoke is required to launch --mode full")
         require_succeeded_smoke(client, args.validated_smoke, args.route)
+        if args.resume_run:
+            require_compatible_failed_resume(client, args.resume_run, args.route)
         isolate_inference_model(client, args.route, attach=True)
     else:
         isolate_inference_model(client, args.route, attach=False)
@@ -189,7 +243,11 @@ def main() -> None:
     label = (
         f"Full96 {args.route} checkpoint 2s inference smoke"
         if args.mode == "model-smoke"
-        else f"Full96 {args.route} ProbeC KS4 two-arm full"
+        else (
+            f"Full96 {args.route} ProbeC KS4 two-arm retry"
+            if args.resume_run
+            else f"Full96 {args.route} ProbeC KS4 two-arm full"
+        )
     )
     client.computations.rename_computation(computation.id, label)
     created = client.computations.get_computation(computation.id)
