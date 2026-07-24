@@ -106,6 +106,19 @@ The full request resumes a successful computation already verified to contain Pr
 Exact process settings, assets, checkpoint hash, and current computation IDs are documented in
 [`code/benchmarking/`](../code/benchmarking/README.md) and [](../data/provenance.md).
 
+After both route computations complete, regenerate the compact performance and
+spike-event accounting tables directly from Code Ocean:
+
+```bash
+set -a; source ~/.codeocean.env; set +a
+python code/benchmarking/audit_ks4_results.py
+```
+
+The audit downloads evaluator CSVs and GT counts but reads only the NPY headers
+of the 0.6–0.9-GB sorter spike arrays. It aborts unless the raw arms agree
+exactly. Generated tables and hashes are documented in
+[`results/benchmarking/`](../results/benchmarking/README.md).
+
 ## 5. Collate + figures
 
 Collate mean-over-10-units into the complete endpoint master table and per-unit matrices, then render

@@ -94,9 +94,25 @@ run.
 
 The common hybrid evaluator matches each of the 10 injected GT units to sorter output and reports
 accuracy, precision, and recall. We summarize arithmetic means over all 10 GT rows, the count with
-nonzero accuracy, the count above 0.8 accuracy, and total sorter units. Omission routes ran in
+nonzero accuracy, the count above 0.8 accuracy, total sorter units, total sorter spike events, event
+rate, and sorter runtime. Total events are the first dimension of each saved SpikeInterface
+`sorting/spikes.npy` array. Because the hybrid recording contains unlabeled native spikes, that
+total cannot be interpreted as a global false-positive count.
+
+For the seven GT units with a matched cluster, we additionally recover integer event accounting from
+the exact injected-event count $N_u$ and evaluator metrics:
+
+$$
+TP_u = \operatorname{round}(N_u\,\mathrm{recall}_u), \qquad
+S_u = \operatorname{round}(TP_u / \mathrm{precision}_u).
+$$
+
+Here $TP_u$ is a matched injected spike, $S_u$ is all spikes assigned to the matched sorter cluster,
+and $S_u-TP_u$ is evaluator-unmatched. The last category can include native spikes and is therefore
+not synonymous with noise. Omission routes ran in
 separate pipeline computations; their raw performance rows were required to agree exactly before
-cross-route interpretation. This is a post hoc, single-case comparison at one fixed sorter
+cross-route interpretation. Raw total events, unit count, and runtime were also required to agree.
+This is a post hoc, single-case comparison at one fixed sorter
 configuration, not independent validation or a sorter-parameter optimization. Computation IDs,
 failure/retry provenance, and launch guards are documented in
 [`code/benchmarking`](code/benchmarking/README.md).

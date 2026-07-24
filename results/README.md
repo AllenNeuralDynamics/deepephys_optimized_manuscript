@@ -51,3 +51,5 @@ row explicitly marked `scored=yes` fails loudly if its endpoint pair is missing.
         support sensitivity for Figure 19.
 - [`residual_diagnostics/`](residual_diagnostics/README.md) — final Full96 raw/prediction/residual
         Gaussianity and whiteness artifacts for Figures 23–25.
+- [`benchmarking/`](benchmarking/README.md) — audited raw/omission0/omission1
+        Kilosort4 aggregate, total-spike, and per-GT-unit event tables.

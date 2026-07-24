@@ -40,7 +40,8 @@ abstract: |
   direction depends on filter support. In a post hoc fixed-configuration Kilosort4 comparison on the
   same hybrid case, raw/omission0/omission1 mean accuracy was 0.447/0.449/0.450. Denoising raised
   recall from 0.494 to 0.614/0.612 but lowered precision from 0.585 to 0.478/0.481; all three inputs
-  detected 7/10 GT units and 2/10 above 0.8 accuracy. The conclusions remain specific to one hybrid
+  detected 7/10 GT units and 2/10 above 0.8 accuracy, while denoised inputs produced 55% more sorter
+  spike events under unchanged settings. The conclusions remain specific to one hybrid
   benchmark; held-out recordings and broader prespecified sorter validation are necessary. The versioned train → score → figure pipeline is
   reproducible from this repository.
 ---

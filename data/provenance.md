@@ -92,11 +92,20 @@ The raw per-unit performance rows agree exactly between completed route runs.
 Raw, omission0, and omission1 mean accuracy is 0.4471, 0.4489, and 0.4503;
 precision is 0.5851, 0.4782, and 0.4808; recall is 0.4939, 0.6136, and 0.6124.
 All three detect 7/10 GT units at any accuracy and 2/10 above 0.8 accuracy. The
-sorter returns 672, 690, and 725 units, respectively. Thus both denoised routes
+sorter returns 672, 690, and 725 units and 24,767,972, 38,486,458, and 38,499,041
+spike events, respectively. The latter counts are the exact first dimensions of
+the saved structured `sorting/spikes.npy` arrays; only their NPY headers were
+downloaded. Thus both denoised routes
 shift the unchanged Kilosort4 configuration toward recall at the expense of
 precision without improving detected-unit counts. Omission1's mean-accuracy lead
 over omission0 is 0.0014, while omission0 yields 35 fewer sorter units. No
 Kilosort threshold or other sorter parameter was tuned for either route.
+
+Compact aggregate, per-unit, and matched-cluster event accounting is committed
+under [`results/benchmarking/`](../results/benchmarking/README.md). The audit
+requires exact raw-arm identity and documents why all-sorter and evaluator-
+unmatched event counts are not global false-positive counts in a hybrid recording
+with unlabeled native spikes.
 
 ## Legacy SUPPORT duration diagnostic (provenance only)
 

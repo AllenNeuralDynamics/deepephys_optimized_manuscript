@@ -10,6 +10,11 @@ Both arms feed the same hybrid ground-truth evaluator. Each route uses its
 `ckpt_step_00210923.pt` state at 53,996,288 training windows, preserving matched
 exposure between omission0 and omission1.
 
+`audit_ks4_results.py` validates both completed computations and regenerates the
+compact aggregate/per-unit tables in `results/benchmarking/`. In addition to the
+evaluator metrics, it reads the remote SpikeInterface array headers to count all
+sorter spike events without downloading the 0.6–0.9-GB arrays.
+
 The model smoke uses run-scoped assets:
 
 ```text
@@ -64,18 +69,23 @@ evaluation in 24,358 s. The failure was an infrastructure transfer error, not a
 model or sorter exception.
 
 The two completed runs have exactly identical raw per-unit accuracy, precision,
-and recall rows. Aggregate results are:
+recall, sorter-unit count, runtime, and spike-event count. Aggregate results are:
 
-| input | mean accuracy | mean precision | mean recall | GT units detected | GT units >0.8 accuracy | sorter units |
-|---|---:|---:|---:|---:|---:|---:|
-| raw AP | 0.4471 | 0.5851 | 0.4939 | 7/10 | 2/10 | 672 |
-| Full96 omission0 | 0.4489 | 0.4782 | 0.6136 | 7/10 | 2/10 | 690 |
-| Full96 omission1 | 0.4503 | 0.4808 | 0.6124 | 7/10 | 2/10 | 725 |
+```{include} ../../results/benchmarking/kilosort4_summary.md
+```
+
+Event accounting for the seven GT-matched clusters is:
+
+```{include} ../../results/benchmarking/kilosort4_event_accounting.md
+```
 
 Both denoised routes shift the fixed Kilosort4 configuration toward recall at
 the expense of precision without changing detected-unit or well-detected-unit
 counts. Omission1 exceeds omission0 mean accuracy by only 0.0014; omission0
-produces 35 fewer sorter units. These are single-run results on one hybrid case,
+produces 35 fewer sorter units. Both denoised arms produce about 55.4% more
+sorter spike events than raw, and evaluator-unmatched events in matched clusters
+approximately triple. Because native spikes are unlabeled, those totals are not
+global false-positive counts. These are single-run results on one hybrid case,
 not a tuned sorter comparison.
 
 The inference capsule was synced to commit `808d7fa` before these launches. The

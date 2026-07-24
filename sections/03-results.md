@@ -604,11 +604,8 @@ Both final Full96 checkpoints completed the same raw-versus-denoised Kilosort4 p
 `recording1_3`. The two computations' raw per-unit accuracy, precision, and recall rows agree
 exactly, establishing one common raw reference. Aggregate evaluator results are:
 
-| input | mean accuracy | mean precision | mean recall | GT units detected | GT units >0.8 accuracy | sorter units |
-|---|---:|---:|---:|---:|---:|---:|
-| raw AP | 0.4471 | 0.5851 | 0.4939 | 7/10 | 2/10 | 672 |
-| Full96 omission0 | 0.4489 | 0.4782 | 0.6136 | 7/10 | 2/10 | 690 |
-| Full96 omission1 | 0.4503 | 0.4808 | 0.6124 | 7/10 | 2/10 | 725 |
+```{include} ../results/benchmarking/kilosort4_summary.md
+```
 
 Both denoised arms therefore gain about 0.12 mean recall while losing about 0.105 mean precision,
 leaving mean accuracy nearly unchanged and recovering no additional injected units. Omission1's
@@ -617,3 +614,23 @@ Kilosort mean accuracy; omission0 returns 35 fewer sorter units. The unchanged c
 does not identify a route-level sorter winner and reinforces that matched-filter d′, residual
 whiteness, and sorter behavior measure different properties. These are post hoc results from one
 recording and one Kilosort4 configuration.
+
+The all-sorter event count reveals a larger input-domain effect than mean accuracy: raw Kilosort
+emits 24,767,972 events (3,466.8/s), versus 38,486,458 (5,387.0/s) for omission0 and 38,499,041
+(5,388.8/s) for omission1, a 55.4% increase for both routes. Sorter runtime rises from 4.07 h raw to
+5.08/6.85 h. Extra clusters explain only part of this increase: events per sorter unit rise from
+36,857 to 55,777/53,102. The two denoised routes differ by only 12,583 total events (0.033%) despite
+their 35-unit difference, suggesting a common event-detection shift followed by route-dependent
+clustering.
+
+Within the same seven GT-matched clusters, event accounting is:
+
+```{include} ../results/benchmarking/kilosort4_event_accounting.md
+```
+
+Denoising recovers about 127k–128k additional injected spikes in those clusters, explaining the
+recall gain, but evaluator-unmatched events approximately triple, explaining the precision loss.
+The total-event increase and longer runtime are consistent with fixed Kilosort settings being less
+selective on denoised voltage. They do not prove that all additional events are noise: native spikes
+are unlabeled, and the evaluator-unmatched category can include native activity assigned to a
+cluster matched with an injected unit.
