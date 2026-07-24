@@ -57,3 +57,13 @@ are consistent with the unchanged Kilosort configuration being less selective
 on denoised voltage. They do not establish why; threshold calibration, native
 spike assignment, splitting/merging, and residual structure remain possible
 contributors.
+
+## Threshold calibration
+
+`ks4_threshold_sweep/` contains the five-minute Full96 omission1
+`Th_learned=8,9,10` calibration, including aggregate and per-unit metrics plus a
+one-second chunk-boundary check. Threshold 10 was the best short-clip candidate:
+mean accuracy increased from 0.4044 to 0.5002 and GT-matched-cluster false
+positives fell 73.5% relative to threshold 8, while detected-unit counts were
+unchanged. A 20-minute confirmation is running because thresholds 9 and 10 were
+not conclusively separated across units on the short clip.
