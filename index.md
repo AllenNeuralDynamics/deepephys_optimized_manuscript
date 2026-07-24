@@ -37,9 +37,11 @@ abstract: |
   weighting at λ = 3 gave a +0.0055 d′ lead within unweighted seed spread, while stronger weighting
   reduced d′ by as much as 0.262 and could distort template shape. Absolute self-template d′ is
   in-sample optimistic because template estimation and hit scoring reuse events, and its aggregate
-  direction depends on filter support. The conclusions are therefore specific to one hybrid
-  benchmark and a linear matched-filter proxy; held-out-recording and sorter-level validation remain
-  necessary. The versioned train → score → figure pipeline is
+  direction depends on filter support. In a post hoc fixed-configuration Kilosort4 comparison on the
+  same hybrid case, raw/omission0/omission1 mean accuracy was 0.447/0.449/0.450. Denoising raised
+  recall from 0.494 to 0.614/0.612 but lowered precision from 0.585 to 0.478/0.481; all three inputs
+  detected 7/10 GT units and 2/10 above 0.8 accuracy. The conclusions remain specific to one hybrid
+  benchmark; held-out recordings and broader prespecified sorter validation are necessary. The versioned train → score → figure pipeline is
   reproducible from this repository.
 ---
 

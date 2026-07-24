@@ -597,3 +597,23 @@ spectra retain pronounced color. Omission0 removes more variance and has lower m
 omission1 has slightly greater spectral flatness and lower far-contact correlation. Thus both models
 remove substantial structured variation, but neither leaves Gaussian white noise and neither route
 dominates every residual statistic.
+
+## Fixed Kilosort4 converts denoising into a precision–recall tradeoff
+
+Both final Full96 checkpoints completed the same raw-versus-denoised Kilosort4 pipeline on ProbeC
+`recording1_3`. The two computations' raw per-unit accuracy, precision, and recall rows agree
+exactly, establishing one common raw reference. Aggregate evaluator results are:
+
+| input | mean accuracy | mean precision | mean recall | GT units detected | GT units >0.8 accuracy | sorter units |
+|---|---:|---:|---:|---:|---:|---:|
+| raw AP | 0.4471 | 0.5851 | 0.4939 | 7/10 | 2/10 | 672 |
+| Full96 omission0 | 0.4489 | 0.4782 | 0.6136 | 7/10 | 2/10 | 690 |
+| Full96 omission1 | 0.4503 | 0.4808 | 0.6124 | 7/10 | 2/10 | 725 |
+
+Both denoised arms therefore gain about 0.12 mean recall while losing about 0.105 mean precision,
+leaving mean accuracy nearly unchanged and recovering no additional injected units. Omission1's
+0.075 d′ lead over omission0 at the final scheduled checkpoint corresponds to only 0.0014 higher
+Kilosort mean accuracy; omission0 returns 35 fewer sorter units. The unchanged configuration thus
+does not identify a route-level sorter winner and reinforces that matched-filter d′, residual
+whiteness, and sorter behavior measure different properties. These are post hoc results from one
+recording and one Kilosort4 configuration.

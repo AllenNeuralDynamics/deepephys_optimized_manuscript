@@ -81,6 +81,26 @@ Consequently, an exactly Gaussian-white residual is neither expected nor a neces
 successful spike-preserving denoising. The paired renderer additionally aborts unless both routes
 share identical raw windows, spectral intervals, overview voltage, geometry, and calibration.
 
+## Post hoc fixed-configuration Kilosort4 benchmark
+
+We evaluated the final scheduled Full96 omission0 and omission1 checkpoints in the existing Code
+Ocean no-generation hybrid pipeline. Each route was compared with raw on the exact ProbeC
+`recording1_3` recording used throughout the study. Raw and model-output arms received the same
+high-pass filter, common-median reference, bad-channel removal, `dredge_fast` motion estimation, and
+Kilosort4 capsule settings (`skip_motion_correction=false`, `min_channels_for_drift=64`). No
+Kilosort threshold or other sorter parameter was tuned by route. Both checkpoints were trained for
+53,996,288 windows, strict-loaded in a 2-s deployment smoke, and selected by SHA-256 before the full
+run.
+
+The common hybrid evaluator matches each of the 10 injected GT units to sorter output and reports
+accuracy, precision, and recall. We summarize arithmetic means over all 10 GT rows, the count with
+nonzero accuracy, the count above 0.8 accuracy, and total sorter units. Omission routes ran in
+separate pipeline computations; their raw performance rows were required to agree exactly before
+cross-route interpretation. This is a post hoc, single-case comparison at one fixed sorter
+configuration, not independent validation or a sorter-parameter optimization. Computation IDs,
+failure/retry provenance, and launch guards are documented in
+[`code/benchmarking`](code/benchmarking/README.md).
+
 ## What matched-filter d′ measures
 
 For each unit, the raw empirical template determines the peak channel and up to 24 channels whose

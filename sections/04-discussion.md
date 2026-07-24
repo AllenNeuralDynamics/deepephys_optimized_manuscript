@@ -135,6 +135,22 @@ can contain unlabeled native spikes, and a spike-preserving predictor is not req
 residual exactly Gaussian. Residual diagnostics should therefore accompany, not replace, GT-event
 and sorter-level evaluation.
 
+## Fixed Kilosort4 favors recall, not additional GT-unit recovery
+
+The completed sorter benchmark confirms that the surrogate metrics cannot be read as sorter
+outcomes. Both Full96 routes raise mean Kilosort recall by about 0.12 but lower precision by about
+0.105, producing only +0.0018/+0.0032 mean-accuracy changes and no change in the 7/10 detected or
+2/10 well-detected GT-unit counts. Omission1's 0.075 final d′ advantage over omission0 contracts to
+a 0.0014 mean-accuracy difference, while omission0 yields 690 sorter units versus 725 for omission1
+and 672 for raw. Thus neither final route dominates: omission1 is marginally higher in accuracy,
+whereas omission0 produces fewer additional clusters.
+
+This is a fixed-configuration diagnostic, not evidence that denoising intrinsically imposes the
+same precision–recall tradeoff. Kilosort thresholds and other parameters were intentionally held
+constant to isolate the input change; they may be differently calibrated after denoising. Tuning is
+a separate follow-up and must be prespecified and evaluated without using this same case as both
+selection and test data.
+
 ## Limitations
 
 First, architecture and recipe choices were developed and evaluated on one recording with ten
@@ -150,6 +166,9 @@ filter reproduces Kilosort's whitening, temporal search, template competition, o
 The residual analysis is likewise post hoc, uses deterministic subsets from the same recording,
 and cannot exclude unlabeled native spikes; its nominal diagnostics have enough observations to
 flag small deviations that may not be operationally important.
+The Kilosort comparison also reuses this recording, has one run per route, and tests only one
+unchanged configuration; its raw-arm identity removes pipeline-sampling ambiguity but does not
+provide held-out or across-sorter generalization.
 Third, many Tier 2 rows, every R9–R13 method control, and each weighted arm have one training seed;
 the nine width/schedule/depth follow-ups also have one training seed, and their paired-unit bootstrap
 intervals resample fixed benchmark units rather than independent recordings;
@@ -177,4 +196,4 @@ weighting is harmful. The modern package still outperforms `origdi` under the ma
 this benchmark. The 4-ms endpoint is retained for uniform model ranking, but compact-support
 sensitivity should accompany claims about absolute raw-versus-denoised detectability. Stronger claims
 require a prespecified held-out recording, long-budget validation of the selected body, and
-end-to-end spike-sorter evaluation.
+broader prespecified sorter/configuration evaluation.

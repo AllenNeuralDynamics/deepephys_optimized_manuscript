@@ -76,7 +76,7 @@ training recipes, a matched base96 width/depth/channel-schedule follow-up, and t
 All models are trained self-supervised and
 scored against injected ground truth in one frozen AP-band hybrid recording. This design isolates
 model-output differences on that benchmark, but architecture selection on the same recording means
-the conclusions require replication on held-out recordings and with a full spike sorter.
+the conclusions require replication on held-out recordings and across prespecified sorter settings.
 
 The layer-level model definition is in [Methods](sections/02-methods.md), the model glossary is in
 [Appendix A](sections/05-appendix.md), and the evolving study design is documented in the

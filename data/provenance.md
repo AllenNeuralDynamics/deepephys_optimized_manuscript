@@ -71,7 +71,7 @@ scheduled state at 53,996,288 windows so omission0 and omission1 are matched by 
 
 | route | checkpoint SHA-256 | deployment smoke | full computation(s) | status |
 |---|---|---|---|---|
-| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` | failed `28b36eb8-2763-47b1-8fd6-19b007f08bf5`; retry `db76c533-9f39-46e6-98fe-e83adf56ea51` | retry active |
+| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` | failed `28b36eb8-2763-47b1-8fd6-19b007f08bf5`; retry `db76c533-9f39-46e6-98fe-e83adf56ea51` | succeeded, 24,358 s |
 | omission1 | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `0e027dc4-e16e-4935-948d-e037abba5c00` | `2ad21011-a937-44dc-a370-5280049621ef` | succeeded, 45,960 s |
 
 Each 2-s deployment smoke strict-loaded its checkpoint on the 384-channel ProbeC recording and wrote
@@ -83,15 +83,20 @@ The first omission0 full run completed raw Kilosort4 (672 units) and omission0
 inference (16,668 s), then failed with `exit_code=1` before denoised preprocessing
 could start. Code Ocean's internal S3 download of `traces_cached_seg0.raw` ended
 with `IncompleteRead(0 bytes read, 8388608 more expected)`. No comparison outputs
-were produced. Retry `db76c533-9f39-46e6-98fe-e83adf56ea51` explicitly resumes
-the failed computation, preserving eligible upstream caches while rerunning the
-failed transfer and downstream nodes.
+were produced. Retry `db76c533-9f39-46e6-98fe-e83adf56ea51` explicitly resumed
+the failed computation. It reused dispatch, omission0 inference, raw preprocessing,
+and raw Kilosort4, then completed the failed denoised branch and common hybrid
+evaluation with `exit_code=0` and the full result tree.
 
-For omission1, raw versus denoised-KS4 mean accuracy was 0.4471 versus 0.4503, precision was 0.5851
-versus 0.4808, and recall was 0.4939 versus 0.6124. Both arms detected 7/10 GT units at all and 2/10
-above 0.8 accuracy. Thus omission1 shifted the fixed Kilosort configuration toward recall at the
-expense of precision without improving well-detected-unit count. The omission0 retry is pending; no
-cross-route sorter conclusion is made until it completes and passes the same identity checks.
+The raw per-unit performance rows agree exactly between completed route runs.
+Raw, omission0, and omission1 mean accuracy is 0.4471, 0.4489, and 0.4503;
+precision is 0.5851, 0.4782, and 0.4808; recall is 0.4939, 0.6136, and 0.6124.
+All three detect 7/10 GT units at any accuracy and 2/10 above 0.8 accuracy. The
+sorter returns 672, 690, and 725 units, respectively. Thus both denoised routes
+shift the unchanged Kilosort4 configuration toward recall at the expense of
+precision without improving detected-unit counts. Omission1's mean-accuracy lead
+over omission0 is 0.0014, while omission0 yields 35 fewer sorter units. No
+Kilosort threshold or other sorter parameter was tuned for either route.
 
 ## Legacy SUPPORT duration diagnostic (provenance only)
 

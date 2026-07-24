@@ -51,15 +51,32 @@ python code/benchmarking/launch_ks4_two_arm.py \
 
 | route | checkpoint SHA-256 | model smoke | full computation(s) |
 |---|---|---|---|
-| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` (succeeded) | `28b36eb8-2763-47b1-8fd6-19b007f08bf5` (failed); `db76c533-9f39-46e6-98fe-e83adf56ea51` (resume retry active) |
+| omission0 | `f30ea1c379aecde0337bd9b168d2d6fafe93529e025ba5c3d7f8a3c0e4321506` | `723ac820-576a-4da9-a274-759afdea3584` (succeeded) | `28b36eb8-2763-47b1-8fd6-19b007f08bf5` (failed); `db76c533-9f39-46e6-98fe-e83adf56ea51` (succeeded) |
 | omission1 | `90d816c54d5a599ff01d1b65666ca3524588391054d58c4146eb713c48a7b15a` | `0e027dc4-e16e-4935-948d-e037abba5c00` (succeeded) | `2ad21011-a937-44dc-a370-5280049621ef` (succeeded) |
 
 The first omission0 run completed raw Kilosort4 (672 units) and the 16,668-s
 DeepInterpolation inference, then exited 1 when denoised preprocessing received
 an incomplete 8-MiB download from Code Ocean's internal S3 cache. It produced no
-evaluation results. Retry `db76c533-9f39-46e6-98fe-e83adf56ea51` resumes that
-run so successful upstream stages are eligible for cache reuse; the failure was
-an infrastructure transfer error, not a model or sorter exception.
+evaluation results. Retry `db76c533-9f39-46e6-98fe-e83adf56ea51` resumed that
+run, reused the dispatcher, omission0 inference, raw preprocessing, and raw
+Kilosort4 caches, then completed denoised preprocessing, Kilosort4, and hybrid
+evaluation in 24,358 s. The failure was an infrastructure transfer error, not a
+model or sorter exception.
+
+The two completed runs have exactly identical raw per-unit accuracy, precision,
+and recall rows. Aggregate results are:
+
+| input | mean accuracy | mean precision | mean recall | GT units detected | GT units >0.8 accuracy | sorter units |
+|---|---:|---:|---:|---:|---:|---:|
+| raw AP | 0.4471 | 0.5851 | 0.4939 | 7/10 | 2/10 | 672 |
+| Full96 omission0 | 0.4489 | 0.4782 | 0.6136 | 7/10 | 2/10 | 690 |
+| Full96 omission1 | 0.4503 | 0.4808 | 0.6124 | 7/10 | 2/10 | 725 |
+
+Both denoised routes shift the fixed Kilosort4 configuration toward recall at
+the expense of precision without changing detected-unit or well-detected-unit
+counts. Omission1 exceeds omission0 mean accuracy by only 0.0014; omission0
+produces 35 fewer sorter units. These are single-run results on one hybrid case,
+not a tuned sorter comparison.
 
 The inference capsule was synced to commit `808d7fa` before these launches. The
 launcher detaches the other route's asset before every submission so model
