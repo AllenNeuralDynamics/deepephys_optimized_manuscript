@@ -83,9 +83,10 @@ Both denoised routes shift the fixed Kilosort4 configuration toward recall at
 the expense of precision without changing detected-unit or well-detected-unit
 counts. Omission1 exceeds omission0 mean accuracy by only 0.0014; omission0
 produces 35 fewer sorter units. Both denoised arms produce about 55.4% more
-sorter spike events than raw, and evaluator-unmatched events in matched clusters
-approximately triple. Because native spikes are unlabeled, those totals are not
-global false-positive counts. These are single-run results on one hybrid case,
+sorter spike events than raw, and false-positive spikes in GT-matched clusters
+approximately triple. Because native spikes are unlabeled, the all-sorter event
+totals are not global false-positive counts, and GT-relative false positives can
+include native activity. These are single-run results on one hybrid case,
 not a tuned sorter comparison.
 
 The inference capsule was synced to commit `808d7fa` before these launches. The

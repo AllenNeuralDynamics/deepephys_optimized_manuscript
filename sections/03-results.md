@@ -629,8 +629,8 @@ Within the same seven GT-matched clusters, event accounting is:
 ```
 
 Denoising recovers about 127k–128k additional injected spikes in those clusters, explaining the
-recall gain, but evaluator-unmatched events approximately triple, explaining the precision loss.
+recall gain, but false-positive spikes approximately triple, explaining the precision loss.
 The total-event increase and longer runtime are consistent with fixed Kilosort settings being less
 selective on denoised voltage. They do not prove that all additional events are noise: native spikes
-are unlabeled, and the evaluator-unmatched category can include native activity assigned to a
-cluster matched with an injected unit.
+are unlabeled, and the evaluator's GT-relative false-positive category can include native activity
+assigned to a cluster matched with an injected unit.

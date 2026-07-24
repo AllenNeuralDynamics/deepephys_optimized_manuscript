@@ -104,8 +104,8 @@ Kilosort threshold or other sorter parameter was tuned for either route.
 Compact aggregate, per-unit, and matched-cluster event accounting is committed
 under [`results/benchmarking/`](../results/benchmarking/README.md). The audit
 requires exact raw-arm identity and documents why all-sorter and evaluator-
-unmatched event counts are not global false-positive counts in a hybrid recording
-with unlabeled native spikes.
+defined false-positive counts are not global biological false-positive counts in
+a hybrid recording with unlabeled native spikes.
 
 ## Legacy SUPPORT duration diagnostic (provenance only)
 

@@ -149,12 +149,13 @@ The spike-event counts support the hypothesis that the unchanged Kilosort config
 harder event-selection problem after denoising. Both routes produce about 38.49 M sorter events
 versus 24.77 M raw (+55.4%), while unit count rises by only 2.7%/7.9%; events per sorter unit rise by
 51.3%/44.1%. Sorter runtime also increases by 24.8%/68.5%. Within GT-matched clusters, true-positive
-injected spikes rise by about 24%, but evaluator-unmatched spikes rise approximately threefold. The
+injected spikes rise by about 24%, but false-positive spikes rise approximately threefold. The
 precision–recall tradeoff therefore reflects both recovering more injected events and admitting many
 more events not matched to those injections.
 
-This pattern is consistent with altered threshold/noise calibration or a denser candidate-event set,
-but it is not a global false-positive estimate. The recording contains unlabeled native spikes, and
+This pattern is consistent with altered threshold/noise calibration or a denser candidate-event set.
+The false-positive label is relative to the injected GT unit, not a claim that every such event is
+biological noise. The recording contains unlabeled native spikes, and
 the two routes' nearly identical total event counts despite different cluster counts indicate that
 event detection and clustering must be analyzed separately. Per-cluster firing distributions,
 template duplication, and a prespecified threshold sweep are the next discriminating checks.

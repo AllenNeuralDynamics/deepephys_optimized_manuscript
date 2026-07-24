@@ -158,7 +158,7 @@ def _event_accounting(
         frame.loc[matched, "true_positive_injected_spikes"]
         / frame.loc[matched, "precision"]
     ).astype(int)
-    frame["evaluator_unmatched_spikes_in_matched_cluster"] = (
+    frame["false_positive_spikes_in_matched_cluster"] = (
         frame["matched_cluster_spikes"] - frame["true_positive_injected_spikes"]
     )
     reconstructed = {
@@ -192,7 +192,7 @@ def _event_accounting(
             "recall",
             "true_positive_injected_spikes",
             "matched_cluster_spikes",
-            "evaluator_unmatched_spikes_in_matched_cluster",
+            "false_positive_spikes_in_matched_cluster",
         ]
     ]
 
@@ -226,8 +226,8 @@ def _summary_row(
             matched["true_positive_injected_spikes"].sum()
         ),
         "matched_cluster_spikes": int(matched["matched_cluster_spikes"].sum()),
-        "evaluator_unmatched_spikes_in_matched_clusters": int(
-            matched["evaluator_unmatched_spikes_in_matched_cluster"].sum()
+        "false_positive_spikes_in_matched_clusters": int(
+            matched["false_positive_spikes_in_matched_cluster"].sum()
         ),
     }
 
@@ -280,7 +280,7 @@ def _write_markdown(summary: pd.DataFrame, output: Path) -> None:
             "input",
             "sorted_spike_events_per_sorter_unit",
             "true_positive_injected_spikes",
-            "evaluator_unmatched_spikes_in_matched_clusters",
+            "false_positive_spikes_in_matched_clusters",
             "matched_cluster_spikes",
         ]
     ].copy()
@@ -288,7 +288,7 @@ def _write_markdown(summary: pd.DataFrame, output: Path) -> None:
         "input",
         "spike events / sorter unit",
         "TP injected spikes",
-        "evaluator-unmatched spikes in matched clusters",
+        "false-positive spikes in GT-matched clusters",
         "all spikes in matched clusters",
     ]
     for column in accounting.columns[1:]:

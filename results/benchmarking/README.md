@@ -19,10 +19,10 @@ The generated files are:
 
 | file | contents | SHA-256 |
 |---|---|---|
-| `kilosort4_summary.csv` | full aggregate performance, unit/event counts, event rates, runtimes, and matched-cluster accounting | `040cd3192deaa1e8be6c87b45cf9919b9175e24277a3ec68b5e951147050ebca` |
+| `kilosort4_summary.csv` | full aggregate performance, unit/event counts, event rates, runtimes, and matched-cluster accounting | `65e716973382b13c860e32d1b6e6d6466f00ba188d7e41b82724eb9f98675b6c` |
 | `kilosort4_summary.md` | manuscript aggregate table | `a6e739c571848f6b2e4fb2151a86775ce7b36a6975dcef119acc88eba703d01b` |
-| `kilosort4_event_accounting.md` | compact matched-cluster event accounting | `1496ce40ba46a35e6492141a0c4caf3c0142699edac939f75d2e0a9245c30c67` |
-| `kilosort4_per_unit.csv` | 10 GT units × raw/omission0/omission1 performance and integer event accounting | `236d0ec9eec92fdbfe1c15c72a9a6156302d6189bd813d14e603eead4b4cf8b7` |
+| `kilosort4_event_accounting.md` | compact matched-cluster event accounting | `2b34d3ed84ee8383bc4925333a58dc771bfc76e94fa60c8c957337f6b046d978` |
+| `kilosort4_per_unit.csv` | 10 GT units × raw/omission0/omission1 performance and integer event accounting | `2107b03f3a4874ffd08800db9451a8000d4334a95c970cafbbef386204406def` |
 
 Regenerate with authenticated Code Ocean access:
 
@@ -43,13 +43,15 @@ TP_u = \operatorname{round}(N_u\,\mathrm{recall}_u), \qquad
 S_u = \operatorname{round}(TP_u / \mathrm{precision}_u).
 $$
 
-`S_u - TP_u` is called evaluator-unmatched rather than noise because native
-spikes can legitimately enter a cluster matched to an injected unit.
+By the evaluator definition, $FP_u=S_u-TP_u$ is the number of **false-positive
+spikes** in the cluster matched to injected unit $u$. This is a GT-relative label:
+native spikes can legitimately enter a cluster matched to an injected unit and
+are still counted as false positives relative to that injected spike train.
 
 Both denoised inputs produce about 55.4% more total sorter events than raw. This
 is not explained by cluster count alone: events per sorter unit rise from 36,857
 raw to 55,777 omission0 and 53,102 omission1. Among matched clusters, recovered
-injected spikes rise by about 24%, while evaluator-unmatched events rise from
+injected spikes rise by about 24%, while false-positive spikes rise from
 119,881 to 366,462/360,588. Together with longer sorter runtimes, these results
 are consistent with the unchanged Kilosort configuration being less selective
 on denoised voltage. They do not establish why; threshold calibration, native

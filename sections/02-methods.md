@@ -108,8 +108,9 @@ S_u = \operatorname{round}(TP_u / \mathrm{precision}_u).
 $$
 
 Here $TP_u$ is a matched injected spike, $S_u$ is all spikes assigned to the matched sorter cluster,
-and $S_u-TP_u$ is evaluator-unmatched. The last category can include native spikes and is therefore
-not synonymous with noise. Omission routes ran in
+and $FP_u=S_u-TP_u$ is the number of false-positive spikes relative to injected unit $u$. These are
+evaluator-defined false positives: they can include native spikes and are therefore not synonymous
+with noise or globally false biological events. Omission routes ran in
 separate pipeline computations; their raw performance rows were required to agree exactly before
 cross-route interpretation. Raw total events, unit count, and runtime were also required to agree.
 This is a post hoc, single-case comparison at one fixed sorter
