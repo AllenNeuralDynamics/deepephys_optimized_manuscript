@@ -598,39 +598,89 @@ omission1 has slightly greater spectral flatness and lower far-contact correlati
 remove substantial structured variation, but neither leaves Gaussian white noise and neither route
 dominates every residual statistic.
 
-## Fixed Kilosort4 converts denoising into a precision–recall tradeoff
+## Unmodified Kilosort4 reveals input-specific threshold calibration
 
-Both final Full96 checkpoints completed the same raw-versus-denoised Kilosort4 pipeline on ProbeC
-`recording1_3`. The two computations' raw per-unit accuracy, precision, and recall rows agree
-exactly, establishing one common raw reference. Aggregate evaluator results are:
+We first reproduced the fixed-configuration comparison, then varied only exposed Kilosort thresholds
+on the same hybrid case. The Kilosort and SpikeInterface sorter implementations were not modified:
 
-```{include} ../results/benchmarking/kilosort4_summary.md
-```
+| implementation surface | executed version or state | changed during exploration? |
+|---|---|---|
+| Kilosort | 4.1.7, CUDA 12 base image | no |
+| SpikeInterface Kilosort4 wrapper | 0.104.7 | no |
+| Kilosort/SpikeInterface source code | upstream packaged implementation | no |
+| full-recording AIND entry point | normal production `run_capsule.py` | no |
+| clip-sweep driver | `run_calibration_sweep.py` calling the same sorter three times | orchestration only; no sorter-source change |
+| sorter configuration | saved 55-parameter dictionary | only the prespecified `Th_*` value |
 
-Both denoised arms therefore gain about 0.12 mean recall while losing about 0.105 mean precision,
-leaving mean accuracy nearly unchanged and recovering no additional injected units. Omission1's
-0.075 d′ lead over omission0 at the final scheduled checkpoint corresponds to only 0.0014 higher
-Kilosort mean accuracy; omission0 returns 35 fewer sorter units. The unchanged configuration thus
-does not identify a route-level sorter winner and reinforces that matched-filter d′, residual
-whiteness, and sorter behavior measure different properties. These are post hoc results from one
-recording and one Kilosort4 configuration.
+`Th_universal` controls initial universal-template detection, whereas `Th_learned` controls event
+extraction with learned templates. Both are ordinary floating-point Kilosort settings
+[@pachitariu2024kilosort4]. The explored values were:
 
-The all-sorter event count reveals a larger input-domain effect than mean accuracy: raw Kilosort
-emits 24,767,972 events (3,466.8/s), versus 38,486,458 (5,387.0/s) for omission0 and 38,499,041
-(5,388.8/s) for omission1, a 55.4% increase for both routes. Sorter runtime rises from 4.07 h raw to
-5.08/6.85 h. Extra clusters explain only part of this increase: events per sorter unit rise from
-36,857 to 55,777/53,102. The two denoised routes differ by only 12,583 total events (0.033%) despite
-their 35-unit difference, suggesting a common event-detection shift followed by route-dependent
-clustering.
+| parameter | values tested | controlled comparison |
+|---|---:|---|
+| `Th_universal` | 9, 10 | omission1 `(9,9)` versus `(10,9)` |
+| `Th_learned` | 8, 9, 10, 10.75 | nested omission1 clips; full omission1; matched raw/omission0 endpoints |
 
-Within the same seven GT-matched clusters, event accounting is:
+All other wrapper and sorter settings remained frozen. Key controls are shown below; the complete
+dictionary and exact one-parameter diffs are stored in the generated audit manifest.
 
-```{include} ../results/benchmarking/kilosort4_event_accounting.md
-```
+| parameter group | frozen executed values |
+|---|---|
+| wrapper | `raise_if_fails=true`; `skip_motion_correction=false`; `min_drift_channels=64`; `chunk_duration=1s` |
+| batching and drift | `batch_size=60000`; `nblocks=5`; `nskip=25`; `do_correction=true` |
+| preprocessing | `do_CAR=true`; `highpass_cutoff=300`; `whitening_range=32`; `skip_kilosort_preprocessing=false` |
+| templates | `templates_from_data=true`; `n_templates=6`; `n_pcs=6`; `nearest_chans=10`; `nearest_templates=100` |
+| detection/curation | `Th_single_ch=6`; `duplicate_spike_ms=0.25`; `acg_threshold=0.2`; `ccg_threshold=0.25`; `keep_good_only=false` |
 
-Denoising recovers about 127k–128k additional injected spikes in those clusters, explaining the
-recall gain, but false-positive spikes approximately triple, explaining the precision loss.
-The total-event increase and longer runtime are consistent with fixed Kilosort settings being less
-selective on denoised voltage. They do not prove that all additional events are noise: native spikes
-are unlabeled, and the evaluator's GT-relative false-positive category can include native activity
-assigned to a cluster matched with an injected unit.
+The complete exploration comprises 15 sorter runs. Accuracy, precision, and recall below are
+arithmetic means over all 10 GT units, including zero rows for unmatched units. TP, FN, and FP use
+the fixed seven-unit reference set (337, 664, 793, 1122, 1143, 1300, and 2143); losing a reference
+unit therefore contributes zero TP and its full FN count. The 5- and 20-min intervals are nested
+calibration clips, so event and performance values should be compared within duration, not treated
+as independent replicates.
+
+| scope | input | `Th_universal` | `Th_learned` | accuracy | precision | recall | GT detected | events/s | TP (fixed 7) | FN (fixed 7) | FP (fixed 7) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| full | raw AP | 9 | 8 | 0.4471 | 0.5851 | 0.4939 | 7/10 | 3,466.8 | 528,844 | 220,712 | 119,881 |
+| full | raw AP | 9 | 10.75 | 0.2549 | 0.2945 | 0.2567 | 3/10 | 2,083.7 | 274,830 | 474,726 | 3,565 |
+| full | Full96 omission0 | 9 | 8 | 0.4489 | 0.4782 | 0.6136 | 7/10 | 5,387.0 | 657,056 | 92,500 | 366,462 |
+| full | Full96 omission0 | 9 | 10.75 | 0.4548 | 0.5779 | 0.5099 | 7/10 | 2,987.8 | 546,055 | 203,501 | 121,759 |
+| full | Full96 omission1 | 9 | 8 | 0.4503 | 0.4808 | 0.6124 | 7/10 | 5,388.8 | 655,819 | 93,737 | 360,588 |
+| full | Full96 omission1 | 9 | 9 | 0.4715 | 0.5303 | 0.5823 | 7/10 | 4,154.9 | 623,520 | 126,036 | 229,311 |
+| full | Full96 omission1 | 9 | 10 | 0.4688 | 0.5626 | 0.5430 | 7/10 | 3,393.0 | 581,454 | 168,102 | 156,203 |
+| full | Full96 omission1 | 9 | 10.75 | 0.4533 | 0.5783 | 0.5077 | 7/10 | 2,988.5 | 543,694 | 205,862 | 120,202 |
+| full | Full96 omission1 | 10 | 9 | 0.4720 | 0.5364 | 0.5799 | 7/10 | 4,185.7 | 620,953 | 128,603 | 224,003 |
+| 20 min | Full96 omission1 | 9 | 8 | 0.4628 | 0.5004 | 0.7106 | 8/10 | 8,370.7 | 119,215 | 6,510 | 113,209 |
+| 20 min | Full96 omission1 | 9 | 9 | 0.5187 | 0.5574 | 0.6830 | 8/10 | 5,848.1 | 116,546 | 9,179 | 54,971 |
+| 20 min | Full96 omission1 | 9 | 10 | 0.5204 | 0.5547 | 0.6329 | 7/10 | 4,357.4 | 113,719 | 12,006 | 38,307 |
+| 5 min | Full96 omission1 | 9 | 8 | 0.4044 | 0.4125 | 0.6528 | 7/10 | 7,660.6 | 29,364 | 2,111 | 32,340 |
+| 5 min | Full96 omission1 | 9 | 9 | 0.4615 | 0.4934 | 0.6202 | 7/10 | 5,217.2 | 27,906 | 3,569 | 19,357 |
+| 5 min | Full96 omission1 | 9 | 10 | 0.5002 | 0.5403 | 0.5996 | 7/10 | 4,028.4 | 26,980 | 4,495 | 8,559 |
+
+The clip screens consistently showed that raising `Th_learned` suppressed events and fixed-seven FP
+while trading away recall. On the full omission1 recording, moving from 8 to 9 increased accuracy
+from 0.4503 to 0.4715 and reduced FP by 36.4%; moving to 10 further reduced FP to 156,203. The
+fractional 10.75 endpoint brought FP to 120,202, only 321 above raw `(9,8)`, while retaining 14,850
+more TP than that raw deployment baseline. Raising only `Th_universal` from 9 to 10 at
+`Th_learned=9` was nearly neutral: accuracy changed by +0.0006, precision by +0.0061, and recall by
+-0.0024. Thus learned-template extraction, not universal-template discovery, controls most of the
+useful selectivity adjustment here.
+
+At matched `(9,10.75)`, omission0 and omission1 were practically tied. Omission0 had fixed-seven
+accuracy/precision/recall 0.6497/0.8255/0.7285 and TP/FN/FP
+546,055/203,501/121,759; omission1 had 0.6476/0.8262/0.7253 and
+543,694/205,862/120,202. The omission route therefore has little aggregate effect once Kilosort is
+matched.
+
+The raw matched-threshold control changes the conclusion. Raw `(9,10.75)` retained only units 793,
+1143, and 2143; units 337, 664, 1122, and 1300 became unmatched. Its low FP count (3,565) and pooled
+precision among surviving matches (0.9872) are achieved by losing four reference units, not by
+improving the overall tradeoff. Both denoisers retain all seven at the same threshold and recover
+about 269k–271k more TP than raw `(9,10.75)`. Denoising therefore shifts the useful Kilosort score
+range: the same strict threshold that is untenable on raw remains viable on denoised voltage.
+
+For deployment on this case, raw `(9,8)` and denoised `(9,10.75)` are the closest tested
+input-specific operating points. Relative to raw `(9,8)`, omission0/omission1 `(9,10.75)` retain the
+same seven units, add 17,211/14,850 TP, and add only 1,878/321 fixed-seven FP. This calibration is
+post hoc and reuses one hybrid recording; it supports an input-domain interaction but requires
+prespecified held-out validation before generalization.

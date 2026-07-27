@@ -15,6 +15,29 @@ compact aggregate/per-unit tables in `results/benchmarking/`. In addition to the
 evaluator metrics, it reads the remote SpikeInterface array headers to count all
 sorter spike events without downloading the 0.6–0.9-GB arrays.
 
+`build_ks4_all_runs_table.py` combines those audited full-recording outputs,
+the complete threshold matrix, and both short calibration sweeps into one
+15-row CSV and Markdown table. It verifies that overlapping raw and omission1
+baseline rows agree before merging, labels every row by duration scope, and
+computes accuracy, precision, recall, TP, FN, and FP on the same seven GT units
+matched by raw 9/8 and every denoised full-recording condition. A condition that
+loses a reference unit retains its zero metrics and full FN count. The other
+three GT units are excluded from these fixed-seven metrics but remain represented
+by zeros in the all-10 macro metrics:
+
+```bash
+python code/benchmarking/build_ks4_all_runs_table.py
+```
+
+`build_ks4_per_unit_snr_table.py` joins all nine full-recording sorter
+conditions to the exact scheduled-step raw, omission0, and omission1 GT-template
+SNR values. It writes a 63-row long-form comparison and a focused seven-row raw
+versus omission1 9/10.75 precision pairing, both ordered by descending raw SNR:
+
+```bash
+python code/benchmarking/build_ks4_per_unit_snr_table.py
+```
+
 The model smoke uses run-scoped assets:
 
 ```text
@@ -186,14 +209,134 @@ unit-bootstrap accuracy difference was not conclusive. Compact evidence and the
 chunk-boundary check are in `results/benchmarking/ks4_threshold_sweep/`.
 
 The longer confirmation uses the same thresholds and evaluator at 1,200 s.
-Inference computation `6add9fa7-e1ff-435d-b9d9-52a3e360901f` and calibration
-commit `0a6ffac` were launched/prepared on 2026-07-24. The guarded launcher now
-targets this confirmation input; no 20-minute sorter result is available yet.
+Inference computation `6add9fa7-e1ff-435d-b9d9-52a3e360901f` produced result
+asset `e7134769-b8c9-437a-ba0d-f5bd9ee0078b`. Calibration computation
+`c474cfbf-d8ff-4548-93b6-7df282523473` completed successfully from commit
+`0a6ffac` in 8,433 s. Threshold 10 again had the highest mean accuracy, although
+it exceeded threshold 9 by only 0.0016 and their paired unit-bootstrap interval
+crossed zero. Relative to 9, threshold 10 reduced total events by 25.5% and
+GT-matched-cluster false-positive spikes by 39.9%, while losing one weakly
+matched GT unit and 0.0500 recall. Threshold 10 is selected for the next
+precision-first sensitivity; threshold 9 is selected for the next benchmark to
+prioritize unit retention. Compact evidence is in
+`results/benchmarking/ks4_threshold_confirmation/`.
 
-The full pipeline remains useful for the eventual confirmation. After selecting
-a candidate threshold, expose the same `params` field on the denoised sorter
-node, resume a completed omission1 computation, and alter only that sorter
-parameter so inference and upstream preprocessing can be reused.
+### Full-recording threshold-9 benchmark
+
+The visual pipeline's production Kilosort node exposes only four positional
+controls and strips undeclared `--params` arguments from API submissions. A
+guarded test submission confirmed that behavior and deleted the rejected run
+before it consumed resources. The selected threshold was instead deployed by
+replacing only the denoised Kilosort node with owned capsule
+`eb0a6d2f-2418-4a0a-9765-beaa973745db` at commit `ff43f0d`. That commit uses the
+normal production entry point and changes only `sorter.Th_learned` from 8 to 9.
+
+An API probe of the edited graph verified the live process bindings. Code Ocean
+assigned new process suffixes when the graph was edited, so the suffixes no
+longer identify the original branch:
+
+| branch | process | capsule |
+|---|---|---|
+| raw | `capsule_spikesort_kilosort_4_ecephys_9` | production `e41ff24a-791c-4a11-a810-0106707d3617` |
+| Full96 omission1 | `capsule_spikesort_kilosort_4_ecephys_12` | threshold-9 `eb0a6d2f-2418-4a0a-9765-beaa973745db` |
+
+Full computation `748787df-c7f1-4d45-9d51-9f9b5fd9cedc` resumed successful
+omission1 computation `2ad21011-a937-44dc-a370-5280049621ef` after validating
+the prior model smoke. Its launch guard checked every process-to-capsule binding
+and parameter vector before retaining the run. The redundant standalone
+inference `eac55c7b-29f9-4d7d-a21a-20d2fe97db81` was canceled after the pipeline
+entered the running state.
+
+The full computation succeeded in 21,871 s. Saved sorter provenance verified
+that all 55 denoised sorter parameters were identical except
+`Th_learned: 8 -> 9`; the raw outputs were also exactly identical between runs.
+Threshold 9 increased denoised mean accuracy from 0.4503 to 0.4715 and precision
+from 0.4808 to 0.5303, with recall decreasing from 0.6124 to 0.5823. Total sorter
+events fell 22.9% and GT-matched-cluster false-positive spikes fell 36.4%, with
+no change in detected or well-detected GT-unit counts. Regenerate the compact
+audit in `results/benchmarking/ks4_full_threshold9/` with:
+
+```bash
+python code/benchmarking/audit_ks4_threshold9.py
+```
+
+Threshold 9 remains provisional because its full-recording mean precision
+(0.5303) is below raw (0.5851), and GT-matched-cluster false-positive spikes
+remain 91.3% above raw. A precision-first full-recording threshold-10 follow-up
+was launched as computation `9c4dd3bf-f773-49f8-b332-683aa17947d3`, resuming the
+successful threshold-9 computation so upstream inference, preprocessing, and
+the raw sorter can be reused. Owned sorter commit `1f7d371` differs from the
+threshold-9 commit only at `sorter.Th_learned: 9 -> 10`. The launch guard
+verified the raw production capsule and denoised owned-capsule bindings before
+retaining the run.
+
+An orthogonal discovery-stage test completed as computation
+`a7a8065f-b4b2-43a4-acf6-b87e7ff02201`. Owned sorter commit `43b46d9` uses
+`Th_universal=10` and `Th_learned=9`; relative to the completed threshold-9
+commit `ff43f0d`, its only changed sorter parameter is
+`sorter.Th_universal: 9 -> 10`. It also resumes the completed threshold-9
+computation. This separates stricter initial universal-template discovery from
+the learned-10 run's stricter final event extraction. The universal-threshold
+test may reduce final unit count, so detected GT units and well-detected GT
+units are required readouts alongside precision, recall, and event counts.
+
+The 10/9 result was nearly neutral versus 9/9: +0.0006 accuracy, +0.0061
+precision, -0.0024 recall, and -2.3% matched-cluster false positives, with 12
+more sorter units. The 9/10 sorter completed successfully but its pipeline
+evaluator failed only in optional SNR binned plotting. Its immutable task output
+was recovered and evaluated directly as computation
+`07338f3d-31b2-43d3-bc78-62b3a1852858`. The recovered result has accuracy
+0.4688, precision 0.5626, recall 0.5430, 689 sorter units, and 156,203
+matched-cluster false-positive spikes. Compact evidence and full recovery
+provenance are in `results/benchmarking/ks4_full_threshold_matrix/` and are
+regenerated with:
+
+```bash
+python code/benchmarking/audit_ks4_threshold_matrix.py
+```
+
+Fractional refinement computation `418f3a7b-1e3a-4d11-a85d-191fd05a37da`
+completed successfully in 18,520 s from sorter commit `4826f2e` with
+`Th_universal=9` and `Th_learned=10.75`. Saved provenance verifies that the
+commit differs from completed 9/10 commit `1f7d371` only at
+`sorter.Th_learned`, and the pipeline raw output is exactly identical. The
+result has accuracy 0.4533, precision 0.5783, recall 0.5077, 682 sorter units,
+and 120,202 matched-cluster false-positive spikes. This is the closest tested
+raw-selectivity match; 9/10 remains the higher-recall and higher-accuracy
+operating point.
+
+Matched-threshold omission0 computation
+`a2ccfc54-5109-44ef-9968-b3c1435fcffc` completed successfully in 17,981 s. It
+resumed successful omission0 computation
+`db76c533-9f39-46e6-98fe-e83adf56ea51`, was gated by succeeded omission0 smoke
+`723ac820-576a-4da9-a274-759afdea3584`, and used sorter commit `4826f2e` with
+`Th_universal=9`, `Th_learned=10.75`. Saved provenance verifies exact raw-arm
+identity and `sorter.Th_learned: 8 -> 10.75` as the only omission0 sorter change.
+The result has accuracy 0.4548, precision 0.5779, recall 0.5099, 673 sorter
+units, and 121,759 common-seven FP spikes. It is practically tied with omission1
+9/10.75, with 2,361 more TP and 1,557 more FP.
+
+Raw AP matched-threshold control computation
+`fab61c02-f1d5-4d26-965b-2cdb47aad29b` completed successfully in 14,618 s after
+launching from completed omission0 10.75
+computation `a2ccfc54-5109-44ef-9968-b3c1435fcffc`. The visual graph replaces
+only production raw sorter process `capsule_spikesort_kilosort_4_ecephys_9`
+with owned process `capsule_spikesort_kilosort_4_ecephys_13` on capsule
+`eb0a6d2f-2418-4a0a-9765-beaa973745db` at commit `4826f2e`. The raw process
+receives `capsule_preprocess_ecephys_10`, and evaluator target `ks4` receives the
+new raw process. Denoised process `capsule_spikesort_kilosort_4_ecephys_12`, its
+`deepks4` evaluator target, inference checkpoint, and every other process remain
+unchanged. Creation-time guards verified all seven process bindings and
+parameters before retaining the run. Saved raw provenance verifies
+`Th_universal=9`, `Th_learned=10.75`, with `sorter.Th_learned: 8 -> 10.75` as
+the only change from raw baseline; the denoised arm is byte-identical to its
+resume source. Raw 10.75 detects only 3/10 GT units and has fixed-seven counts
+TP=274,830, FN=474,726, FP=3,565. Both denoised 10.75 arms retain 7/10 units,
+demonstrating that this threshold is viable only after denoising on this case.
+After completion, the temporary control graph was restored and verified:
+production capsule `e41ff24a-791c-4a11-a810-0106707d3617` again owns raw process
+`capsule_spikesort_kilosort_4_ecephys_9`, while owned 10.75 process
+`capsule_spikesort_kilosort_4_ecephys_12` remains only on the denoised branch.
 
 ### Short-recording calibration
 

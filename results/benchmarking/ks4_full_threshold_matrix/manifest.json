@@ -1,0 +1,104 @@
+{
+  "pipeline_id": "5a096db9-3fd7-4984-b5a3-f409b4c8b6ee",
+  "computation_ids": {
+    "raw 9/10.75": "fab61c02-f1d5-4d26-965b-2cdb47aad29b",
+    "omission0 9/8": "db76c533-9f39-46e6-98fe-e83adf56ea51",
+    "omission0 9/10.75": "a2ccfc54-5109-44ef-9968-b3c1435fcffc",
+    "9/8": "2ad21011-a937-44dc-a370-5280049621ef",
+    "9/9": "748787df-c7f1-4d45-9d51-9f9b5fd9cedc",
+    "9/10_failed_pipeline": "9c4dd3bf-f773-49f8-b332-683aa17947d3",
+    "9/10_recovery_evaluation": "07338f3d-31b2-43d3-bc78-62b3a1852858",
+    "9/10.75": "418f3a7b-1e3a-4d11-a85d-191fd05a37da",
+    "10/9": "a7a8065f-b4b2-43a4-acf6-b87e7ff02201"
+  },
+  "sorter_capsule_id": "eb0a6d2f-2418-4a0a-9765-beaa973745db",
+  "sorter_commits": {
+    "raw 9/10.75": "4826f2e",
+    "omission0 9/10.75": "4826f2e",
+    "9/9": "ff43f0d",
+    "9/10": "1f7d371",
+    "9/10.75": "4826f2e",
+    "10/9": "43b46d9"
+  },
+  "learned10_recovered_sorter_asset_id": "07a54bd7-f145-41c8-b19e-1d8e05c060b2",
+  "duration_s": 7144.262,
+  "raw_baseline_identity": "exact across all computations that retained raw Th_learned=8",
+  "raw_control_identity": "raw 9/10.75 intentionally differs only at Th_learned; the denoised omission0 9/10.75 arm is exact versus its resume source",
+  "controlled_sorter_parameter_changes": {
+    "raw_9/8_to_9/10.75": {
+      "Th_learned": {
+        "baseline": 8,
+        "candidate": 10.75
+      }
+    },
+    "omission0_9/8_to_9/10.75": {
+      "Th_learned": {
+        "baseline": 8,
+        "candidate": 10.75
+      }
+    },
+    "9/8_to_9/9": {
+      "Th_learned": {
+        "baseline": 8,
+        "candidate": 9
+      }
+    },
+    "9/9_to_9/10": {
+      "Th_learned": {
+        "baseline": 9,
+        "candidate": 10
+      }
+    },
+    "9/10_to_9/10.75": {
+      "Th_learned": {
+        "baseline": 10,
+        "candidate": 10.75
+      }
+    },
+    "9/9_to_10/9": {
+      "Th_universal": {
+        "baseline": 9,
+        "candidate": 10
+      }
+    }
+  },
+  "paired_unit_accuracy_bootstraps_vs_9_9": {
+    "9/10": {
+      "draws": 200000,
+      "seed": 0,
+      "mean_difference": -0.002721969136782154,
+      "median_difference": 0.0,
+      "interval_95_low": -0.029452528454072136,
+      "interval_95_high": 0.022205993665481854,
+      "probability_mean_difference_gt_0": 0.42714,
+      "units_improved": 3,
+      "units_worsened": 4,
+      "units_unchanged": 3
+    },
+    "9/10.75": {
+      "draws": 200000,
+      "seed": 0,
+      "mean_difference": -0.018170254835627436,
+      "median_difference": 0.0,
+      "interval_95_low": -0.06487700093813979,
+      "interval_95_high": 0.021933444744468927,
+      "probability_mean_difference_gt_0": 0.21358,
+      "units_improved": 3,
+      "units_worsened": 4,
+      "units_unchanged": 3
+    },
+    "10/9": {
+      "draws": 200000,
+      "seed": 0,
+      "mean_difference": 0.0005549824232144451,
+      "median_difference": 0.0,
+      "interval_95_low": -0.005329725208698755,
+      "interval_95_high": 0.006508032506590267,
+      "probability_mean_difference_gt_0": 0.573665,
+      "units_improved": 3,
+      "units_worsened": 4,
+      "units_unchanged": 3
+    }
+  },
+  "learned10_recovery_reason": "Pipeline evaluation failed only in optional SNR binned plotting; the completed sorter task was captured and evaluated directly."
+}

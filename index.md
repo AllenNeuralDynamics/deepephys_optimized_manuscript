@@ -37,11 +37,15 @@ abstract: |
   weighting at λ = 3 gave a +0.0055 d′ lead within unweighted seed spread, while stronger weighting
   reduced d′ by as much as 0.262 and could distort template shape. Absolute self-template d′ is
   in-sample optimistic because template estimation and hit scoring reuse events, and its aggregate
-  direction depends on filter support. In a post hoc fixed-configuration Kilosort4 comparison on the
-  same hybrid case, raw/omission0/omission1 mean accuracy was 0.447/0.449/0.450. Denoising raised
-  recall from 0.494 to 0.614/0.612 but lowered precision from 0.585 to 0.478/0.481; all three inputs
-  detected 7/10 GT units and 2/10 above 0.8 accuracy, while denoised inputs produced 55% more sorter
-  spike events under unchanged settings. The conclusions remain specific to one hybrid
+  direction depends on filter support. In a post hoc baseline Kilosort4 comparison on the same
+  hybrid case, raw/omission0/omission1 mean accuracy was 0.447/0.449/0.450. Denoising raised recall
+  from 0.494 to 0.614/0.612 but lowered precision from 0.585 to 0.478/0.481 under common
+  `(Th_universal, Th_learned)=(9,8)` settings. A controlled exploration changed exposed thresholds
+  without modifying Kilosort 4.1.7 code. At `(9,10.75)`, omission0/omission1 retained 7/10 units and
+  recovered 546,055/543,694 TP with 121,759/120,202 fixed-reference FP, versus 528,844 TP and
+  119,881 FP for raw `(9,8)`. Raw `(9,10.75)` retained only 3/10 units, demonstrating that denoising
+  shifts the useful Kilosort threshold range; the two omission routes remained effectively tied.
+  The conclusions remain specific to one hybrid
   benchmark; held-out recordings and broader prespecified sorter validation are necessary. The versioned train → score → figure pipeline is
   reproducible from this repository.
 ---

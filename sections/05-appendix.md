@@ -202,7 +202,7 @@ tables retain **all 89 scored endpoints**, including audit-only confounded runs.
 | Figure 19, template-support sensitivity | Full96 omission0/omission1 and seed-0 original DI; in-sample and two-fold event-level cross-fitted d′ | other models and sorter-level outcomes |
 | Figures 20–22, learning-stage voltage and unit profiles | five scheduled states from each Full96 duration route; one fixed event and four fixed GT units | other checkpoints, seeds, units, and sorter-level outcomes |
 | Figures 23–25, residual Gaussianity and whiteness | shared raw AP windows plus final scheduled Full96 omission0/omission1 predictions and residuals | other models; GT-event recovery and sorter accuracy |
-| Kilosort4 Results and event-accounting tables | raw AP + final scheduled Full96 omission0/omission1; one fixed configuration on ProbeC `recording1_3` | other models, recordings, sorters, and tuned parameter settings |
+| Kilosort4 threshold exploration and event-accounting tables | raw AP `(9,8)/(9,10.75)`; Full96 omission0 `(9,8)/(9,10.75)`; Full96 omission1 `(9,8)/(9,9)/(9,10)/(9,10.75)/(10,9)`; nested 5- and 20-min omission1 `Th_learned=8,9,10` clips; unmodified Kilosort4 code on ProbeC `recording1_3` | other models, independent recordings, other sorters, and held-out threshold validation |
 
 This coverage rule prevents a missing model from being mistaken for a favorable comparison while
 also avoiding omnibus plots that mix training replicates, unmatched objectives, or different budgets

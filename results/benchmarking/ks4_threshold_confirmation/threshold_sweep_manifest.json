@@ -1,0 +1,41 @@
+{
+  "recording_folder": "../data/full96_om1_probec_1200s",
+  "gt_folder": "../data/probec_recording1_3/sorting.zarr",
+  "duration_s": 1200.0,
+  "sampling_frequency": 30000.0,
+  "input_channels": 384,
+  "preprocessed_channels": 384,
+  "thresholds": [
+    8.0,
+    9.0,
+    10.0
+  ],
+  "preprocessing_pipeline": {
+    "phase_shift": {
+      "margin_ms": 100.0
+    },
+    "highpass_filter": {
+      "freq_min": 300.0,
+      "margin_ms": 5.0
+    },
+    "detect_and_remove_bad_channels": {
+      "method": "coherence+psd",
+      "dead_channel_threshold": -0.5,
+      "noisy_channel_threshold": 1.0,
+      "outside_channel_threshold": -0.3,
+      "outside_channels_location": "top",
+      "n_neighbors": 11,
+      "channel_filters": [
+        "noise",
+        "out",
+        "dead"
+      ],
+      "seed": 0
+    },
+    "common_reference": {
+      "reference": "global",
+      "operator": "median"
+    }
+  },
+  "elapsed_s": 7761.896937443002
+}

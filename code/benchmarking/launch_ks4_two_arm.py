@@ -123,7 +123,8 @@ def require_succeeded_smoke(
     if not computation.has_results:
         raise RuntimeError(f"smoke computation {computation_id} has no results")
     actual = [(asset.id, asset.mount) for asset in computation.data_assets or []]
-    if actual != expected_smoke_assets(route):
+    expected = expected_smoke_assets(route)
+    if len(actual) != len(expected) or set(actual) != set(expected):
         raise RuntimeError(f"smoke computation used unexpected assets: {actual!r}")
     outputs = {
         item.path for item in client.computations.list_computation_results(computation_id).items

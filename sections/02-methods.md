@@ -81,16 +81,37 @@ Consequently, an exactly Gaussian-white residual is neither expected nor a neces
 successful spike-preserving denoising. The paired renderer additionally aborts unless both routes
 share identical raw windows, spectral intervals, overview voltage, geometry, and calibration.
 
-## Post hoc fixed-configuration Kilosort4 benchmark
+## Post hoc Kilosort4 benchmark and controlled threshold exploration
 
 We evaluated the final scheduled Full96 omission0 and omission1 checkpoints in the existing Code
 Ocean no-generation hybrid pipeline. Each route was compared with raw on the exact ProbeC
 `recording1_3` recording used throughout the study. Raw and model-output arms received the same
 high-pass filter, common-median reference, bad-channel removal, `dredge_fast` motion estimation, and
-Kilosort4 capsule settings (`skip_motion_correction=false`, `min_channels_for_drift=64`). No
-Kilosort threshold or other sorter parameter was tuned by route. Both checkpoints were trained for
-53,996,288 windows, strict-loaded in a 2-s deployment smoke, and selected by SHA-256 before the full
-run.
+wrapper controls (`skip_motion_correction=false`, `min_drift_channels=64`). Both checkpoints were
+trained for 53,996,288 windows, strict-loaded in a 2-s deployment smoke, and selected by SHA-256
+before the full run.
+
+The sorter implementation was not modified. Every run used the Kilosort 4.1.7 CUDA 12 base image
+and SpikeInterface 0.104.7 Kilosort4 wrapper [@pachitariu2024kilosort4]. We changed ordinary exposed
+configuration values, not Kilosort source, matching-pursuit code, template-learning code, clustering,
+or the SpikeInterface sorter implementation. The owned full-pipeline capsule retained the normal
+production entry point. Relative to frozen production wrapper commit `03d3522`, final commit
+`4826f2e` changes one line in `code/params.json`, `sorter.Th_learned: 8 -> 10.75`; the intermediate
+full-run commits likewise changed only the tested threshold. Saved sorting provenance records the
+complete 55-parameter sorter dictionary for every full run and was required to show exactly the
+prespecified change.
+
+The original raw/omission0/omission1 comparison froze `Th_universal=9` and `Th_learned=8`. We then
+screened Full96 omission1 at `Th_learned=8,9,10` on the first 300 s and repeated those settings on
+the nested first 1,200 s. These clips are calibration stages, not independent replicates, and were
+compared only within duration because recording length changes template learning, clustering, and
+drift estimation. The full-recording follow-up tested omission1 at `(Th_universal, Th_learned)` =
+`(9,8)`, `(9,9)`, `(9,10)`, `(9,10.75)`, and `(10,9)`. The `(10,9)` run isolates the initial
+universal-template detection threshold; the learned-threshold runs alter the final learned-template
+matching-pursuit threshold. Matched endpoint controls then tested omission0 and raw at `(9,10.75)`.
+All other sorter settings remained frozen. The raw control temporarily placed the same owned capsule
+on the raw branch; creation-time guards verified graph bindings, and the production raw node was
+restored after completion.
 
 The common hybrid evaluator matches each of the 10 injected GT units to sorter output and reports
 accuracy, precision, and recall. We summarize arithmetic means over all 10 GT rows, the count with
@@ -99,8 +120,11 @@ rate, and sorter runtime. Total events are the first dimension of each saved Spi
 `sorting/spikes.npy` array. Because the hybrid recording contains unlabeled native spikes, that
 total cannot be interpreted as a global false-positive count.
 
-For the seven GT units with a matched cluster, we additionally recover integer event accounting from
-the exact injected-event count $N_u$ and evaluator metrics:
+For event accounting, we predefine the seven GT units matched by raw `(9,8)` and every denoised
+full-recording condition: 337, 664, 793, 1122, 1143, 1300, and 2143. A stricter setting that loses
+one of these reference units retains zero accuracy, precision, recall, and true positives plus its
+full false-negative count; the analysis does not shrink to surviving units. For each reference unit,
+we recover integer event accounting from the exact injected-event count $N_u$ and evaluator metrics:
 
 $$
 TP_u = \operatorname{round}(N_u\,\mathrm{recall}_u), \qquad
@@ -108,14 +132,13 @@ S_u = \operatorname{round}(TP_u / \mathrm{precision}_u).
 $$
 
 Here $TP_u$ is a matched injected spike, $S_u$ is all spikes assigned to the matched sorter cluster,
-and $FP_u=S_u-TP_u$ is the number of false-positive spikes relative to injected unit $u$. These are
-evaluator-defined false positives: they can include native spikes and are therefore not synonymous
-with noise or globally false biological events. Omission routes ran in
-separate pipeline computations; their raw performance rows were required to agree exactly before
-cross-route interpretation. Raw total events, unit count, and runtime were also required to agree.
-This is a post hoc, single-case comparison at one fixed sorter
-configuration, not independent validation or a sorter-parameter optimization. Computation IDs,
-failure/retry provenance, and launch guards are documented in
+$FP_u=S_u-TP_u$, and $FN_u=N_u-TP_u$. These are evaluator-defined false positives: they can include
+native spikes and are therefore not synonymous with noise or globally false biological events.
+Raw baseline arms were required to agree exactly before cross-route interpretation. The raw
+`(9,10.75)` control intentionally differs from that baseline; its denoised arm was required to be
+exactly identical to its cached omission0 `(9,10.75)` source. This is a post hoc, single-case
+parameter exploration, not independent validation. Computation IDs, failure/retry provenance,
+complete generated tables, and launch guards are documented in
 [`code/benchmarking`](code/benchmarking/README.md).
 
 ## What matched-filter d′ measures

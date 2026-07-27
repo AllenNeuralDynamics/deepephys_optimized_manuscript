@@ -135,36 +135,45 @@ can contain unlabeled native spikes, and a spike-preserving predictor is not req
 residual exactly Gaussian. Residual diagnostics should therefore accompany, not replace, GT-event
 and sorter-level evaluation.
 
-## Fixed Kilosort4 favors recall, not additional GT-unit recovery
+## Unmodified Kilosort4 thresholds are input-domain specific
 
-The completed sorter benchmark confirms that the surrogate metrics cannot be read as sorter
-outcomes. Both Full96 routes raise mean Kilosort recall by about 0.12 but lower precision by about
-0.105, producing only +0.0018/+0.0032 mean-accuracy changes and no change in the 7/10 detected or
-2/10 well-detected GT-unit counts. Omission1's 0.075 final d′ advantage over omission0 contracts to
-a 0.0014 mean-accuracy difference, while omission0 yields 690 sorter units versus 725 for omission1
-and 672 for raw. Thus neither final route dominates: omission1 is marginally higher in accuracy,
-whereas omission0 produces fewer additional clusters.
+The fixed `(Th_universal, Th_learned)=(9,8)` comparison confirms that surrogate metrics cannot be
+read directly as sorter outcomes. Both Full96 routes raise mean recall by about 0.12 but lower
+precision by about 0.105, with no change in the 7/10 detected or 2/10 well-detected GT-unit counts.
+Omission1's 0.075 final d′ advantage over omission0 contracts to a 0.0014 mean-accuracy difference.
+At fixed settings, neither route is a sorter-level winner.
 
-The spike-event counts support the hypothesis that the unchanged Kilosort configuration has a
-harder event-selection problem after denoising. Both routes produce about 38.49 M sorter events
-versus 24.77 M raw (+55.4%), while unit count rises by only 2.7%/7.9%; events per sorter unit rise by
-51.3%/44.1%. Sorter runtime also increases by 24.8%/68.5%. Within GT-matched clusters, true-positive
-injected spikes rise by about 24%, but false-positive spikes rise approximately threefold. The
-precision–recall tradeoff therefore reflects both recovering more injected events and admitting many
-more events not matched to those injections.
+The controlled exploration shows that this baseline tradeoff is largely a calibration effect. We
+did not modify Kilosort or SpikeInterface sorter code; ordinary `Th_*` settings were changed while
+the other 54 entries in the saved 55-parameter dictionary remained fixed. Raising `Th_learned` on
+denoised omission1 progressively suppresses events and fixed-reference FP while lowering recall.
+Raising `Th_universal` alone from 9 to 10 at `Th_learned=9` is nearly neutral, implicating final
+learned-template extraction rather than initial universal-template discovery as the primary control
+in this case.
 
-This pattern is consistent with altered threshold/noise calibration or a denser candidate-event set.
-The false-positive label is relative to the injected GT unit, not a claim that every such event is
-biological noise. The recording contains unlabeled native spikes, and
-the two routes' nearly identical total event counts despite different cluster counts indicate that
-event detection and clustering must be analyzed separately. Per-cluster firing distributions,
-template duplication, and a prespecified threshold sweep are the next discriminating checks.
+The omission routes remain effectively tied after calibration. At `(9,10.75)`, omission0 and
+omission1 fixed-seven accuracy differ by 0.0021, precision by -0.0007, and recall by 0.0031.
+Omission0 recovers 2,361 more TP and admits 1,557 more FP. The larger omission1 template-SNR gain
+therefore does not yield a practically large aggregate sorter advantage.
 
-This is a fixed-configuration diagnostic, not evidence that denoising intrinsically imposes the
-same precision–recall tradeoff. Kilosort thresholds and other parameters were intentionally held
-constant to isolate the input change; they may be differently calibrated after denoising. Tuning is
-a separate follow-up and must be prespecified and evaluated without using this same case as both
-selection and test data.
+The matched raw control is more discriminating. Raw `(9,10.75)` loses units 337, 664, 1122, and
+1300, leaving only 3/10 detected units and 274,830 TP across the predefined seven-unit set. Both
+denoisers retain all seven and recover more than 543,000 TP at the identical threshold. The raw
+control's 3,565 FP and 0.9872 pooled precision among surviving matches should not be interpreted as
+superior sorting: those values are conditional on severe unit loss. Denoising changes the useful
+score range, so a threshold suitable after denoising can be too strict for raw voltage.
+
+For deployment on this recording, raw `(9,8)` and denoised `(9,10.75)` provide the closest tested
+input-specific operating points. Relative to raw `(9,8)`, the denoised endpoints retain the same
+seven units, recover 14,850–17,211 more TP, and add only 321–1,878 fixed-reference FP. This is
+stronger evidence than comparing raw and denoised at one arbitrary common threshold: it shows both
+the matched-threshold interaction and the achievable calibrated tradeoff.
+
+The false-positive label remains relative to injected GT, not a claim that every such event is
+biological noise. Native spikes are unlabeled, and all-sorter event totals include unmatched
+clusters. More importantly, threshold selection and evaluation reuse one hybrid recording; the
+5- and 20-min clips are nested within it. The result supports input-specific calibration but does
+not establish an optimal threshold or generalization to held-out recordings.
 
 ## Limitations
 
@@ -181,9 +190,10 @@ filter reproduces Kilosort's whitening, temporal search, template competition, o
 The residual analysis is likewise post hoc, uses deterministic subsets from the same recording,
 and cannot exclude unlabeled native spikes; its nominal diagnostics have enough observations to
 flag small deviations that may not be operationally important.
-The Kilosort comparison also reuses this recording, has one run per route, and tests only one
-unchanged configuration; its raw-arm identity removes pipeline-sampling ambiguity but does not
-provide held-out or across-sorter generalization.
+The Kilosort comparison also reuses this recording for threshold selection and final evaluation.
+Its one-parameter controls, exact cached-arm identity checks, and matched raw/denoised endpoint
+reduce implementation ambiguity but do not provide held-out, across-recording, or across-sorter
+generalization.
 Third, many Tier 2 rows, every R9–R13 method control, and each weighted arm have one training seed;
 the nine width/schedule/depth follow-ups also have one training seed, and their paired-unit bootstrap
 intervals resample fixed benchmark units rather than independent recordings;

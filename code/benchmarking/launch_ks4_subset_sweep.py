@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture and launch the exact-ProbeC five-minute Kilosort threshold sweep."""
+"""Capture and launch the exact-ProbeC 20-minute Kilosort threshold sweep."""
 from __future__ import annotations
 
 import argparse
@@ -36,7 +36,7 @@ def require_inference_result(co: CodeOcean) -> None:
     computation = co.computations.get_computation(INFERENCE_COMPUTATION_ID)
     if computation.exit_code != 0 or not computation.has_results:
         raise RuntimeError(
-            "five-minute inference is not ready: "
+            "20-minute inference is not ready: "
             f"state={computation.state}, exit={computation.exit_code}, "
             f"has_results={computation.has_results}"
         )
@@ -115,7 +115,7 @@ def main() -> None:
     parser.add_argument(
         "action", choices=("status", "create-asset", "launch")
     )
-    parser.add_argument("--asset-id", help="ready five-minute inference asset")
+    parser.add_argument("--asset-id", help="ready 20-minute inference asset")
     args = parser.parse_args()
     co = client()
 
