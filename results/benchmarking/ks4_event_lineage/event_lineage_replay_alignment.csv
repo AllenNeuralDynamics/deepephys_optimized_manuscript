@@ -1,0 +1,5 @@
+events,event_keys,events_in_duplicate_keys,replay_events,exact_time_template_events,extraction_only_events,replay_only_events,time_matched_events_within_tolerance,score_close_events,score_different_events,score_abs_difference_mean,score_abs_difference_max,score_abs_difference_q99,domain,Th_learned
+21834516,21833143,2185,21834525,21834507,9,18,21834511,21834477,30,2.9988939331815345e-08,0.27306270599365234,0.0,raw,8.0
+8137701,8136670,1570,8137702,8137701,0,1,8137701,8137701,0,0.0,0.0,0.0,raw,10.75
+10203192,10202118,1708,10203192,10203191,1,1,10203191,10203187,4,5.5640709817339484e-09,0.04542732238769531,0.0,denoised,8.0
+4428486,4427735,1146,4428486,4428486,0,0,4428486,4428486,0,0.0,0.0,0.0,denoised,10.75

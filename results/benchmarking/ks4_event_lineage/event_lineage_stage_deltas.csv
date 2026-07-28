@@ -1,0 +1,13 @@
+domain,Th_learned,from_stage,to_stage,event_delta,cluster_delta,matched_gt_unit_delta,tp_delta,fn_delta,fp_in_matched_clusters_delta,events_in_unmatched_clusters_delta,gt_negative_events_any_unit_delta
+raw,8.0,detection_template,final_clustering,0,-218,-5,-73494,73494,-179088,252582,0
+raw,8.0,final_clustering,cluster_merging,0,-64,0,0,0,0,0,0
+raw,8.0,cluster_merging,duplicate_removal,-686158,0,0,0,0,-4,-686154,-686158
+raw,10.75,detection_template,final_clustering,0,-128,-1,-12289,12289,-12095,24384,0
+raw,10.75,final_clustering,cluster_merging,0,-68,0,0,0,0,0,4
+raw,10.75,cluster_merging,duplicate_removal,-46392,0,0,0,0,-22,-46370,-46392
+denoised,8.0,detection_template,final_clustering,0,75,0,-1920,1920,-18991,20911,0
+denoised,8.0,final_clustering,cluster_merging,0,-77,0,0,0,0,0,0
+denoised,8.0,cluster_merging,duplicate_removal,-18980,0,0,0,0,-54,-18926,-18980
+denoised,10.75,detection_template,final_clustering,0,34,0,152,-152,815,-967,0
+denoised,10.75,final_clustering,cluster_merging,0,-70,0,0,0,0,0,-11
+denoised,10.75,cluster_merging,duplicate_removal,-5622,0,0,0,0,-16,-5606,-5622

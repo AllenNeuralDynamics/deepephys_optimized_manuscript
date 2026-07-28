@@ -30,6 +30,11 @@ The generated files are:
 | `kilosort4_event_accounting.md` | compact matched-cluster event accounting | `2b34d3ed84ee8383bc4925333a58dc771bfc76e94fa60c8c957337f6b046d978` |
 | `kilosort4_per_unit.csv` | 10 GT units × raw/omission0/omission1 performance and integer event accounting | `2107b03f3a4874ffd08800db9451a8000d4334a95c970cafbbef386204406def` |
 
+`ks4_event_lineage/` contains the fixed-template event-lineage diagnosis and
+accepted-score analysis at `Th_learned=8` and `10.75`. The reproducible figures
+are `figures/kilosort4_fp_by_peel.{png,pdf}` and
+`figures/kilosort4_score_margin_by_peel.{png,pdf}`.
+
 Regenerate with authenticated Code Ocean access:
 
 ```bash
@@ -145,3 +150,29 @@ denoised 10.75 runs. Across the fixed seven reference units it has 274,830 TP,
 474,726 FN, and 3,565 FP. The low FP count therefore reflects severe unit loss,
 not a better overall tradeoff. Both denoisers retain all seven units at the same
 threshold, showing that denoising shifts the useful Kilosort operating range.
+
+## Fixed-template event lineage
+
+Code Ocean computation `d0efc11d-4141-443b-b381-98c9dbeecd6a` learned templates,
+whitening, drift, and channel selection once from the first 1,200 seconds of
+Full96 omission1 denoised voltage, then traced every accepted raw and denoised
+event through detection, clustering, merging, and duplicate removal at learned
+thresholds 8 and 10.75. The final manifest write failed after all scientific
+artifacts were saved; commit `d200d09` fixes that serialization-only defect.
+
+At threshold 10.75, final matched-cluster FPs occur later and closer to the
+acceptance boundary than TPs. Raw TP events have event-weighted mean score margin
+`score - Th_learned` 12.03 at median peel 6, versus FP margin 2.29 at median peel
+22. Denoised TP events have margin 10.95 at median peel 6, versus FP margin 2.99
+at median peel 13. Denoised threshold 8 shows the same separation: TP margin
+12.31 at median peel 7, versus FP margin 2.85 at median peel 25. Cluster merging
+changes no matched TP/FN/FP totals, and deduplication removes only 16–54
+matched-cluster FPs depending on the condition.
+
+This is a controlled denoised-template experiment, not the production raw
+baseline. Under the denoised-derived transform, raw threshold 8 matches only two
+GT units, has zero evaluator-defined FP in those two clusters, and places
+21,112,308 events in unmatched clusters. The production raw 9/8 run instead
+learns raw-native templates and matches 7/10 GT units. A separate raw-native
+lineage run is required before combining its peel curve with the controlled
+denoised curves.
