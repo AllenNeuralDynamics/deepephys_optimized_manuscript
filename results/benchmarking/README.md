@@ -173,6 +173,19 @@ This is a controlled denoised-template experiment, not the production raw
 baseline. Under the denoised-derived transform, raw threshold 8 matches only two
 GT units, has zero evaluator-defined FP in those two clusters, and places
 21,112,308 events in unmatched clusters. The production raw 9/8 run instead
-learns raw-native templates and matches 7/10 GT units. A separate raw-native
-lineage run is required before combining its peel curve with the controlled
-denoised curves.
+learns raw-native templates and matches 7/10 GT units.
+
+## Native default 9/8 baseline lineage
+
+`ks4_native_baseline/` pairs the completed raw-native computation
+`adaf8bcd-453d-472c-a98e-bf00158b6b67` with the denoised-native threshold-8
+lineage above. Each domain learns its own preprocessing, whitening, drift, and
+templates on the same first 1,200 seconds. Raw-native matches 7/10 GT units with
+97,677 TP, 81,689 FN, and 31,012 matched-cluster FP. Denoised-native matches 8/10
+with 125,183 TP, 54,183 FN, and 80,624 FP. Thus denoising adds 27,506 recovered
+injected spikes and one GT match while adding 49,612 matched-cluster FP.
+
+In both baselines, FP events occur later and closer to threshold than TP events.
+Raw-native TP/FP median peels are 7/13 and their event-weighted score margins are
+6.89/2.20. Denoised-native values are 7/25 and 12.31/2.85. The comparison is
+rendered in `figures/kilosort4_native_baseline_by_peel.{png,pdf}`.

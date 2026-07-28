@@ -1,0 +1,2 @@
+events,event_keys,events_in_duplicate_keys,replay_events,exact_time_template_events,extraction_only_events,replay_only_events,time_matched_events_within_tolerance,score_close_events,score_different_events,score_abs_difference_mean,score_abs_difference_max,score_abs_difference_q99,domain,Th_learned
+4279957,4278950,1927,4279957,4279957,0,0,4279957,4279955,2,1.0160744468024063e-10,0.00041484832763671875,0.0,raw_native,8.0

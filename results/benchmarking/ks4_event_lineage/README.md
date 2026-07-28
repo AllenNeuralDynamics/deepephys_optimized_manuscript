@@ -12,7 +12,8 @@ traced every accepted event through detection template, final clustering, CCG
 merging, and duplicate removal. This controlled transform isolates input-domain
 score and subtraction behavior. It is not the production raw baseline, which
 learns its own raw-native templates and matches 7/10 GT units at the default
-9/8 thresholds.
+9/8 thresholds. The completed interval-matched native comparison is in
+`../ks4_native_baseline/`.
 
 The Code Ocean process returned exit code 1 only after all scientific artifacts
 were written, while serializing the final manifest. Commit `d200d09` fixes that

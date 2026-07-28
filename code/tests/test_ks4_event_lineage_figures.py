@@ -9,6 +9,7 @@ FIGURE_CODE = Path(__file__).resolve().parents[1] / "figures"
 sys.path.insert(0, str(FIGURE_CODE))
 
 from kilosort4_fp_by_peel import build_table
+from kilosort4_native_baseline import build_tables as build_native_tables
 from kilosort4_score_margin_by_peel import EXPECTED_EVENTS, load_analysis
 
 
@@ -17,6 +18,15 @@ class KilosortEventLineageFigureTests(unittest.TestCase):
     def setUpClass(cls):
         cls.fp_table = build_table()
         cls.margin_table, cls.margin_summary = load_analysis()
+        (
+            (
+                cls.native_scores,
+                cls.native_summary,
+                cls.native_stages,
+            ),
+            cls.native_peels,
+            _,
+        ) = build_native_tables()
 
     def test_fp_totals_and_shares(self):
         expected = {"raw": 56509, "denoised": 30931}
@@ -85,6 +95,43 @@ class KilosortEventLineageFigureTests(unittest.TestCase):
                 ]
             )
         )
+
+    def test_native_default_baseline_final_counts(self):
+        final = self.native_stages.query("stage == 'duplicate_removal'").set_index(
+            "domain"
+        )
+        expected = {
+            "raw_native": (7, 97677, 81689, 31012),
+            "denoised": (8, 125183, 54183, 80624),
+        }
+        for domain, values in expected.items():
+            observed = tuple(
+                int(final.at[domain, column])
+                for column in (
+                    "matched_gt_units",
+                    "tp",
+                    "fn",
+                    "fp_in_matched_clusters",
+                )
+            )
+            self.assertEqual(observed, values)
+
+    def test_native_default_fp_is_later_and_more_marginal_than_tp(self):
+        summary = self.native_summary.set_index(["domain", "status"])
+        for domain in ("raw_native", "denoised"):
+            tp = summary.loc[(domain, "tp")]
+            fp = summary.loc[(domain, "fp_matched_cluster")]
+            self.assertGreater(fp["median_peel"], tp["median_peel"])
+            self.assertLess(
+                fp["weighted_mean_score_margin"],
+                tp["weighted_mean_score_margin"],
+            )
+
+    def test_native_default_fp_shares_are_normalized(self):
+        for domain in ("raw_native", "denoised"):
+            rows = self.native_peels.loc[self.native_peels["domain"].eq(domain)]
+            self.assertAlmostEqual(rows["fp_share"].sum(), 1.0)
+            self.assertAlmostEqual(rows["fp_cumulative"].iloc[-1], 1.0)
 
 
 if __name__ == "__main__":
