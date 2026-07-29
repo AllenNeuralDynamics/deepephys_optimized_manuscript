@@ -140,8 +140,18 @@ def main() -> None:
     accepted = gate.loc[gate["accepted_events"].gt(0)].copy()
     if accepted.empty:
         raise ValueError("target-decoy run accepted no events")
-    if accepted["estimated_fdr"].gt(EXPECTED_POLICY["target_fdr"] + 1e-12).any():
+    required_counts = {"selected_target_count", "selected_decoy_count"}
+    if not required_counts.issubset(gate.columns):
+        raise ValueError(f"gate table is missing exact counts: {sorted(required_counts)}")
+    selected_targets = accepted["selected_target_count"].astype(np.int64)
+    selected_decoys = accepted["selected_decoy_count"].astype(np.int64)
+    if not selected_targets.eq(accepted["accepted_events"].astype(np.int64)).all():
+        raise ValueError("selected target count differs from accepted events")
+    exact_fdr = (1 + selected_decoys) / selected_targets
+    if exact_fdr.gt(EXPECTED_POLICY["target_fdr"]).any():
         raise ValueError("accepted peel exceeds target FDR")
+    gate["exact_fdr"] = np.nan
+    gate.loc[accepted.index, "exact_fdr"] = exact_fdr
     if gate["negative_count_above_floor"].sum() == 0:
         raise ValueError("target-decoy run has no negative null support")
     gate_summary = (
@@ -162,6 +172,7 @@ def main() -> None:
                 "negative_to_positive_floor_ratio",
                 lambda values: float(np.nanmedian(values.replace(np.inf, np.nan))),
             ),
+            max_exact_fdr=("exact_fdr", "max"),
         )
         .reset_index()
     )

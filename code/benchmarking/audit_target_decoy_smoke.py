@@ -90,7 +90,20 @@ def main() -> None:
         raise ValueError("target-decoy smoke accepted no events")
     if not np.isfinite(accepted["selected_threshold"]).all():
         raise ValueError("accepted peel has a nonfinite threshold")
-    if accepted["estimated_fdr"].gt(EXPECTED_POLICY["target_fdr"] + 1e-12).any():
+    if {"selected_target_count", "selected_decoy_count"}.issubset(gate.columns):
+        selected_targets = accepted["selected_target_count"].astype(np.int64)
+        selected_decoys = accepted["selected_decoy_count"].astype(np.int64)
+    else:
+        # The first smoke predates explicit count columns. Reconstruct the exact
+        # integer decoy count from the float32 estimate and accepted target count.
+        selected_targets = accepted["accepted_events"].astype(np.int64)
+        selected_decoys = (
+            accepted["estimated_fdr"] * selected_targets - 1
+        ).round().astype(np.int64)
+    if not selected_targets.eq(accepted["accepted_events"].astype(np.int64)).all():
+        raise ValueError("selected target count differs from accepted events")
+    exact_fdr = (1 + selected_decoys) / selected_targets
+    if exact_fdr.gt(EXPECTED_POLICY["target_fdr"]).any():
         raise ValueError("accepted peel exceeds target FDR")
     if gate["positive_count_above_floor"].sum() == 0:
         raise ValueError("smoke has no positive target support")
@@ -109,6 +122,7 @@ def main() -> None:
         "accepted_gate_rows": len(accepted),
         "median_selected_threshold": float(accepted["selected_threshold"].median()),
         "max_selected_threshold": float(accepted["selected_threshold"].max()),
+        "max_exact_fdr": float(exact_fdr.max()),
         "median_sign_balance": float(
             gate["negative_to_positive_floor_ratio"].replace([np.inf], np.nan).median()
         ),
