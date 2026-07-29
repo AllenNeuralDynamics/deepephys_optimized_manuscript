@@ -1,0 +1,7 @@
+domain,Th_learned,from_stage,to_stage,event_delta,cluster_delta,matched_gt_unit_delta,tp_delta,fn_delta,fp_in_matched_clusters_delta,events_in_unmatched_clusters_delta,gt_negative_events_any_unit_delta
+raw_native_fdr,8.0,detection_template,final_clustering,0,-184,0,0,0,18,-18,0
+raw_native_fdr,8.0,final_clustering,cluster_merging,0,-50,0,0,0,0,0,34
+raw_native_fdr,8.0,cluster_merging,duplicate_removal,-142,0,0,0,0,-3,-139,-142
+denoised_native_fdr,8.0,detection_template,final_clustering,0,-186,0,0,0,4,-4,0
+denoised_native_fdr,8.0,final_clustering,cluster_merging,0,-53,0,0,0,0,0,59
+denoised_native_fdr,8.0,cluster_merging,duplicate_removal,-200,0,0,0,0,-3,-197,-199

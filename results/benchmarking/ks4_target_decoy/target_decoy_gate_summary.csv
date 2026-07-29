@@ -1,0 +1,3 @@
+domain,gate_rows,accepted_gate_rows,accepted_events,median_selected_threshold,max_selected_threshold,median_sign_balance,max_exact_fdr
+denoised_native_fdr,5094,4494,1062810,25.377853393554688,52.608665466308594,0.9593147751605996,0.05
+raw_native_fdr,5615,5015,1243369,18.606586456298828,35.12428665161133,0.9639830508474576,0.05

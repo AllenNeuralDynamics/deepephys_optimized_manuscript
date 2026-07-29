@@ -189,3 +189,22 @@ In both baselines, FP events occur later and closer to threshold than TP events.
 Raw-native TP/FP median peels are 7/13 and their event-weighted score margins are
 6.89/2.20. Denoised-native values are 7/25 and 12.31/2.85. The comparison is
 rendered in `figures/kilosort4_native_baseline_by_peel.{png,pdf}`.
+
+## GT-blind target-decoy FDR experiment
+
+`ks4_target_decoy/` records a preregistered experimental replacement for the
+fixed learned threshold. Positive signed template local maxima were treated as
+targets and sign-reversed maxima as decoys. Independently for every batch and
+peel, the matcher selected the smallest threshold at or above 8 satisfying the
+knockoff-plus target FDR estimate `(1 + decoys) / targets <= 0.05`. Ground truth
+was used only after sorting for evaluation.
+
+The algorithm controlled its stated candidate-level FDR but was not a useful
+sorting operating point. It retained only units 793 and 2143 in both domains.
+Raw TP fell from 97,677 to 30,920 and denoised TP from 125,183 to 35,082, while
+matched-cluster FP fell to 18 and 4. Median selected thresholds were 18.61 raw
+and 25.38 denoised, far above Kilosort's default 8. This rejects the complete
+sign-reversed local-max tail as a 5% candidate-level null for unit-preserving
+spike sorting; it does not justify tuning the FDR target on this hybrid case.
+
+The result is rendered in `figures/kilosort4_target_decoy_result.{png,pdf}`.
